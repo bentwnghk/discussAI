@@ -43,10 +43,10 @@ class DialogueItem(BaseModel):
     text: str
     speaker: Literal["Candidate A", "Candidate B", "Candidate C", "Candidate D"]
 
-    def voice(self, language: str = "English"): # Add language parameter, remove @property
-        # Always use OPENAI_VOICE_MAPPINGS.
+    def voice(self): # Remove language parameter, make it a property again
+        # Always use OPENAI_VOICE_MAPPINGS for English voices.
         # one-api will be responsible for mapping these voice IDs (e.g., "nova")
-        # and the 'language' from the payload to the correct downstream provider voice.
+        # to the correct downstream provider voice for English.
         return OPENAI_VOICE_MAPPINGS[self.speaker]
 
 
@@ -57,7 +57,7 @@ class Dialogue(BaseModel):
 
 # Add retry mechanism to TTS calls for resilience
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10), retry=retry_if_exception_type(Exception))
-def get_mp3(text: str, voice: str, api_key: str = None, language_selection: str = "English") -> bytes:
+def get_mp3(text: str, voice: str, api_key: str = None) -> bytes:
     """
     Generates MP3 audio for the given text by making a direct request to the
     one-api compatible endpoint (expected at OPENAI_BASE_URL).
@@ -84,30 +84,17 @@ def get_mp3(text: str, voice: str, api_key: str = None, language_selection: str 
         "Content-Type": "application/json"
     }
 
-    # Manually construct the payload. The 'language': 'Cantonese' field is included
-    # as per the user's requirement for one-api to process this for MiniMax language_boost.
+    # Manually construct the payload for English TTS
     payload: Dict[str, Any] = { # Ensure payload is explicitly typed for clarity
+        "model": "tts-1",
         "voice": voice,
         "input": text,
         "response_format": "mp3",
     }
 
-    if language_selection == "Cantonese":
-        payload["model"] = "speech-2.5-turbo-preview"
-        payload["language"] = language_selection # This field is intended for one-api
-                                                 # to trigger MiniMax language_boost if needed.
-    elif language_selection in ["English", "Chinese"]:
-        payload["model"] = "tts-1"
-        # tts-1 does not accept the language parameter, so it's omitted.
-    else:
-        # Default or fallback behavior if a new language is added without explicit handling
-        logger.warning(f"Unhandled language_selection '{language_selection}', defaulting to speech-2.5-turbo-preview and including language parameter.")
-        payload["model"] = "speech-2.5-turbo-preview"
-        payload["language"] = language_selection
-
     logger.debug(
         f"Requesting TTS. Endpoint: '{speech_endpoint_url}', "
-        f"Voice: '{voice}', Selected Language for Payload: '{language_selection}', Text: '{text[:50]}...'"
+        f"Voice: '{voice}', Language: English, Text: '{text[:50]}...'"
     )
 
     try:
@@ -224,7 +211,6 @@ def generate_audio(
     input_method: str,
     files: Optional[List[str]],
     input_text: Optional[str],
-    language: str = "English",
     openai_api_key: str = None,
 ) -> (str, str, str, str): # Added 4th str for the hidden gr.File component
     """Generates audio from uploaded files or direct text input."""
@@ -344,13 +330,13 @@ def generate_audio(
         temperature=0.5,
         max_tokens=16384
     )
-    def generate_dialogue(text: str, language: str) -> Dialogue:
+    def generate_dialogue(text: str) -> Dialogue:
         """
         You are a language tutor helping Hong Kong secondary students improve their speaking skills, particularly for group discussion or interaction.
-        
+
         Your task is to take the input text provided and create a dialogue between 4 students who are engaged in a group discussion on the topic provided in the input text. Don't worry about the formatting issues or any irrelevant information; your goal is to extract the discussion topic and question prompts as well as any relevant key points or interesting facts from the text accompanying the discussion topic for the group discussion.
 
-        Important: The ENTIRE dialogue (including brainstorming, scratchpad, and actual dialogue) should be written in {language}. If 'Chinese' or 'Cantonese', use correct idiomatic Traditional Chinese (繁體中文) suitable for a Hong Kong audience.
+        Important: The ENTIRE dialogue (including brainstorming, scratchpad, and actual dialogue) should be written in English.
 
         Here is the input text you will be working with:
 
@@ -392,7 +378,7 @@ def generate_audio(
     try:
         gr.Info("✨ Generating dialogue script with AI...")
         llm_start_time = time.time()
-        llm_output = generate_dialogue(full_text, language)
+        llm_output = generate_dialogue(full_text)
         logger.info(f"Dialogue generation took {time.time() - llm_start_time:.2f} seconds.")
 
     except ValidationError as e:
@@ -430,7 +416,7 @@ def generate_audio(
         # was done at the beginning of the generate_audio function.
         # If that check passed, we can proceed.
         future_to_index = {
-            executor.submit(get_mp3, line.text, line.voice(language), resolved_openai_api_key, language): i # Pass UI 'language' as 'language_selection'
+            executor.submit(get_mp3, line.text, line.voice(), resolved_openai_api_key): i # English only, no language parameter needed
             for i, line in enumerate(llm_output.dialogue) if line.text.strip()
         }
         
@@ -523,17 +509,8 @@ def generate_audio(
 
     total_duration = time.time() - start_time
     tts_cost = (characters / 1_000_000) * 15
-    if language in ["Cantonese"]:
-        tts_cost *= 8
-        gr.Info(f"🎉 Audio generation complete! Total time: {total_duration:.2f} seconds.")
-        gr.Info(f"💸 This audio generation costs US${tts_cost:.2f}.")
-    elif language in ["Chinese"]:
-        tts_cost *= 2
-        gr.Info(f"🎉 Audio generation complete! Total time: {total_duration:.2f} seconds.")
-        gr.Info(f"💸 This audio generation costs US${tts_cost:.2f}.")
-    else:
-        gr.Info(f"🎉 Audio generation complete! Total time: {total_duration:.2f} seconds.")
-        gr.Info(f"💸 This audio generation costs US${tts_cost:.2f}.")
+    gr.Info(f"🎉 Audio generation complete! Total time: {total_duration:.2f} seconds.")
+    gr.Info(f"💸 This audio generation costs US${tts_cost:.2f}.")
 
     # Prepare audio title for history
     # Get current time in UTC
@@ -606,11 +583,11 @@ allowed_extensions = [
 
 examples_dir = Path("examples")
 examples = [
-    [ # Input method, files, text, language, api_key
-        "Upload Files", [str(examples_dir / "DSE 2019 Paper 4 Set 2.2.png")], "", "English", None
+    [ # Input method, files, text, api_key
+        "Upload Files", [str(examples_dir / "DSE 2019 Paper 4 Set 2.2.png")], "", None
     ],
     [
-        "Upload Files", [str(examples_dir / "DSE 2023 Paper 4 Set 1.1.png")], "", "English", None
+        "Upload Files", [str(examples_dir / "DSE 2023 Paper 4 Set 1.1.png")], "", None
     ]
 ]
 
@@ -656,11 +633,6 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 🎙️🎧", css="footer
     
     
 
-    lang_input = gr.Radio(
-            label="🌐 Discussion Language",
-            choices=["English", "Chinese", "Cantonese"],
-            value="English",
-        )
 
     API_KEY_URL = "https://api.mr5ai.com"
     with gr.Accordion("⚙️ Advanced Settings", open=False):
@@ -727,7 +699,6 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 🎙️🎧", css="footer
             input_method_radio,
             file_input,
             text_input,
-            lang_input,
             api_key_input
         ],
         outputs=[audio_output, transcript_output, js_trigger_data_textbox, temp_audio_file_output_for_url],
@@ -737,10 +708,9 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 🎙️🎧", css="footer
     gr.Examples(
         examples=examples,
         inputs=[ # Ensure order matches generate_audio parameters for examples
-            input_method_radio, 
-            file_input, 
-            text_input, 
-            lang_input, 
+            input_method_radio,
+            file_input,
+            text_input,
             api_key_input
         ],
         # Examples won't trigger the history save directly unless we adapt the example fn or outputs
