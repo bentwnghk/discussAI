@@ -426,9 +426,11 @@ def generate_audio(
     )
     def generate_dialogue(text: str, language: str) -> Dialogue:
         """
-        Your task is to take the input text provided and turn it into an engaging, informative podcast dialogue. The input text may be messy or unstructured, as it could come from a variety of sources like PDFs or web pages. Don't worry about the formatting issues or any irrelevant information; your goal is to extract the key points and interesting facts that could be discussed in a podcast.
+        You are a language tutor helping Hong Kong secondary students improve their speaking skills, particularly for group discussion or interaction.
+        
+        Your task is to take the input text provided and create a dialogue between 4 students who are engaged in a group discussion on the topic provided in the input text. Don't worry about the formatting issues or any irrelevant information; your goal is to extract the key points and interesting facts for the group discussion.
 
-        Important: The ENTIRE podcast dialogue (including brainstorming, scratchpad, and actual dialogue) should be written in {language}. If 'Chinese' or 'Cantonese', use correct idiomatic Traditional Chinese (繁體中文) suitable for a Hong Kong audience.
+        Important: The ENTIRE dialogue (including brainstorming, scratchpad, and actual dialogue) should be written in {language}. If 'Chinese' or 'Cantonese', use correct idiomatic Traditional Chinese (繁體中文) suitable for a Hong Kong audience.
 
         Here is the input text you will be working with:
 
@@ -436,26 +438,32 @@ def generate_audio(
         {text}
         </input_text>
 
-        First, carefully read through the input text and identify the main topics, key points, and any interesting facts or anecdotes. Think about how you could present this information in a fun, engaging way that would be suitable for an audio podcast.
+        First, carefully read through the input text and identify the discussion topic and question prompts, as well as any relevant key points or interesting facts from the text accompanying the discussion topic.
 
         <scratchpad>
-        Brainstorm creative ways to discuss the main topics and key points you identified in the input text. Consider using analogies, storytelling techniques, or hypothetical scenarios to make the content more relatable and engaging for listeners.
+        Brainstorm creative ways to discuss the main topic and the question prompts you identified in the input text.
 
-        Keep in mind that your podcast should be accessible to a general audience, so avoid using too much jargon or assuming prior knowledge of the topic. If necessary, think of ways to briefly explain any complex concepts in simple terms.
+        Keep in mind that your dialogue should model an authentic discussion and interaction among 4 students in an oral exam setting. It must demonstrate the communication skills and strategies that are expected to be found in a speaking (group discussion) assessment.
 
-        Use your imagination to fill in any gaps in the input text or to come up with thought-provoking questions that could be explored in the podcast. The goal is to create an informative and entertaining dialogue, so feel free to be creative in your approach.
+        During the group discussion, the students are expected to: 
+        - Use strategies to initiate an interaction (e.g. Today, we are here to discuss the proposal to ..., Let's begin by talking about the reasons why ...).
+        - Use strategies to maintain an interaction (e.g. What do you guys think?, Alright, does anyone have any other ideas to add?, OK, shall we move on to discuss ...).
+        - Use strategies to respond to an interaction (e.g. I agree., That's an interesting suggestion, but I'm a bit worried that ...).
+        - Use strategies to rephrase another student's ideas when needed (e.g. I see what you mean. You were saying that ...).
+        - Use a range of accurate vocabulary and language patterns.
+        - Express a range of well-developed ideas clearly, with elaboration and detail.
 
-        Write your brainstorming ideas and a rough outline for the podcast dialogue here. Be sure to note the key insights and takeaways you want to reiterate at the end.
+        Write your brainstorming ideas and a rough outline for the dialogue here. Be sure to note the communication strategies you want to incorporate into your dialogue.
         </scratchpad>
 
-        Now that you have brainstormed ideas and created a rough outline, it's time to write the actual podcast dialogue. Aim for a natural, conversational flow between the host and any guest speakers. Incorporate the best ideas from your brainstorming session and make sure to explain any complex topics in an easy-to-understand way.
+        Now that you have brainstormed ideas and created a rough outline, it's time to write the actual dialogue. Aim for a natural, conversational flow between the 4 speakers. Incorporate the best ideas from your brainstorming session and make sure to incorporate the expected communication strategies in a deliberate way.
 
         <podcast_dialogue>
-        Write your engaging, informative podcast dialogue here, based on the key points and creative ideas you came up with during the brainstorming session. Use a conversational tone and include any necessary context or explanations to make the content accessible to a general audience. Use made-up names for the hosts and guests to create a more engaging and immersive experience for listeners. Do not include any bracketed placeholders like [Host] or [Guest]. Design your output to be read aloud -- it will be directly converted into audio. Assign appropriate speakers (female-1, male-1, female-2, male-2) to each line, varying them for a natural conversation. Ensure the output strictly adheres to the required format: a list of objects, each with 'text' and 'speaker' fields.
+        Write an engaging, informative dialogue here. Use a conversational tone and include any relevant context or explanations from the text accompanying the discussion topic. Use 'Candidate A', 'Candidate B', 'Candidate C', 'Candidate D' to identify the 4 speakers. Do not include any bracketed placeholders like [Candidate A] or [Candidate B]. Design your output to be read aloud -- it will be directly converted into audio. Assign appropriate speakers (Candidate A, Candidate B, Candidate C, Candidate D) to each line, varying them for a natural conversation with natural turn-taking. Ensure the output strictly adheres to the required format: a list of objects, each with 'text' and 'speaker' fields.
 
-        Make the dialogue as long and detailed as possible, while still staying on topic and maintaining an engaging flow. Aim to use your full output capacity to create the longest podcast episode you can, while still communicating the key information from the input text in an entertaining way.
+        Make the dialogue 6-8 minutes long, staying on topic and maintaining an engaging flow.
 
-        At the end of the dialogue, have the host and guest speakers naturally summarize the main insights and takeaways from their discussion. This should flow organically from the conversation, reiterating the key points in a casual, conversational manner. Avoid making it sound like an obvious recap - the goal is to reinforce the central ideas one last time before signing off.
+        At the end of the dialogue, have one of the speakers very briefy summarize the main ideas from their discussion in 1-2 sentences.
         </podcast_dialogue>
         """
 
@@ -677,13 +685,10 @@ allowed_extensions = [
 examples_dir = Path("examples")
 examples = [
     [ # Input method, files, text, url, language, api_key
-        "Upload Files", [str(examples_dir / "Intangible cultural heritage item.pdf")], "", "", "English", None
+        "Upload Files", [str(examples_dir / "DSE 2019 Paper 4 Set 2.2.png")], "", "", "English", None
     ],
     [
-        "Upload Files", [str(examples_dir / "JUPAS Guide.jpg")], "", "", "Chinese", None
-    ],
-    [
-        "URL", None, "", "https://geographical.co.uk/culture/uncontacted-tribes-around-the-world", "Cantonese", None
+        "Upload Files", [str(examples_dir / "DSE 2023 Paper 4 Set 1.1.png")], "", "", "English", None
     ]
 ]
 
