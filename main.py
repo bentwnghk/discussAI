@@ -23,6 +23,7 @@ from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_ex
 from mimetypes import guess_type
 import docx # Added for DOCX support
 import pytz
+import requests
 
 OPENAI_VOICE_MAPPINGS = {
     "female-1": "nova",
