@@ -142,12 +142,6 @@ def is_image(filename):
     # Check extension and guessed MIME type
     return filename.lower().endswith(image_exts) or (t or "").startswith("image")
 
-def is_text(filename):
-    if not filename: return False
-    t, _ = guess_type(filename)
-    # Check extension and guessed MIME type
-    return filename.lower().endswith(".txt") or (t or "") == "text/plain"
-
 def is_docx(filename):
     if not filename: return False
     t, _ = guess_type(filename)
@@ -203,8 +197,6 @@ def extract_text_from_image_via_vision(image_file, openai_api_key=None):
     except Exception as e:
         logger.error(f"Vision extraction failed for {image_file}. Error: {e}")
         raise # Reraise for retry
-
-
 
 
 def generate_audio(
@@ -266,13 +258,6 @@ def generate_audio(
                 except Exception as e:
                     logger.error(f"Error processing image {file_path_obj.name} with Vision API: {e}")
                     raise gr.Error(f"Error extracting text from image: {file_path_obj.name}. Check API key, file format, and OpenAI status. Error: {e}")
-            elif is_text(str(file_path_obj)):
-                try:
-                    with open(actual_file_path, "r", encoding="utf-8", errors='ignore') as f: 
-                        text = f.read()
-                except Exception as e:
-                    logger.error(f"Error reading text file {file_path_obj.name}: {e}")
-                    raise gr.Error(f"Error reading text file: {file_path_obj.name}. Check encoding. Error: {e}")
             elif is_docx(str(file_path_obj)):
                 try:
                     doc = docx.Document(actual_file_path)
@@ -289,7 +274,7 @@ def generate_audio(
                 try:
                    f_size = file_path_obj.stat().st_size
                    if f_size > 0:
-                       raise gr.Error(f"Unsupported file type: {file_path_obj.name}. Please upload TXT, PDF, DOCX, or image file (JPG, JPEG, PNG). Note: Older .doc format is not supported.")
+                       raise gr.Error(f"Unsupported file type: {file_path_obj.name}. Please upload DOCX, PDF, or image file (JPG, JPEG, PNG). Note: Older .doc format is not supported.")
                    else:
                        logger.warning(f"Skipping empty or placeholder file: {file_path_obj.name}")
                        text = ""
@@ -578,7 +563,7 @@ def generate_audio(
 # --- Gradio UI Definition ---
 
 allowed_extensions = [
-    ".txt", ".pdf", ".docx", ".jpg", ".jpeg", ".png" 
+    ".jpg", ".jpeg", ".png", ".docx", ".pdf"
 ]
 
 examples_dir = Path("examples")
@@ -619,7 +604,7 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️🎧", css="fo
 
     with gr.Group(visible=True) as file_upload_group:
         file_input = gr.Files(
-            label="Upload JPG, JPEG, PNG, TXT, PDF, or DOCX Files",
+            label="Upload JPG, JPEG, PNG, DOCX, or PDF Files",
             file_types=allowed_extensions,
             file_count="multiple",
         )
@@ -630,8 +615,6 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️🎧", css="fo
             lines=10,
             placeholder="Paste or type your discussion topic here..."
         )
-    
-    
 
 
     API_KEY_URL = "https://api.mr5ai.com"
