@@ -1,31 +1,33 @@
 # Mr.🆖 DiscussAI 🎙️🎧
 
 <p align="center">
-  <strong>Transform documents, images, and websites into engaging podcast episodes using AI</strong>
+  <strong>AI Language Tutor for Hong Kong Students 🇭🇰</strong>
 </p>
 
 <p align="center">
-  Convert long-form content into natural podcast dialogues that capture attention and make information more accessible for auditory learning on the go.
+  Enhance speaking skills through AI-generated group discussions. Transform topics into realistic 4-student dialogues with authentic conversation strategies for HKDSE oral exam preparation.
 </p>
 
 ## Features
 
-- **📁 Versatile Input Support:** Upload documents (PDF, DOCX, TXT), images with OCR (JPG, JPEG, PNG), paste text directly, or convert websites via URL
-- **🤖 AI-Powered Dialogue Generation:** Uses OpenAI's GPT-4.1-mini to create natural, engaging podcast conversations from your content
-- **🎵 Professional Audio:** Leverages OpenAI's text-to-speech models for high-quality, lifelike voices through Mr.🆖 AI Hub routing
-- **🌐 Multi-Language Support:** Generate podcasts in English, Chinese (Traditional), or Cantonese with optimized voice synthesis
-- **💰 Cost Transparency:** Real-time TTS cost calculation and tracking (English, Chinese, Cantonese)
-- **🖥️ User-Friendly Interface:** Gradio-based web interface for easy interaction
-- **💾 Smart History Management:** Browse and reload previous podcasts stored in your browser (IndexedDB + localStorage)
-- **🔧 Resilient Processing:** Retry mechanisms and error handling for reliable conversion
-- **⚡ FastAPI Backend:** Robust server architecture with deployment-ready setup
+- **🎓 Educational Focus:** Designed specifically for Hong Kong secondary students to practice group discussion skills for HKDSE oral exams
+- **👥 4-Student Dialogues:** Generates realistic conversations between Candidates A, B, C, and D with authentic interaction patterns
+- **🗣️ Communication Strategies:** Incorporates essential discussion skills - initiating, maintaining, responding, and rephrasing ideas
+- **📁 Multiple Input Methods:** Upload documents (PDF, DOCX, TXT), images with OCR (JPG, JPEG, PNG), or paste discussion topics directly
+- **🤖 AI-Powered Generation:** Uses OpenAI's GPT-4.1-mini to create engaging, topic-relevant dialogues with proper brainstorming and structure
+- **🎵 Audio Narration:** High-quality text-to-speech with natural voices through Mr.🆖 AI Hub for immersive practice sessions
+- **🌐 Multi-Language Support:** Practice in English, Chinese (Traditional), or Cantonese - perfect for Hong Kong's linguistic diversity
+- **⏱️ Exam-Length Practice:** Generates 8-10 minute discussions matching typical HKDSE oral exam duration
+- **💰 Cost Transparency:** Real-time TTS cost calculation and tracking for different languages
+- **💾 Practice History:** Save and review previous discussion sessions with full transcripts and audio
 
 ## Demo Examples
 
-The project includes sample inputs:
-- PDF documents (e.g., "Intangible cultural heritage item.pdf")
-- Images with text (e.g., "JUPAS Guide.jpg")
-- URL extraction from web pages
+The project includes sample HKDSE exam materials:
+- **DSE 2019 Paper 4 Set 2.2.png** - Sample group discussion exam paper for practice
+- **DSE 2023 Paper 4 Set 1.1.png** - Additional HKDSE oral exam materials
+
+These examples demonstrate how to transform exam topics into interactive group discussions for oral practice.
 
 ## Installation
 
@@ -69,74 +71,84 @@ The project includes sample inputs:
    ```
    The Gradio interface will open in your browser at http://localhost:8000
 
-2. **Generate Podcasts:**
-   - **Upload Files:** Select PDF, DOCX, TXT, or image files
-   - **Paste Text:** Directly input text content
-   - **From URL:** Convert web pages to podcasts
-   - Choose language: English, Chinese, or Cantonese
-   - Enter your API key (auto-saved to browser)
-   - Click "Generate Podcast"
+2. **Generate Group Discussions:**
+   - **Upload HKDSE Materials:** Use sample exam papers or upload your own study materials (PDF, DOCX, TXT, or images)
+   - **Enter Discussion Topics:** Paste exam topics or practice questions directly
+   - **Select Language:** Choose English, Chinese (Traditional), or Cantonese for practice
+   - **Enter API Key:** Add your Mr.🆖 AI Hub API key (auto-saved to browser)
+   - **Click "Generate Discussion"**
 
-3. **View Results:**
-   - Listen to the generated MP3 podcast
-   - Review the dialogue transcript
-   - Check TTS costs
-   - Access previous podcasts in the History panel
+3. **Practice & Review:**
+   - **Listen to Audio:** Hear realistic 4-student discussions with natural conversation flow
+   - **Study Transcripts:** Review dialogue structure and communication strategies
+   - **Track Costs:** Monitor TTS expenses for different languages
+   - **Build Practice History:** Save and revisit previous sessions for continued improvement
 
 ### Input Methods
 
-#### 1. File Upload
-- **PDF:** Digital documents, scans, reports
-- **DOCX:** Word documents
-- **TXT:** Plain text files
-- **Images:** JPG/PNG with text extraction via OpenAI Vision API
+#### 1. HKDSE Study Materials
+- **PDF:** Exam papers, study guides, and practice materials
+- **DOCX:** Word documents with discussion topics and questions
+- **TXT:** Practice questions and topic outlines
+- **Images:** Scanned exam papers and study materials (JPG/PNG with OCR)
 
-#### 2. Text Input
-- Paste any text content
-- Supports up to ~8000 token dialogues
+#### 2. Direct Topic Input
+- **Discussion Topics:** Paste exam questions or practice topics directly
+- **Custom Scenarios:** Create your own discussion situations
+- **Text Length:** Supports comprehensive topics for 8-10 minute dialogues
 
-#### 3. URL Processing
-- Convert web articles to podcasts
-- Automatic content extraction with fallbacks
-- Supports major news sites and blogs
+#### 3. Educational Content
+- **Study Materials:** Convert any educational content into discussion practice
+- **Exam Questions:** Transform test questions into interactive group discussions
+- **Practice Scenarios:** Create realistic oral exam situations
 
 ### Language Options
 
-- **English:** Standard OpenAI TTS models
-- **Chinese (繁體):** Traditional Chinese with optimized output
-- **Cantonese:** Specialized voice support through Mr.🆖 AI Hub
+Perfect for Hong Kong's multilingual environment:
+
+- **English:** Practice for HKDSE English Language Paper 4 (School-based Assessment)
+- **Chinese (繁體):** Traditional Chinese discussions for Chinese Language oral exams
+- **Cantonese:** Native Hong Kong Cantonese for authentic local language practice
+
+Each language includes culturally appropriate communication strategies and exam-relevant vocabulary.
 
 ## Architecture
 
-- **Frontend:** Gradio web interface
-- **Backend:** FastAPI server with async processing
-- **Storage:** Temporary file management with auto-cleanup
-- **AI Services:** OpenAI GPT-4.1-mini + TTS via Mr.🆖 AI Hub
-- **Database:** Browser-based history (IndexedDB/localStorage)
-- **Deployment:** Ready for Docker/Uvicorn
+**Designed for Educational Excellence:**
 
-## Cost Estimation
+- **Frontend:** Intuitive Gradio web interface optimized for student learning
+- **Backend:** FastAPI server with robust async processing for reliable generation
+- **AI Engine:** OpenAI GPT-4.1-mini specialized for educational dialogue creation
+- **Voice Synthesis:** Premium TTS through Mr.🆖 AI Hub with multi-language support
+- **Storage:** Browser-based history system for tracking practice progress
+- **Deployment:** Production-ready with Docker support for institutional use
 
-TTS costs vary by language:
-- English: ~$0.15 per 1M characters
-- Chinese: ~$0.30 per 1M characters (x2 multiplier)
-- Cantonese: ~$0.75 per 1M characters (x8 multiplier)
+## Educational Investment
+
+**Transparent Pricing for Quality Learning:**
+
+TTS costs vary by language and are clearly displayed after each generation:
+- **English:** ~$0.15 per 1M characters (standard rate)
+- **Chinese:** ~$0.30 per 1M characters (2x multiplier for Traditional Chinese)
+- **Cantonese:** ~$0.75 per 1M characters (8x multiplier for native Hong Kong Cantonese)
+
+*Typical 8-10 minute discussion: $0.05-0.25 depending on language choice*
 
 ## Project Structure
 
 ```
 .
-├── main.py              # Application entry point
-├── description.md        # UI descriptions
-├── head.html             # Custom HTML/JS for browser features
-├── static/               # Web assets (logo, icon)
-├── examples/             # Sample files for testing
-├── pyproject.toml        # Python dependencies
-├── uv.lock              # Dependency lock file
-├── Dockerfile           # Container configuration
-├── docker-compose.yml   # Docker composition
+├── main.py              # Main application with AI dialogue generation
+├── description.md        # Educational UI descriptions and messaging
+├── head.html             # Advanced browser features for practice history
+├── static/               # Web assets (logo, educational icons)
+├── examples/             # HKDSE sample papers for demonstration
+├── pyproject.toml        # Educational AI and web framework dependencies
+├── uv.lock              # Locked dependency versions
+├── Dockerfile           # Container for institutional deployment
+├── docker-compose.yml   # Complete deployment configuration
 ├── LICENSE              # Apache 2.0 License
-└── README.md            # This file
+└── README.md            # Educational project documentation
 ```
 
 ## Configuration
@@ -157,12 +169,13 @@ The application is designed to work with Mr.🆖 AI Hub compatible endpoints. Se
 
 ## Troubleshooting
 
-### Common Issues
+### Common Issues for Students & Teachers
 
-- **API Key Issues:** Ensure your Mr.🆖 AI Hub key is valid and has sufficient credits
-- **File Upload Errors:** Check file size limits and supported formats
-- **URL Processing:** Some websites block scraping - try different sources
-- **TTS Failures:** Request timeouts - the app has retry mechanisms
+- **API Key Issues:** Ensure your Mr.🆖 AI Hub key is valid and has sufficient credits for TTS generation
+- **Study Material Upload:** Check that HKDSE papers and study materials are in supported formats (PDF, DOCX, TXT, JPG, PNG)
+- **Content Extraction:** Some scanned documents might need better quality images for accurate text extraction
+- **Generation Timeouts:** Complex topics might take longer - the app has retry mechanisms built-in
+- **Audio Quality:** Ensure stable internet connection for consistent TTS generation
 
 ### Debug Mode
 
@@ -188,5 +201,5 @@ Licensed under the Apache License 2.0. See [LICENSE](LICENSE) for details.
 ---
 
 <div align="center">
-  Transform your content into <strong>podcasts that engage and inform</strong> 🎙️
+  <strong>Empower Hong Kong students with AI-enhanced speaking practice</strong> 🇭🇰🗣️
 </div>
