@@ -22,8 +22,6 @@ from pypdf import PdfReader
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential # tenacity is imported here
 from mimetypes import guess_type
 import docx # Added for DOCX support
-import requests # requests is imported here
-from bs4 import BeautifulSoup # Added for HTML parsing
 import pytz
 
 OPENAI_VOICE_MAPPINGS = {
@@ -218,84 +216,17 @@ def extract_text_from_image_via_vision(image_file, openai_api_key=None):
         logger.error(f"Vision extraction failed for {image_file}. Error: {e}")
         raise # Reraise for retry
 
-# Helper function to extract text from URL
-@retry(stop=stop_after_attempt(2), wait=wait_exponential(multiplier=1, min=2, max=5), retry=retry_if_exception_type(requests.exceptions.RequestException))
-def extract_text_from_url(url: str) -> str:
-    """Fetches content from a URL and extracts text using BeautifulSoup."""
-    if not url.startswith(('http://', 'https://')):
-        url = 'https://' + url # Basic correction for missing scheme
-    logger.info(f"Fetching content from URL: {url}")
-    try:
-        headers = { # Add headers to mimic a browser visit
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
-        response = requests.get(url, headers=headers, timeout=15) # Increased timeout
-        response.raise_for_status()  # Raises an HTTPError for bad responses (4XX or 5XX)
 
-        # Attempt to decode using UTF-8, then fall back to apparent_encoding
-        try:
-            html_content = response.content.decode('utf-8')
-        except UnicodeDecodeError:
-            html_content = response.text # relies on apparent_encoding
-
-        soup = BeautifulSoup(html_content, 'html.parser')
-
-        # Remove script and style elements
-        for script_or_style in soup(["script", "style"]):
-            script_or_style.decompose()
-
-        # Get text: try common main content tags first, then fall back to body
-        # This is a heuristic and might need adjustment for specific site structures
-        main_content_tags = ['article', 'main', '.main-content', '#main', '#content', '.post-content', '.entry-content']
-        text_parts = []
-        found_main_content = False
-
-        for tag_selector in main_content_tags:
-            elements = soup.select(tag_selector)
-            if elements:
-                for element in elements:
-                    text_parts.append(element.get_text(separator='\n', strip=True))
-                found_main_content = True
-                break # Stop if main content is found
-
-        if not found_main_content and soup.body:
-            text_parts.append(soup.body.get_text(separator='\n', strip=True))
-        
-        extracted_text = "\n\n".join(filter(None, text_parts))
-
-        if not extracted_text.strip():
-            logger.warning(f"No significant text extracted from URL: {url}")
-            return "" # Return empty string if no text is found
-        
-        logger.info(f"Successfully extracted {len(extracted_text)} characters from URL: {url}")
-        return extracted_text
-
-    except requests.exceptions.HTTPError as e:
-        logger.error(f"HTTP error fetching URL {url}: {e}")
-        raise gr.Error(f"Failed to fetch content from URL: {url}. Server returned: {e.response.status_code}")
-    except requests.exceptions.ConnectionError as e:
-        logger.error(f"Connection error fetching URL {url}: {e}")
-        raise gr.Error(f"Failed to connect to URL: {url}. Please check the URL and your internet connection.")
-    except requests.exceptions.Timeout:
-        logger.error(f"Timeout fetching URL {url}")
-        raise gr.Error(f"Fetching content from URL {url} timed out. The website might be slow or unresponsive.")
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Error fetching URL {url}: {e}")
-        raise gr.Error(f"An error occurred while trying to fetch the URL: {url}. Details: {e}")
-    except Exception as e:
-        logger.error(f"Unexpected error processing URL {url}: {e}")
-        raise gr.Error(f"An unexpected error occurred while processing the URL {url}. Error: {e}")
 
 
 def generate_audio(
     input_method: str,
     files: Optional[List[str]],
     input_text: Optional[str],
-    url_input: Optional[str], # Added url_input
     language: str = "English",
     openai_api_key: str = None,
 ) -> (str, str, str, str): # Added 4th str for the hidden gr.File component
-    """Generates podcast audio from uploaded files, direct text input, or URL."""
+    """Generates podcast audio from uploaded files or direct text input."""
     start_time = time.time()
     
     # API Key Check - one-api (at OPENAI_BASE_URL via resolved_openai_api_key) handles all TTS routing.
@@ -395,19 +326,7 @@ def generate_audio(
         full_text = input_text
         podcast_title_base = "Pasted Text"
 
-    elif input_method == "URL": # New block for URL input
-        if not url_input or not url_input.strip():
-            raise gr.Error("Please enter a URL or switch to another input method.")
-        try:
-            full_text = extract_text_from_url(url_input)
-            if not full_text.strip():
-                raise gr.Error(f"Could not extract any meaningful text from the URL: {url_input}. The page might be empty, primarily image-based without OCR, or protected.")
-            podcast_title_base = url_input.split('//')[-1].split('/')[0] # Domain as base title
-        except gr.Error as e: # Catch Gradio errors from extract_text_from_url
-            raise e # Re-raise to display in UI
-        except Exception as e: # Catch any other unexpected errors
-            logger.error(f"Unexpected error during URL processing for {url_input}: {e}")
-            raise gr.Error(f"An unexpected error occurred while processing the URL: {url_input}. Please try again or use a different URL.")
+    
 
     else:
         raise gr.Error("Invalid input method selected.")
@@ -428,7 +347,7 @@ def generate_audio(
         """
         You are a language tutor helping Hong Kong secondary students improve their speaking skills, particularly for group discussion or interaction.
         
-        Your task is to take the input text provided and create a dialogue between 4 students who are engaged in a group discussion on the topic provided in the input text. Don't worry about the formatting issues or any irrelevant information; your goal is to extract the key points and interesting facts for the group discussion.
+        Your task is to take the input text provided and create a dialogue between 4 students who are engaged in a group discussion on the topic provided in the input text. Don't worry about the formatting issues or any irrelevant information; your goal is to extract the discussion topic and question prompts as well as any relevant key points or interesting facts from the text accompanying the discussion topic for the group discussion.
 
         Important: The ENTIRE dialogue (including brainstorming, scratchpad, and actual dialogue) should be written in {language}. If 'Chinese' or 'Cantonese', use correct idiomatic Traditional Chinese (繁體中文) suitable for a Hong Kong audience.
 
@@ -443,12 +362,12 @@ def generate_audio(
         <scratchpad>
         Brainstorm creative ways to discuss the main topic and the question prompts you identified in the input text.
 
-        Keep in mind that your dialogue should model an authentic discussion and interaction among 4 students in an oral exam setting. It must demonstrate the communication skills and strategies that are expected to be found in a speaking (group discussion) assessment.
+        Keep in mind that your dialogue should model an authentic discussion and interaction among 4 students in an oral exam setting. It must demonstrate the communication skills and strategies that are expected to be found in an effective group discussion.
 
         During the group discussion, the students are expected to: 
-        - Use strategies to initiate an interaction (e.g. Today, we are here to discuss the proposal to ..., Let's begin by talking about the reasons why ...).
-        - Use strategies to maintain an interaction (e.g. What do you guys think?, Alright, does anyone have any other ideas to add?, OK, shall we move on to discuss ...).
-        - Use strategies to respond to an interaction (e.g. I agree., That's an interesting suggestion, but I'm a bit worried that ...).
+        - Use strategies to initiate an interaction (e.g. Today, we are here to discuss the proposal to ... | Let's begin by talking about the reasons why ...).
+        - Use strategies to maintain an interaction (e.g. What do you guys think? | Alright, does anyone have any other ideas to add? | OK, shall we move on to discuss ...).
+        - Use strategies to respond to an interaction (e.g. I agree. | That's an interesting suggestion, but I'm a bit worried that ... | I'm sorry I don't agree.).
         - Use strategies to rephrase another student's ideas when needed (e.g. I see what you mean. You were saying that ...).
         - Use a range of accurate vocabulary and language patterns.
         - Express a range of well-developed ideas clearly, with elaboration and detail.
@@ -456,12 +375,12 @@ def generate_audio(
         Write your brainstorming ideas and a rough outline for the dialogue here. Be sure to note the communication strategies you want to incorporate into your dialogue.
         </scratchpad>
 
-        Now that you have brainstormed ideas and created a rough outline, it's time to write the actual dialogue. Aim for a natural, conversational flow between the 4 speakers. Incorporate the best ideas from your brainstorming session and make sure to incorporate the expected communication strategies in a deliberate way.
+        Now that you have brainstormed ideas and created a rough outline, it's time to write the actual dialogue. Aim for a natural, conversational flow between the 4 speakers. Incorporate the ideas from your brainstorming session and make sure to incorporate the expected communication strategies in a deliberate manner.
 
         <podcast_dialogue>
         Write an engaging, informative dialogue here. Use a conversational tone and include any relevant context or explanations from the text accompanying the discussion topic. Use 'Candidate A', 'Candidate B', 'Candidate C', 'Candidate D' to identify the 4 speakers. Do not include any bracketed placeholders like [Candidate A] or [Candidate B]. Design your output to be read aloud -- it will be directly converted into audio. Assign appropriate speakers (Candidate A, Candidate B, Candidate C, Candidate D) to each line, varying them for a natural conversation with natural turn-taking. Ensure the output strictly adheres to the required format: a list of objects, each with 'text' and 'speaker' fields.
 
-        Make the dialogue 6-8 minutes long, staying on topic and maintaining an engaging flow.
+        Make the dialogue 8-10 minutes long, staying on topic and maintaining an engaging flow.
 
         At the end of the dialogue, have one of the speakers very briefy summarize the main ideas from their discussion in 1-2 sentences.
         </podcast_dialogue>
@@ -684,11 +603,11 @@ allowed_extensions = [
 
 examples_dir = Path("examples")
 examples = [
-    [ # Input method, files, text, url, language, api_key
-        "Upload Files", [str(examples_dir / "DSE 2019 Paper 4 Set 2.2.png")], "", "", "English", None
+    [ # Input method, files, text, language, api_key
+        "Upload Files", [str(examples_dir / "DSE 2019 Paper 4 Set 2.2.png")], "", "English", None
     ],
     [
-        "Upload Files", [str(examples_dir / "DSE 2023 Paper 4 Set 1.1.png")], "", "", "English", None
+        "Upload Files", [str(examples_dir / "DSE 2023 Paper 4 Set 1.1.png")], "", "English", None
     ]
 ]
 
@@ -703,7 +622,7 @@ def read_file_content(filepath: str, default: str = "") -> str:
          return default
 
 
-description_md = read_file_content("description.md", "Generate a podcast from text, documents, or a URL.")
+description_md = read_file_content("description.md", "Generate a podcast from text or documents.")
 footer_md = read_file_content("footer.md", "")
 head_html = read_file_content("head.html", "")
 
@@ -713,7 +632,7 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 PodcastAI 🎙️🎧", css="footer
 
     with gr.Row():
         input_method_radio = gr.Radio(
-            ["Upload Files", "Enter Text", "URL"], # Added "URL"
+            ["Upload Files", "Enter Text"],
             label="📁 Sources",
             value="Upload Files"
         )
@@ -732,12 +651,7 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 PodcastAI 🎙️🎧", css="footer
             placeholder="Paste or type your text here..."
         )
     
-    with gr.Group(visible=False) as url_input_group: # New URL input group
-        url_input_field = gr.Textbox( # Renamed to avoid conflict if needed later
-            label="🔗 Enter URL",
-            lines=1,
-            placeholder="https://example.com/article"
-        )
+    
 
     lang_input = gr.Radio(
             label="🌐 Podcast Language",
@@ -776,26 +690,21 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 PodcastAI 🎙️🎧", css="footer
         """Updates visibility and clears the inactive input fields."""
         is_upload = choice == "Upload Files"
         is_text = choice == "Enter Text"
-        is_url = choice == "URL" # New condition
 
         # Determine visibility updates
         file_vis = is_upload
         text_vis = is_text
-        url_vis = is_url # New visibility
 
         # Determine value updates (clear hidden fields)
         # gr.update() means no change to value
         file_val_update = gr.update(value=None) if not is_upload else gr.update()
         text_val_update = gr.update(value="") if not is_text else gr.update()
-        url_val_update = gr.update(value="") if not is_url else gr.update() # New value update
 
         return {
             file_upload_group: gr.update(visible=file_vis),
             text_input_group: gr.update(visible=text_vis),
-            url_input_group: gr.update(visible=url_vis), # Update URL group visibility
             file_input: file_val_update,
             text_input: text_val_update,
-            url_input_field: url_val_update, # Update URL field value
         }
 
     input_method_radio.change(
@@ -804,10 +713,8 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 PodcastAI 🎙️🎧", css="footer
         outputs=[
             file_upload_group, 
             text_input_group, 
-            url_input_group, # Add url_input_group to outputs
             file_input, 
-            text_input,
-            url_input_field  # Add url_input_field to outputs
+            text_input
         ]
     )
 
@@ -817,11 +724,10 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 PodcastAI 🎙️🎧", css="footer
             input_method_radio,
             file_input,
             text_input,
-            url_input_field, # Added url_input_field
             lang_input,
             api_key_input
         ],
-        outputs=[audio_output, transcript_output, js_trigger_data_textbox, temp_audio_file_output_for_url], # Added temp_audio_file_output_for_url
+        outputs=[audio_output, transcript_output, js_trigger_data_textbox, temp_audio_file_output_for_url],
         api_name="generate_podcast"
     )
 
@@ -831,13 +737,12 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 PodcastAI 🎙️🎧", css="footer
             input_method_radio, 
             file_input, 
             text_input, 
-            url_input_field, # Added url_input_field
             lang_input, 
             api_key_input
         ],
         # Examples won't trigger the history save directly unless we adapt the example fn or outputs
         # For now, history save is only for manual generation.
-        outputs=[audio_output, transcript_output, js_trigger_data_textbox, temp_audio_file_output_for_url], # Added temp_audio_file_output_for_url
+        outputs=[audio_output, transcript_output, js_trigger_data_textbox, temp_audio_file_output_for_url],
         fn=generate_audio,
         cache_examples=True,
         run_on_click=True,
