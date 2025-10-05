@@ -25,10 +25,10 @@
   console.log("[HEAD_SCRIPT] Global error handler set.");
 
   // --- IndexedDB Setup ---
-  const DB_NAME = 'pdfToPodcastDB';
+  const DB_NAME = 'DiscussAIDB';
   const DB_VERSION = 1;
-  const PODCAST_STORE_NAME = 'podcasts'; // For audio blobs and full data
-  const LOCAL_HISTORY_KEY = 'podcastHistoryMetadata'; // For localStorage (metadata only)
+  const PODCAST_STORE_NAME = 'discussions'; // For audio blobs and full data
+  const LOCAL_HISTORY_KEY = 'DiscussAIHistoryMetadata'; // For localStorage (metadata only)
 
   let db; // Will hold the database instance
 
@@ -76,7 +76,7 @@
         localStorage.setItem(LOCAL_HISTORY_KEY, JSON.stringify(historyMetadata));
     } catch (e) {
         console.error("[METADATA_HISTORY] Error saving to localStorage:", e);
-        alert("Could not save podcast metadata list. Storage might be full.");
+        alert("Could not save metadata list. Storage might be full.");
     }
   }
   // --- End localStorage for Metadata List ---
@@ -93,7 +93,7 @@
     const historyMetadata = getPodcastMetadataHistory(); // Get metadata from localStorage
     
     if (historyMetadata.length === 0) {
-        listContainer.innerHTML = '<li style="padding: 10px; text-align: center;">No podcasts in history.</li>';
+        listContainer.innerHTML = '<li style="padding: 10px; text-align: center;">No discussions in history.</li>';
     } else {
         historyMetadata.forEach(podcastMeta => { // Iterate over metadata
             const item = document.createElement('li');
@@ -166,15 +166,15 @@
         console.log("[ACTUAL_INIT] IndexedDB opened successfully.");
     } catch (error) {
         console.error("[ACTUAL_INIT] Failed to open IndexedDB. History feature will be limited.", error);
-        alert("Failed to initialize podcast database. History feature may not work correctly.");
+        alert("Failed to initialize database. History feature may not work correctly.");
         // Proceed with other initializations if possible, or degrade gracefully
     }
     
     loadPodcastFromHistory = async function(podcastId) { // Now async
-        console.log(`[LOAD_HISTORY] Attempting to load podcast ID: ${podcastId}`);
+        console.log(`[LOAD_HISTORY] Attempting to load discussion ID: ${podcastId}`);
         if (!db) {
             console.error("[LOAD_HISTORY] IndexedDB not available.");
-            alert("Podcast database is not available. Cannot load audio.");
+            alert("Database is not available. Cannot load discussion.");
             return;
         }
 
@@ -183,14 +183,14 @@
         const request = store.get(podcastId);
 
         request.onerror = (event) => {
-            console.error("[LOAD_HISTORY] Error fetching podcast from IndexedDB:", event.target.error);
-            alert("Error loading podcast data.");
+            console.error("[LOAD_HISTORY] Error fetching discussion from IndexedDB:", event.target.error);
+            alert("Error loading discussion data.");
         };
 
         request.onsuccess = (event) => {
             const podcast = event.target.result;
             if (podcast && podcast.audioBlob) { // Check for audioBlob
-                console.log(`[LOAD_HISTORY] Found podcast in IndexedDB: ${podcast.title}`);
+                console.log(`[LOAD_HISTORY] Found discussion in IndexedDB: ${podcast.title}`);
                 const audioWrapper = document.getElementById('podcast_audio_player');
                 const transcriptDisplayElement = document.querySelector('#podcast_transcript_display textarea');
                 let audioPlayerElement = audioWrapper ? audioWrapper.querySelector('audio') : null;
@@ -222,22 +222,22 @@
                 }
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
-                console.warn(`[LOAD_HISTORY] Podcast ID ${podcastId} not found in IndexedDB or missing audioBlob.`);
-                alert("Podcast data or audio not found in local database.");
+                console.warn(`[LOAD_HISTORY] Discussion ID ${podcastId} not found in IndexedDB or missing audioBlob.`);
+                alert("Discussion data or audio not found in local database.");
             }
         };
     };
 
     deletePodcastFromHistory = async function(podcastId) { // Now async
-        if (!confirm("Are you sure you want to delete this podcast from history?")) return;
+        if (!confirm("Are you sure you want to delete this discussion from history?")) return;
         
-        console.log(`[DELETE_HISTORY] Attempting to delete podcast ID: ${podcastId}`);
+        console.log(`[DELETE_HISTORY] Attempting to delete discussion ID: ${podcastId}`);
         // Delete from IndexedDB
         if (db) {
             const tx = db.transaction(PODCAST_STORE_NAME, 'readwrite');
             const store = tx.objectStore(PODCAST_STORE_NAME);
             const req = store.delete(podcastId);
-            req.onsuccess = () => console.log(`[DELETE_HISTORY] Podcast ${podcastId} deleted from IndexedDB.`);
+            req.onsuccess = () => console.log(`[DELETE_HISTORY] Discussion ${podcastId} deleted from IndexedDB.`);
             req.onerror = (e) => console.error(`[DELETE_HISTORY] Error deleting ${podcastId} from IndexedDB:`, e.target.error);
             await new Promise(resolve => tx.oncomplete = resolve); // Wait for tx to complete
         } else {
@@ -250,17 +250,17 @@
         savePodcastMetadataHistory(historyMetadata);
         
         renderPodcastHistory(); // Re-render the list
-        console.log(`[DELETE_HISTORY] Podcast ${podcastId} metadata removed and history re-rendered.`);
+        console.log(`[DELETE_HISTORY] Discussion ${podcastId} metadata removed and history re-rendered.`);
     };
 
     renamePodcastInHistory = async function(podcastId) {
-        const newTitle = prompt("Enter the new title for the audio:");
+        const newTitle = prompt("Enter the new title for the discussion:");
         if (!newTitle || newTitle.trim() === "") {
             console.log("[RENAME_HISTORY] Rename cancelled or empty title provided.");
             return;
         }
 
-        console.log(`[RENAME_HISTORY] Attempting to rename audio ID: ${podcastId} to "${newTitle}"`);
+        console.log(`[RENAME_HISTORY] Attempting to rename discussion ID: ${podcastId} to "${newTitle}"`);
 
         // 1. Update IndexedDB
         if (db) {
@@ -274,7 +274,7 @@
                     podcast.title = newTitle.trim();
                     const updateReq = store.put(podcast);
                     updateReq.onsuccess = () => {
-                        console.log(`[RENAME_HISTORY] Audio ${podcastId} title updated in IndexedDB.`);
+                        console.log(`[RENAME_HISTORY] Discussion ${podcastId} title updated in IndexedDB.`);
                     };
                     updateReq.onerror = (e) => {
                         console.error(`[RENAME_HISTORY] Error updating title for ${podcastId} in IndexedDB:`, e.target.error);
@@ -282,7 +282,7 @@
                 }
             };
             req.onerror = (e) => {
-                console.error(`[RENAME_HISTORY] Error fetching audio ${podcastId} for rename from IndexedDB:`, e.target.error);
+                console.error(`[RENAME_HISTORY] Error fetching discussion ${podcastId} for rename from IndexedDB:`, e.target.error);
             };
             await new Promise(resolve => tx.oncomplete = resolve);
         } else {
@@ -295,7 +295,7 @@
         if (podcastMetaIndex > -1) {
             historyMetadata[podcastMetaIndex].title = newTitle.trim();
             savePodcastMetadataHistory(historyMetadata);
-            console.log(`[RENAME_HISTORY] Audio ${podcastId} metadata updated in localStorage.`);
+            console.log(`[RENAME_HISTORY] Discussion ${podcastId} metadata updated in localStorage.`);
         }
 
         // 3. Re-render the list
@@ -304,7 +304,7 @@
     };
 
     saveNewPodcastToHistory = async function(title, audioFileUrlFromComponent, transcriptText, tts_cost) { // Added tts_cost
-        console.log("[SAVE_NEW] Attempting to save podcast:", { title, audioUrl: audioFileUrlFromComponent, transcriptLength: transcriptText?.length, tts_cost }); // Added tts_cost
+        console.log("[SAVE_NEW] Attempting to save discussion:", { title, audioUrl: audioFileUrlFromComponent, transcriptLength: transcriptText?.length, tts_cost }); // Added tts_cost
         if (!audioFileUrlFromComponent || typeof transcriptText === 'undefined') {
             console.error("[SAVE_NEW] Audio URL or transcript is missing."); return;
         }
@@ -317,8 +317,8 @@
         const currentHistoryMetadata = getPodcastMetadataHistory();
         const existingPodcast = currentHistoryMetadata.find(podcast => podcast.title === title);
         if (existingPodcast) {
-            console.warn(`[SAVE_NEW] Podcast with title "${title}" already exists in history. Skipping save.`);
-            alert(`A podcast with the title "${title}" already exists in your history and will not be added again.`);
+            console.warn(`[SAVE_NEW] Discussion with title "${title}" already exists in history. Skipping save.`);
+            alert(`A discussion with the title "${title}" already exists in your history and will not be added again.`);
             // Optionally remove any "saving..." message if it was added
             const savingMsgElemForSkip = document.getElementById('podcastSavingMessage');
             if (savingMsgElemForSkip) savingMsgElemForSkip.remove();
@@ -329,9 +329,9 @@
         let savingMsgElem = document.getElementById('podcastSavingMessage');
         if (!savingMsgElem && historyListElem) {
             savingMsgElem = document.createElement('li'); savingMsgElem.id = 'podcastSavingMessage';
-            savingMsgElem.textContent = 'Fetching & Saving Podcast...'; savingMsgElem.style.fontStyle = 'italic';
+            savingMsgElem.textContent = 'Fetching & Saving Discussion...'; savingMsgElem.style.fontStyle = 'italic';
             historyListElem.prepend(savingMsgElem);
-        } else if (savingMsgElem) { savingMsgElem.textContent = 'Fetching & Saving Podcast...';}
+        } else if (savingMsgElem) { savingMsgElem.textContent = 'Fetching & Saving Discussion...';}
 
         try {
             console.log(`[SAVE_NEW] Fetching audio blob from: ${audioFileUrlFromComponent}`);
@@ -342,11 +342,11 @@
 
             if (!db) {
                 console.error("[SAVE_NEW] IndexedDB not available. Cannot save audio blob.");
-                if(savingMsgElem) savingMsgElem.textContent = 'Error: Podcast DB not ready.';
+                if(savingMsgElem) savingMsgElem.textContent = 'Error: DiscussAI DB not ready.';
                 return;
             }
 
-            const podcastId = 'podcast-' + Date.now() + '-' + Math.random().toString(36).substring(2, 9);
+            const podcastId = 'GI-' + Date.now() + '-' + Math.random().toString(36).substring(2, 9);
             const podcastDataForDB = {
                 id: podcastId,
                 title: title,
@@ -361,7 +361,7 @@
             const request = store.put(podcastDataForDB);
 
             request.onsuccess = () => {
-                console.log(`[SAVE_NEW] Podcast data (with blob) saved to IndexedDB with ID: ${podcastId}`);
+                console.log(`[SAVE_NEW] Discussion data (with blob) saved to IndexedDB with ID: ${podcastId}`);
                 // Now save metadata to localStorage
                 const historyMetadata = getPodcastMetadataHistory(); // Re-fetch in case of concurrent ops, though unlikely here
                 historyMetadata.unshift({
@@ -375,10 +375,10 @@
                 savePodcastMetadataHistory(historyMetadata);
                 if (savingMsgElem) savingMsgElem.remove();
                 renderPodcastHistory();
-                console.log("[SAVE_NEW] Podcast metadata saved to localStorage and history rendered.");
+                console.log("[SAVE_NEW] Discussion metadata saved to localStorage and history rendered.");
             };
             request.onerror = (event) => {
-                console.error("[SAVE_NEW] Error saving podcast to IndexedDB:", event.target.error);
+                console.error("[SAVE_NEW] Error saving discussion to IndexedDB:", event.target.error);
                 if(savingMsgElem) savingMsgElem.textContent = `DB Save Error: ${event.target.error.name}`;
             };
 
