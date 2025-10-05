@@ -40,8 +40,8 @@ These examples demonstrate how to transform exam topics into interactive group d
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/bentwnghk/mr5-podcast-ai.git
-   cd mr5-podcast-ai
+   git clone https://github.com/bentwnghk/discussAI.git
+   cd discussAI
    ```
 
 2. **Install dependencies:**
@@ -194,7 +194,7 @@ Licensed under the Apache License 2.0. See [LICENSE](LICENSE) for details.
 
 ## Support
 
-- Create issues on [GitHub](https://github.com/bentwnghk/mr5-podcast-ai) for bugs/feature requests
+- Create issues on [GitHub](https://github.com/bentwnghk/discussAI) for bugs/feature requests
 - Check the examples directory for sample inputs
 - Review browser console for detailed error messages
 
