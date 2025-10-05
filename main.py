@@ -226,7 +226,7 @@ def generate_audio(
     language: str = "English",
     openai_api_key: str = None,
 ) -> (str, str, str, str): # Added 4th str for the hidden gr.File component
-    """Generates podcast audio from uploaded files or direct text input."""
+    """Generates audio from uploaded files or direct text input."""
     start_time = time.time()
     
     # API Key Check - one-api (at OPENAI_BASE_URL via resolved_openai_api_key) handles all TTS routing.
@@ -240,7 +240,7 @@ def generate_audio(
     
     full_text = ""
     gr.Info("📦 Processing input...")
-    podcast_title_base = "Podcast" # Default title base
+    podcast_title_base = "Group Discussion" # Default title base
 
     if input_method == "Upload Files":
         if not files:
@@ -320,11 +320,11 @@ def generate_audio(
             podcast_title_base = file_names[0] if len(file_names) == 1 else f"{len(file_names)} Files"
 
 
-    elif input_method == "Enter Text":
+    elif input_method == "Enter Topic":
         if not input_text or not input_text.strip():
-            raise gr.Error("Please enter text or switch to another input method.")
+            raise gr.Error("Please enter topic or switch to another input method.")
         full_text = input_text
-        podcast_title_base = "Pasted Text"
+        podcast_title_base = "Pasted Topic"
 
     
 
@@ -493,7 +493,7 @@ def generate_audio(
             dir=temporary_directory,
             delete=False, 
             suffix=".mp3",
-            prefix="podcast_audio_"
+            prefix="GI_audio_"
         ) as temp_file:
              temp_file.write(audio)
              temp_file_path = temp_file.name 
@@ -508,7 +508,7 @@ def generate_audio(
         raise gr.Error("Failed to save the generated audio file.")
 
     try:
-        for file in glob.glob(f"{temporary_directory}podcast_audio_*.mp3"):
+        for file in glob.glob(f"{temporary_directory}GI_audio_*.mp3"):
             if os.path.isfile(file) and time.time() - os.path.getmtime(file) > 24 * 60 * 60: 
                 try:
                     os.remove(file)
@@ -522,17 +522,17 @@ def generate_audio(
     tts_cost = (characters / 1_000_000) * 15
     if language in ["Cantonese"]:
         tts_cost *= 8
-        gr.Info(f"🎉 Podcast generation complete! Total time: {total_duration:.2f} seconds.")
-        gr.Info(f"💸 This podcast generation costs US${tts_cost:.2f}.")
+        gr.Info(f"🎉 Audio generation complete! Total time: {total_duration:.2f} seconds.")
+        gr.Info(f"💸 This audio generation costs US${tts_cost:.2f}.")
     elif language in ["Chinese"]:
         tts_cost *= 2
-        gr.Info(f"🎉 Podcast generation complete! Total time: {total_duration:.2f} seconds.")
-        gr.Info(f"💸 This podcast generation costs US${tts_cost:.2f}.")
+        gr.Info(f"🎉 Audio generation complete! Total time: {total_duration:.2f} seconds.")
+        gr.Info(f"💸 This audio generation costs US${tts_cost:.2f}.")
     else:
-        gr.Info(f"🎉 Podcast generation complete! Total time: {total_duration:.2f} seconds.")
-        gr.Info(f"💸 This podcast generation costs US${tts_cost:.2f}.")
+        gr.Info(f"🎉 Audio generation complete! Total time: {total_duration:.2f} seconds.")
+        gr.Info(f"💸 This audio generation costs US${tts_cost:.2f}.")
 
-    # Prepare podcast title for history
+    # Prepare audio title for history
     # Get current time in UTC
     utc_now = datetime.datetime.now(datetime.timezone.utc)
     # Define Hong Kong timezone
@@ -622,39 +622,39 @@ def read_file_content(filepath: str, default: str = "") -> str:
          return default
 
 
-description_md = read_file_content("description.md", "Generate a podcast from text or documents.")
+description_md = read_file_content("description.md", "Generate a sample group discussion with accompanying audio from a provided topic.")
 footer_md = read_file_content("footer.md", "")
 head_html = read_file_content("head.html", "")
 
 
-with gr.Blocks(theme="ocean", title="Mr.🆖 PodcastAI 🎙️🎧", css="footer{display:none !important}") as demo: # Reverted allowed_paths
+with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 🎙️🎧", css="footer{display:none !important}") as demo: # Reverted allowed_paths
     gr.Markdown(description_md)
 
     with gr.Row():
         input_method_radio = gr.Radio(
-            ["Upload Files", "Enter Text"],
+            ["Upload Files", "Enter Topic"],
             label="📁 Sources",
             value="Upload Files"
         )
 
     with gr.Group(visible=True) as file_upload_group:
         file_input = gr.Files(
-            label="Upload TXT, PDF, DOCX, JPG, JPEG, or PNG Files",
+            label="Upload JPG, JPEG, PNG, TXT, PDF, or DOCX Files",
             file_types=allowed_extensions,
             file_count="multiple",
         )
 
     with gr.Group(visible=False) as text_input_group: 
         text_input = gr.Textbox(
-            label="✍️ Enter Text",
+            label="✍️ Enter Topic",
             lines=10,
-            placeholder="Paste or type your text here..."
+            placeholder="Paste or type your discussion topic here..."
         )
     
     
 
     lang_input = gr.Radio(
-            label="🌐 Podcast Language",
+            label="🌐 Discussion Language",
             choices=["English", "Chinese", "Cantonese"],
             value="English",
         )
@@ -671,15 +671,15 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 PodcastAI 🎙️🎧", css="footer
                 elem_id="mr_ng_ai_hub_api_key_input"
         )
 
-    submit_button = gr.Button("✨ Generate Podcast", variant="primary")
+    submit_button = gr.Button("✨ Generate Discussion with Audio", variant="primary")
 
     with gr.Column():
-        audio_output = gr.Audio(label="Podcast Audio", type="filepath", elem_id="podcast_audio_player") # Keep existing elem_id
+        audio_output = gr.Audio(label="🔊 Audio", type="filepath", elem_id="podcast_audio_player") # Keep existing elem_id
         transcript_output = gr.Textbox(label="📃 Transcript", lines=15, show_copy_button=True, autoscroll=False, elem_id="podcast_transcript_display") # Keep existing elem_id
 
-    with gr.Accordion("📜 History (Stored in your browser)", open=False): # Keep existing Accordion
+    with gr.Accordion("📜 Archives (Stored in your browser)", open=False): # Keep existing Accordion
         # This HTML component will be populated by JavaScript from head.html
-        podcast_history_display = gr.HTML("<ul id='podcastHistoryList' style='list-style-type: none; padding: 0;'><li>Loading history...</li></ul>")
+        podcast_history_display = gr.HTML("<ul id='podcastHistoryList' style='list-style-type: none; padding: 0;'><li>Loading archives...</li></ul>")
         # Hidden Textbox component to pass JSON data to JavaScript
         js_trigger_data_textbox = gr.Textbox(label="JS Trigger Data", visible=False, elem_id="js_trigger_data_textbox")
         # Hidden File component to get a Gradio-served URL for the audio
@@ -689,7 +689,7 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 PodcastAI 🎙️🎧", css="footer
     def switch_input_method(choice):
         """Updates visibility and clears the inactive input fields."""
         is_upload = choice == "Upload Files"
-        is_text = choice == "Enter Text"
+        is_text = choice == "Enter Topic"
 
         # Determine visibility updates
         file_vis = is_upload
@@ -728,7 +728,7 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 PodcastAI 🎙️🎧", css="footer
             api_key_input
         ],
         outputs=[audio_output, transcript_output, js_trigger_data_textbox, temp_audio_file_output_for_url],
-        api_name="generate_podcast"
+        api_name="generate_audio"
     )
 
     gr.Examples(
@@ -764,8 +764,8 @@ app = gr.mount_gradio_app(app, demo, path="/")
 if __name__ == "__main__":
     examples_dir.mkdir(exist_ok=True)
     example_files = [
-        "Intangible cultural heritage item.pdf",
-        "JUPAS Guide.jpg"
+        "DSE 2019 Paper 4 Set 2.2.png",
+        "DSE 2023 Paper 4 Set 1.1.png"
     ]
     for fname in example_files:
         fpath = examples_dir / fname

@@ -1,4 +1,4 @@
-# Mr.🆖 PodcastAI 🎙️🎧
+# Mr.🆖 DiscussAI 🎙️🎧
 
 <p align="center">
   <strong>Transform documents, images, and websites into engaging podcast episodes using AI</strong>

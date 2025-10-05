@@ -1,6 +1,6 @@
 <p style="text-align:center; font-size: 2.5em;">
-  <strong>Mr.🆖 PodcastAI 🎙️🎧</strong>
+  <strong>Mr.🆖 DiscussAI 🎙️🎧</strong>
 </p>
 <p style="text-align:center; font-size: 1em;">
-  <strong>🪄 Turn documents (text, Word, PDF, image) and websites into professional podcasts with one click ✨ Convert your content into engaging podcast-like conversations that capture and hold attention, while keeping every key insight 💡 Great for transforming lengthy articles and educational content into audio discussions for auditory learning on the go</strong>
+  <strong>🗣️ AI Language Tutor for Hong Kong Students 🇭🇰 Enhance your English speaking skills through AI-generated audio group discussions ✨ Transform topics into realistic 4-student dialogues with authentic conversation strategies 🎓 Perfect for HKDSE oral exam preparation and group interaction practice 📚 Generate 8-10 minute discussions with transcripts and audio narration</strong>
 </p>
