@@ -365,21 +365,23 @@ def generate_audio(
 
         Keep in mind that your dialogue should model an authentic discussion and interaction among 4 students in an oral exam setting. It must demonstrate the communication skills and strategies that are expected to be found in an effective group discussion.
 
-        During the group discussion, the students are expected to: 
+        During the group discussion, the students are expected to do the following: 
+        - Express a range of well-developed ideas clearly, with elaboration and detail.
         - Use strategies to initiate an interaction (e.g. Today, we are here to discuss the proposal to ... | Let's begin by talking about the reasons why ...).
-        - Use strategies to maintain an interaction (e.g. What do you guys think? | Alright, does anyone have any other ideas to add? | OK, shall we move on to discuss ...).
+        - Use strategies to maintain an interaction (e.g. What do you think? | Any thoughts, Candidate C?).
+        - Use strategies to transition between question prompts (e.g. Alright, does anyone have any other ideas to add on this point? If not, shall we move on to discuss ...?).
         - Use strategies to respond to an interaction (e.g. I agree. | That's an interesting suggestion, but I'm a bit worried that ... | I'm sorry I don't agree.).
         - Use strategies to rephrase another student's ideas when needed (e.g. I see what you mean. You were saying that ...).
+        - Use strategies to ask for clarification (e.g. I'm not sure if I understood you correctly. Did you mean that ...?).
         - Use a range of accurate vocabulary and language patterns.
-        - Express a range of well-developed ideas clearly, with elaboration and detail.
 
-        Write your brainstorming ideas and a rough outline for the dialogue here. Be sure to note the communication strategies you want to incorporate into your dialogue.
+        Write your brainstorming ideas and an outline for the dialogue here. Be sure to note the communication strategies you want to incorporate into your dialogue.
         </scratchpad>
 
-        Now that you have brainstormed ideas and created a rough outline, it's time to write the actual dialogue. Aim for a natural, conversational flow between the 4 speakers. Incorporate the ideas from your brainstorming session and make sure to incorporate the expected communication strategies in a deliberate manner.
+        Now that you have brainstormed ideas and created an outline, it's time to write the actual dialogue. Aim for a natural, conversational flow between the 4 speakers. Incorporate the ideas from your brainstorming session and make sure to incorporate the expected communication strategies in a deliberate manner.
 
         <podcast_dialogue>
-        Write an engaging, informative dialogue here. Use a conversational tone and include any relevant context or explanations from the text accompanying the discussion topic. Use 'Candidate A', 'Candidate B', 'Candidate C', 'Candidate D' to identify the 4 speakers. Do not include any bracketed placeholders like [Candidate A] or [Candidate B]. Design your output to be read aloud -- it will be directly converted into audio. Assign appropriate speakers (Candidate A, Candidate B, Candidate C, Candidate D) to each line, varying them for a natural conversation with natural turn-taking. Ensure the output strictly adheres to the required format: a list of objects, each with 'text' and 'speaker' fields.
+        Write an engaging, informative dialogue here. Use a conversational tone and include any relevant context or explanations from the text accompanying the discussion topic. Use 'Candidate A', 'Candidate B', 'Candidate C', 'Candidate D' to identify the 4 speakers. Do not include any bracketed placeholders like [Candidate A] or [Candidate B]. Design your output to be read aloud -- it will be directly converted into audio. Assign appropriate speakers (Candidate A, Candidate B, Candidate C, Candidate D) to each line, varying the speaking order for a natural conversation flow. Ensure the output strictly adheres to the required format: a list of objects, each with 'text' and 'speaker' fields.
 
         Make the dialogue 8-10 minutes long, staying on topic and maintaining an engaging flow.
 
