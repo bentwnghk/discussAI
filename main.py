@@ -598,7 +598,7 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️🎧", css="fo
     with gr.Row():
         input_method_radio = gr.Radio(
             ["Upload Files", "Enter Topic"],
-            label="📁 Sources",
+            label="📁 Discussion Topic",
             value="Upload Files"
         )
 
