@@ -1,6 +1,6 @@
 <p style="text-align:center; font-size: 2.5em;">
-  <strong>Mr.🆖 DiscussAI 🎙️🎧</strong>
+  <strong>Mr.🆖 DiscussAI 👥🎙️🎧</strong>
 </p>
 <p style="text-align:center; font-size: 1em;">
-  <strong>🗣️ AI Language Tutor for Hong Kong Students 🇭🇰 Enhance your English speaking skills through AI-generated audio group discussions ✨ Transform topics into realistic 4-student dialogues with authentic conversation strategies 🎓 Perfect for HKDSE oral exam preparation and group interaction practice 📚 Generate 8-10 minute discussions with transcripts and audio narration</strong>
+  <strong>🗣️ AI Speaking Tutor for Hong Kong Students ✨ Transform any DSE speaking topics into realistic exam-length group discussions with full transcripts and immersive audio 📸 Simply take photos of your Group Interaction task, upload it, and let Mr.🆖 DiscussAI handle the rest! 🎓 Perfect for DSE oral exam preparation and practice of essential group interaction skills 💾 Save and review previous discussion sessions</strong>
 </p>

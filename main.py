@@ -607,7 +607,7 @@ footer_md = read_file_content("footer.md", "")
 head_html = read_file_content("head.html", "")
 
 
-with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 🎙️🎧", css="footer{display:none !important}") as demo: # Reverted allowed_paths
+with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️🎧", css="footer{display:none !important}") as demo: # Reverted allowed_paths
     gr.Markdown(description_md)
 
     with gr.Row():
