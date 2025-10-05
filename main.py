@@ -26,10 +26,10 @@ import pytz
 import requests
 
 OPENAI_VOICE_MAPPINGS = {
-    "female-1": "nova",
-    "male-1": "alloy",
-    "female-2": "fable",
-    "male-2": "echo",
+    "Candidate A": "nova",
+    "Candidate B": "alloy",
+    "Candidate C": "fable",
+    "Candidate D": "echo",
 }
 
 if sentry_dsn := os.getenv("SENTRY_DSN"):
@@ -41,7 +41,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 class DialogueItem(BaseModel):
     text: str
-    speaker: Literal["female-1", "male-1", "female-2", "male-2"]
+    speaker: Literal["Candidate A", "Candidate B", "Candidate C", "Candidate D"]
 
     def voice(self, language: str = "English"): # Add language parameter, remove @property
         # Always use OPENAI_VOICE_MAPPINGS.
