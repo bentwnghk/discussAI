@@ -344,6 +344,8 @@ def generate_audio(
         - Strategies for rephrasing a group discussion (e.g. I see what you mean. You were saying that ...).
         - Strategies for asking for clarification a group discussion (e.g. I'm not sure if I understood you correctly. Did you mean that ...?).
 
+        Use natural, accurate vocabulary and expressions suitable for Hong Kong secondary students.
+
         Write your brainstorming ideas and discussion outline here.
         </scratchpad>
 
