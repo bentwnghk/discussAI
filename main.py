@@ -336,12 +336,12 @@ def generate_audio(
 
         Express a range of well-developed ideas clearly, with elaboration and detail.
 
-        **Length Planning for 8-10 minute dialogue:**
-        - Plan for approximately 1000-1400 total words across all dialogue lines
+        **Length Planning for 6-8 minute dialogue:**
+        - Plan for approximately 800-1100 total words across all dialogue lines
         - Structure the discussion with 3-4 main question prompts from the input text
-        - Allocate 2-3 minutes of discussion per main question prompt
-        - Each speaker should contribute 200-350 words of substantial content
-        - Include multiple rounds of discussion per topic (initial thoughts → examples → counterarguments → agreements/disagreements)
+        - Allocate 1.5-2.5 minutes of discussion per main question prompt
+        - Each speaker should contribute 180-275 words of meaningful content
+        - Include 1-2 discussion rounds per main question prompt (initial thoughts → key examples → agreements/disagreements)
 
         Model an authentic discussion and interaction among 4 students, and include the following strategies:
         - Strategies for initiating a group discussion (e.g. Alright, we are here to discuss the proposal to ... | Let's begin by talking about the reasons why ...).
@@ -359,14 +359,14 @@ def generate_audio(
         Now that you have brainstormed ideas and created an outline, it's time to write the full dialogue.
 
         <podcast_dialogue>
-        Write an engaging, informative dialogue here that will be 8-10 minutes long when spoken at a natural pace.
+        Write an engaging, informative dialogue here that will be 6-8 minutes long when spoken at a natural pace.
 
-        **Content Requirements for 8-10 minute length:**
-        - Ensure substantial contributions from each speaker (200-350 words per speaker)
-        - Each speaker should express multiple detailed viewpoints with examples
-        - Include 2-3 rounds of discussion per major topic (initial position → supporting examples → counterarguments → resolution)
-        - Add detailed explanations, personal experiences, and hypothetical scenarios
-        - Include natural conversation fillers and extended responses
+        **Content Requirements for 6-8 minute length:**
+        - Ensure meaningful contributions from each speaker (180-275 words per speaker)
+        - Each speaker should express key viewpoints with relevant examples appropriate for Hong Kong secondary students
+        - Include 1-2 discussion rounds per major question prompt (initial position → supporting examples → agreements/disagreements)
+        - Add clear explanations and relevant examples without excessive detail
+        - Include natural conversation patterns appropriate for secondary school level
 
         Use a conversational tone with natural pacing and detailed discussions.
 
@@ -380,15 +380,15 @@ def generate_audio(
 
         Assign appropriate speakers (Candidate A, Candidate B, Candidate C, Candidate D) to each line. Ensure the output strictly adheres to the required format: a list of objects, each with 'text' and 'speaker' fields.
 
-        Make the dialogue 8-10 minutes long when spoken at a natural pace (approximately 120-150 words per minute).
+        Make the dialogue 6-8 minutes long when spoken at a natural pace (approximately 120-150 words per minute).
 
         To achieve this length:
-        - Target approximately 1000-1400 words total across all speakers
-        - Include detailed explanations and elaborations for each point
-        - Have speakers ask follow-up questions and provide extended responses
-        - Include multiple examples and scenarios for each question prompt
-        - Ensure each speaker contributes substantial content (200-350 words per speaker)
-        - Include natural pauses for thinking, clarification requests, and detailed responses
+        - Target approximately 800-1100 words total across all speakers
+        - Include focused explanations and elaborations appropriate for secondary students
+        - Have speakers ask follow-up questions and provide concise but thoughtful responses
+        - Include relevant examples and scenarios for each question prompt
+        - Ensure each speaker contributes meaningful content (180-275 words per speaker)
+        - Include natural pauses for thinking and clarification requests
 
         At the end of the dialogue, include a brief summary (1–2 sentences) by one of the candidates.
         </podcast_dialogue>
