@@ -599,12 +599,12 @@ def read_file_content(filepath: str, default: str = "") -> str:
          return default
 
 
-description_md = read_file_content("description.md", "Generate a sample group discussion with accompanying audio from a provided topic.")
+description_md = read_file_content("description.md", "AI-Powered Group Discussion Practice for HKDSE Oral Exam")
 footer_md = read_file_content("footer.md", "")
 head_html = read_file_content("head.html", "")
 
 
-with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️🎧", css="footer{display:none !important}") as demo: # Reverted allowed_paths
+with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer{display:none !important}") as demo: # Reverted allowed_paths
     gr.Markdown(description_md)
 
     with gr.Row():
@@ -616,7 +616,7 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️🎧", css="fo
 
     with gr.Group(visible=True) as file_upload_group:
         file_input = gr.Files(
-            label="Upload JPG, JPEG, PNG, DOCX, or PDF Files",
+            label="Upload Group Interaction Task",
             file_types=allowed_extensions,
             file_count="multiple",
         )
