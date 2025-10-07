@@ -349,7 +349,7 @@ def generate_audio(
         - Strategies for transitioning in a group discussion (e.g. Does anyone have anything else to add? If not, shall we move on to discuss ...?).
         - Strategies for responding in a group discussion (e.g. I agree. | That's an interesting suggestion, but I'm a bit worried that ... | Sorry, I disagree.).
         - Strategies for rephrasing a group discussion (e.g. I see what you mean. You were saying that ...).
-        - Strategies for asking for clarification a group discussion (e.g. I'm not sure if I understood you correctly. Did you mean that ...?).
+        - Strategies for asking for clarification in a group discussion (e.g. I'm not sure if I understood you correctly. Did you mean that ...?).
 
         Use natural, accurate vocabulary and expressions suitable for Hong Kong secondary students.
 
