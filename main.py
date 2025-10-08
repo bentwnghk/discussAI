@@ -199,11 +199,146 @@ def extract_text_from_image_via_vision(image_file, openai_api_key=None):
         raise # Reraise for retry
 
 
+# Normal mode dialogue generation function (current detailed prompt)
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=15), retry=retry_if_exception_type(ValidationError))
+@llm(
+    model="gpt-4.1-mini",
+    api_key=None,  # Will be passed as parameter
+    base_url=None,  # Will be passed as parameter
+    temperature=0.5,
+    max_tokens=16384
+)
+def generate_dialogue_normal(text: str, api_key: str, base_url: str) -> Dialogue:
+    """
+    You are an English language tutor helping Hong Kong secondary students improve their speaking skills, especially for group discussions in oral exams.
+
+    Your task is to take the input text provided and create a realistic group discussion in English between four students (Candidate A, B, C, D) on the topic provided in the input text. Don't worry about the formatting issues or any irrelevant information; your goal is to extract the discussion topic and question prompts as well as any relevant key points or interesting facts from the input text for the group discussion.
+
+    Important: The ENTIRE dialogue (including brainstorming, scratchpad, and actual dialogue) should be written in English.
+
+    Here is the input text you will be working with:
+
+    <input_text>
+    {text}
+    </input_text>
+
+    First, carefully read through the input text and identify the discussion topic and question prompts, as well as any relevant key points or interesting facts from the text accompanying the discussion topic.
+
+    <scratchpad>
+    Brainstorm ideas and outline the discussion. Make sure your discussion follows the question prompts you identified in the input text.
+
+    Express a range of well-developed ideas clearly, with elaboration and detail.
+
+    **Length Planning for 6-8 minute dialogue:**
+    - Plan for approximately 800-1100 total words across all dialogue lines
+    - Structure the discussion with 3-4 main question prompts from the input text
+    - Allocate 1.5-2.5 minutes of discussion per main question prompt
+    - Each speaker should contribute 180-275 words of meaningful content
+    - Include 1-2 discussion rounds per main question prompt (initial thoughts → key examples → agreements/disagreements)
+
+    Model an authentic discussion and interaction among 4 students, and include the following strategies:
+    - Strategies for initiating a group discussion (e.g. Alright, we are here to discuss the proposal to ... | Let's begin by talking about the reasons why ...).
+    - Strategies for maintaining a group discussion (e.g. What do you think? | Any thoughts, Candidate C?).
+    - Strategies for transitioning in a group discussion (e.g. Does anyone have anything else to add? If not, shall we move on to discuss ...?).
+    - Strategies for responding in a group discussion (e.g. I agree. | That's an interesting suggestion, but I'm a bit worried that ... | Sorry, I disagree.).
+    - Strategies for rephrasing a group discussion (e.g. I see what you mean. You were saying that ...).
+    - Strategies for asking for clarification in a group discussion (e.g. I'm not sure if I understood you correctly. Did you mean that ...?).
+
+    Use natural, accurate vocabulary and expressions suitable for Hong Kong secondary students.
+
+    Write your brainstorming ideas and discussion outline here, ensuring the planned structure will result in a 6-8 minute dialogue when spoken naturally.
+    </scratchpad>
+
+    Now that you have brainstormed ideas and created an outline, it's time to write the full dialogue.
+
+    <podcast_dialogue>
+    Write an engaging, informative dialogue here that will be 6-8 minutes long when spoken at a natural pace.
+
+    **Content Requirements for 6-8 minute length:**
+    - Ensure meaningful contributions from each speaker (180-275 words per speaker)
+    - Each speaker should express key viewpoints with relevant examples appropriate for Hong Kong secondary students
+    - Include 1-2 discussion rounds per major question prompt (initial position → supporting examples → agreements/disagreements)
+    - Add clear explanations and relevant examples without excessive detail
+    - Include natural conversation patterns appropriate for secondary school level
+
+    Use a conversational tone with natural pacing and detailed discussions.
+
+    Include elaboration, clarification, and questioning strategies throughout to extend the discussion naturally.
+
+    Use 'Candidate A', 'Candidate B', 'Candidate C', 'Candidate D' to identify the 4 speakers. Do not include any bracketed placeholders like [Candidate A] or [Candidate B].
+
+    Alternate speakers naturally, ensuring balanced participation from all candidates.
+
+    Design your output to be read aloud -- it will be directly converted into audio, so focus on natural speech patterns and detailed content.
+
+    Assign appropriate speakers (Candidate A, Candidate B, Candidate C, Candidate D) to each line. Ensure the output strictly adheres to the required format: a list of objects, each with 'text' and 'speaker' fields.
+
+    Make the dialogue 6-8 minutes long when spoken at a natural pace (approximately 120-150 words per minute).
+
+    To achieve this length:
+    - Target approximately 800-1100 words total across all speakers
+    - Include focused explanations and elaborations appropriate for secondary students
+    - Have speakers ask follow-up questions and provide concise but thoughtful responses
+    - Include relevant examples and scenarios for each question prompt
+    - Ensure each speaker contributes meaningful content (180-275 words per speaker)
+    - Include natural pauses for thinking and clarification requests
+
+    At the end of the dialogue, include a brief summary (1–2 sentences) by one of the candidates.
+    </podcast_dialogue>
+    """
+
+# Simpler mode dialogue generation function
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=15), retry=retry_if_exception_type(ValidationError))
+@llm(
+    model="gpt-4.1-mini",
+    api_key=None,  # Will be passed as parameter
+    base_url=None,  # Will be passed as parameter
+    temperature=0.5,
+    max_tokens=16384
+)
+def generate_dialogue_simpler(text: str, api_key: str, base_url: str) -> Dialogue:
+    """
+    You are an English language tutor helping Hong Kong secondary students improve their speaking skills, especially for group discussions in oral exams.
+    Your task is to take the input text provided and create a realistic group discussion in English between four students (Candidate A, B, C, D) on the topic provided in the input text. Don't worry about the formatting issues or any irrelevant information; your goal is to extract the discussion topic and question prompts as well as any relevant key points or interesting facts from the input text for the group discussion.
+    Important: The ENTIRE dialogue (including brainstorming, scratchpad, and actual dialogue) should be written in English.
+    Here is the input text you will be working with:
+    <input_text>
+    {text}
+    </input_text>
+    First, carefully read through the input text and identify the discussion topic and question prompts, as well as any relevant key points or interesting facts from the text accompanying the discussion topic.
+    <scratchpad>
+    Brainstorm ideas and outline the discussion. Make sure your discussion follows the question prompts you identified in the input text.
+    Express a range of well-developed ideas clearly, with elaboration and detail.
+    Model an authentic discussion and interaction among 4 students, and include the following strategies:
+     - Strategies for initiating a group discussion (e.g. Alright, we are here to discuss the proposal to ... | Let's begin by talking about the reasons why ...).
+    - Strategies for maintaining a group discussion (e.g. What do you think? | Any thoughts, Candidate C?).
+    - Strategies for transitioning in a group discussion (e.g. Does anyone have anything else to add? If not, shall we move on to discuss ...?).
+    - Strategies for responding in a group discussion (e.g. I agree. | That's an interesting suggestion, but I'm a bit worried that ... | Sorry, I disagree.).
+    - Strategies for rephrasing a group discussion (e.g. I see what you mean. You were saying that ...).
+    - Strategies for asking for clarification a group discussion (e.g. I'm not sure if I understood you correctly. Did you mean that ...?).
+    Use natural, accurate vocabulary and expressions suitable for Hong Kong secondary students.
+    Write your brainstorming ideas and discussion outline here.
+    </scratchpad>
+    Now that you have brainstormed ideas and created an outline, it's time to write the full dialogue.
+    <podcast_dialogue>
+    Write an engaging, informative dialogue here.
+    Use a conversational tone.
+    Include elaboration, clarification, and questioning strategies.
+    Use 'Candidate A', 'Candidate B', 'Candidate C', 'Candidate D' to identify the 4 speakers. Do not include any bracketed placeholders like [Candidate A] or [Candidate B].
+    Alternate speakers naturally.
+    Design your output to be read aloud -- it will be directly converted into audio.
+    Assign appropriate speakers (Candidate A, Candidate B, Candidate C, Candidate D) to each line. Ensure the output strictly adheres to the required format: a list of objects, each with 'text' and 'speaker' fields.
+    Make the dialogue 8-10 minutes long.
+    At the end of the dialogue, include a brief summary (1–2 sentences) by one of the candidates.
+    </podcast_dialogue>
+    """
+
 def generate_audio(
     input_method: str,
     files: Optional[List[str]],
     input_text: Optional[str],
     openai_api_key: str = None,
+    dialogue_mode: str = "Normal",
 ) -> (str, str, str, str): # Added 4th str for the hidden gr.File component
     """Generates audio from uploaded files or direct text input."""
     start_time = time.time()
@@ -307,97 +442,16 @@ def generate_audio(
     if not full_text.strip(): # Double check after all input methods
         raise gr.Error("No text content to process. Please provide valid input.")
 
-    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=15), retry=retry_if_exception_type(ValidationError))
-    @llm(
-        model="gpt-4.1-mini", # This LLM call might still use OpenAI
-        api_key=resolved_openai_api_key, # Dialogue generation still uses OpenAI key
-        base_url=resolved_openai_base_url,
-        temperature=0.5,
-        max_tokens=16384
-    )
-    def generate_dialogue(text: str) -> Dialogue:
-        """
-        You are an English language tutor helping Hong Kong secondary students improve their speaking skills, especially for group discussions in oral exams.
-
-        Your task is to take the input text provided and create a realistic group discussion in English between four students (Candidate A, B, C, D) on the topic provided in the input text. Don't worry about the formatting issues or any irrelevant information; your goal is to extract the discussion topic and question prompts as well as any relevant key points or interesting facts from the input text for the group discussion.
-
-        Important: The ENTIRE dialogue (including brainstorming, scratchpad, and actual dialogue) should be written in English.
-
-        Here is the input text you will be working with:
-
-        <input_text>
-        {text}
-        </input_text>
-
-        First, carefully read through the input text and identify the discussion topic and question prompts, as well as any relevant key points or interesting facts from the text accompanying the discussion topic.
-
-        <scratchpad>
-        Brainstorm ideas and outline the discussion. Make sure your discussion follows the question prompts you identified in the input text.
-
-        Express a range of well-developed ideas clearly, with elaboration and detail.
-
-        **Length Planning for 6-8 minute dialogue:**
-        - Plan for approximately 800-1100 total words across all dialogue lines
-        - Structure the discussion with 3-4 main question prompts from the input text
-        - Allocate 1.5-2.5 minutes of discussion per main question prompt
-        - Each speaker should contribute 180-275 words of meaningful content
-        - Include 1-2 discussion rounds per main question prompt (initial thoughts → key examples → agreements/disagreements)
-
-        Model an authentic discussion and interaction among 4 students, and include the following strategies:
-        - Strategies for initiating a group discussion (e.g. Alright, we are here to discuss the proposal to ... | Let's begin by talking about the reasons why ...).
-        - Strategies for maintaining a group discussion (e.g. What do you think? | Any thoughts, Candidate C?).
-        - Strategies for transitioning in a group discussion (e.g. Does anyone have anything else to add? If not, shall we move on to discuss ...?).
-        - Strategies for responding in a group discussion (e.g. I agree. | That's an interesting suggestion, but I'm a bit worried that ... | Sorry, I disagree.).
-        - Strategies for rephrasing a group discussion (e.g. I see what you mean. You were saying that ...).
-        - Strategies for asking for clarification in a group discussion (e.g. I'm not sure if I understood you correctly. Did you mean that ...?).
-
-        Use natural, accurate vocabulary and expressions suitable for Hong Kong secondary students.
-
-        Write your brainstorming ideas and discussion outline here, ensuring the planned structure will result in an 8-10 minute dialogue when spoken naturally.
-        </scratchpad>
-
-        Now that you have brainstormed ideas and created an outline, it's time to write the full dialogue.
-
-        <podcast_dialogue>
-        Write an engaging, informative dialogue here that will be 6-8 minutes long when spoken at a natural pace.
-
-        **Content Requirements for 6-8 minute length:**
-        - Ensure meaningful contributions from each speaker (180-275 words per speaker)
-        - Each speaker should express key viewpoints with relevant examples appropriate for Hong Kong secondary students
-        - Include 1-2 discussion rounds per major question prompt (initial position → supporting examples → agreements/disagreements)
-        - Add clear explanations and relevant examples without excessive detail
-        - Include natural conversation patterns appropriate for secondary school level
-
-        Use a conversational tone with natural pacing and detailed discussions.
-
-        Include elaboration, clarification, and questioning strategies throughout to extend the discussion naturally.
-
-        Use 'Candidate A', 'Candidate B', 'Candidate C', 'Candidate D' to identify the 4 speakers. Do not include any bracketed placeholders like [Candidate A] or [Candidate B].
-
-        Alternate speakers naturally, ensuring balanced participation from all candidates.
-
-        Design your output to be read aloud -- it will be directly converted into audio, so focus on natural speech patterns and detailed content.
-
-        Assign appropriate speakers (Candidate A, Candidate B, Candidate C, Candidate D) to each line. Ensure the output strictly adheres to the required format: a list of objects, each with 'text' and 'speaker' fields.
-
-        Make the dialogue 6-8 minutes long when spoken at a natural pace (approximately 120-150 words per minute).
-
-        To achieve this length:
-        - Target approximately 800-1100 words total across all speakers
-        - Include focused explanations and elaborations appropriate for secondary students
-        - Have speakers ask follow-up questions and provide concise but thoughtful responses
-        - Include relevant examples and scenarios for each question prompt
-        - Ensure each speaker contributes meaningful content (180-275 words per speaker)
-        - Include natural pauses for thinking and clarification requests
-
-        At the end of the dialogue, include a brief summary (1–2 sentences) by one of the candidates.
-        </podcast_dialogue>
-        """
+    # Choose dialogue generation function based on mode
+    if dialogue_mode == "Simpler":
+        dialogue_generator = generate_dialogue_simpler
+    else:
+        dialogue_generator = generate_dialogue_normal
 
     try:
         gr.Info("✨ Generating dialogue script with AI...")
         llm_start_time = time.time()
-        llm_output = generate_dialogue(full_text)
+        llm_output = dialogue_generator(full_text, resolved_openai_api_key, resolved_openai_base_url)
         logger.info(f"Dialogue generation took {time.time() - llm_start_time:.2f} seconds.")
 
     except ValidationError as e:
@@ -636,6 +690,14 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
             value="Upload Files"
         )
 
+    with gr.Row():
+        dialogue_mode_radio = gr.Radio(
+            ["Normal", "Simpler"],
+            label="🎯 Dialogue Complexity",
+            value="Normal",
+            info="Normal: Detailed discussion with elaborations (6-8 min). Simpler: Concise discussion with key points (4-5 min)."
+        )
+
     with gr.Group(visible=True) as file_upload_group:
         file_input = gr.Files(
             label="Upload Group Interaction Task",
@@ -716,7 +778,8 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
             input_method_radio,
             file_input,
             text_input,
-            api_key_input
+            api_key_input,
+            dialogue_mode_radio
         ],
         outputs=[audio_output, transcript_output, js_trigger_data_textbox, temp_audio_file_output_for_url],
         api_name="generate_audio"
@@ -728,7 +791,8 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
             input_method_radio,
             file_input,
             text_input,
-            api_key_input
+            api_key_input,
+            dialogue_mode_radio
         ],
         # Examples won't trigger the history save directly unless we adapt the example fn or outputs
         # For now, history save is only for manual generation.
