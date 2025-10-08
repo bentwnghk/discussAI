@@ -677,10 +677,10 @@ allowed_extensions = [
 examples_dir = Path("examples")
 examples = [
     [ # Input method, dialogue mode, files, text, api_key
-        "Upload Files", "Normal", [str(examples_dir / "DSE 2019 Paper 4 Set 2.2.png")], "", None
+        "Upload Files", [str(examples_dir / "DSE 2019 Paper 4 Set 2.2.png")], "", "Normal", None
     ],
     [
-        "Upload Files", "Simpler", [str(examples_dir / "DSE 2023 Paper 4 Set 1.1.png")], "", None
+        "Upload Files", [str(examples_dir / "DSE 2023 Paper 4 Set 1.1.png")], "", "Simpler",  None
     ]
 ]
 
