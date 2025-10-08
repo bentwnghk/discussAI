@@ -355,9 +355,9 @@ def generate_dialogue_simpler(text: str) -> Dialogue:
 
 def generate_audio(
     input_method: str,
-    dialogue_mode: str = "Normal",
     files: Optional[List[str]],
     input_text: Optional[str],
+    dialogue_mode: str = "Normal",
     openai_api_key: str = None,
 ) -> (str, str, str, str): # Added 4th str for the hidden gr.File component
     """Generates audio from uploaded files or direct text input."""
@@ -796,9 +796,9 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
         fn=generate_audio,
         inputs=[ # Order must match generate_audio parameters
             input_method_radio,
-            dialogue_mode_radio,
             file_input,
             text_input,
+            dialogue_mode_radio,
             api_key_input
         ],
         outputs=[audio_output, transcript_output, js_trigger_data_textbox, temp_audio_file_output_for_url],
@@ -809,9 +809,9 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
         examples=examples,
         inputs=[ # Ensure order matches generate_audio parameters for examples
             input_method_radio,
-            dialogue_mode_radio,
             file_input,
             text_input,
+            dialogue_mode_radio,
             api_key_input
         ],
         # Examples won't trigger the history save directly unless we adapt the example fn or outputs
