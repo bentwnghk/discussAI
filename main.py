@@ -203,8 +203,8 @@ def extract_text_from_image_via_vision(image_file, openai_api_key=None):
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=15), retry=retry_if_exception_type(ValidationError))
 @llm(
     model="gpt-4.1-mini",
-    api_key=lambda: os.getenv("OPENAI_API_KEY"),
-    base_url=lambda: os.getenv("OPENAI_BASE_URL"),
+    api_key=os.getenv("OPENAI_API_KEY"),
+    base_url=os.getenv("OPENAI_BASE_URL"),
     temperature=0.5,
     max_tokens=16384
 )
@@ -291,8 +291,8 @@ def generate_dialogue_normal(text: str) -> Dialogue:
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=15), retry=retry_if_exception_type(ValidationError))
 @llm(
     model="gpt-4.1-mini",
-    api_key=lambda: os.getenv("OPENAI_API_KEY"),
-    base_url=lambda: os.getenv("OPENAI_BASE_URL"),
+    api_key=os.getenv("OPENAI_API_KEY"),
+    base_url=os.getenv("OPENAI_BASE_URL"),
     temperature=0.5,
     max_tokens=16384
 )
