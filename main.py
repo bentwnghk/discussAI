@@ -710,14 +710,6 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
             value="Upload Files"
         )
 
-    with gr.Row():
-        dialogue_mode_radio = gr.Radio(
-            ["Normal", "Simpler"],
-            label="🎯 Dialogue Complexity",
-            value="Normal",
-            info="Normal: Detailed discussion with elaborations (6-8 min). Simpler: Concise discussion with key points (4-5 min)."
-        )
-
     with gr.Group(visible=True) as file_upload_group:
         file_input = gr.Files(
             label="Upload Group Interaction Task",
@@ -732,6 +724,13 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
             placeholder="Paste or type your discussion topic here..."
         )
 
+    with gr.Row():
+        dialogue_mode_radio = gr.Radio(
+            ["Normal", "Simpler"],
+            label="🎯 Level of Complexity",
+            value="Normal",
+            info="Normal: Detailed discussion with elaborations (6-8 min). Simpler: Concise discussion with key points (4-5 min)."
+        )
 
     API_KEY_URL = "https://api.mr5ai.com"
     with gr.Accordion("⚙️ Advanced Settings", open=False):
