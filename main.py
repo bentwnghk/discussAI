@@ -203,12 +203,12 @@ def extract_text_from_image_via_vision(image_file, openai_api_key=None):
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=15), retry=retry_if_exception_type(ValidationError))
 @llm(
     model="gpt-4.1-mini",
-    api_key=None,  # Will be passed as parameter
-    base_url=None,  # Will be passed as parameter
+    api_key=resolved_openai_api_key,
+    base_url=resolved_openai_base_url,
     temperature=0.5,
     max_tokens=16384
 )
-def generate_dialogue_normal(text: str, api_key: str, base_url: str) -> Dialogue:
+def generate_dialogue_normal(text: str) -> Dialogue:
     """
     You are an English language tutor helping Hong Kong secondary students improve their speaking skills, especially for group discussions in oral exams.
 
@@ -291,12 +291,12 @@ def generate_dialogue_normal(text: str, api_key: str, base_url: str) -> Dialogue
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=15), retry=retry_if_exception_type(ValidationError))
 @llm(
     model="gpt-4.1-mini",
-    api_key=None,  # Will be passed as parameter
-    base_url=None,  # Will be passed as parameter
+    api_key=resolved_openai_api_key,
+    base_url=resolved_openai_base_url,
     temperature=0.5,
     max_tokens=16384
 )
-def generate_dialogue_simpler(text: str, api_key: str, base_url: str) -> Dialogue:
+def generate_dialogue_simpler(text: str) -> Dialogue:
     """
     You are an English language tutor helping Hong Kong secondary students improve their speaking skills, especially for group discussions in oral exams.
 
@@ -355,10 +355,10 @@ def generate_dialogue_simpler(text: str, api_key: str, base_url: str) -> Dialogu
 
 def generate_audio(
     input_method: str,
+    dialogue_mode: str = "Normal",
     files: Optional[List[str]],
     input_text: Optional[str],
     openai_api_key: str = None,
-    dialogue_mode: str = "Normal",
 ) -> (str, str, str, str): # Added 4th str for the hidden gr.File component
     """Generates audio from uploaded files or direct text input."""
     start_time = time.time()
@@ -471,7 +471,7 @@ def generate_audio(
     try:
         gr.Info("✨ Generating dialogue script with AI...")
         llm_start_time = time.time()
-        llm_output = dialogue_generator(full_text, resolved_openai_api_key, resolved_openai_base_url)
+        llm_output = dialogue_generator(full_text)
         logger.info(f"Dialogue generation took {time.time() - llm_start_time:.2f} seconds.")
 
     except ValidationError as e:
@@ -676,11 +676,11 @@ allowed_extensions = [
 
 examples_dir = Path("examples")
 examples = [
-    [ # Input method, files, text, api_key
-        "Upload Files", [str(examples_dir / "DSE 2019 Paper 4 Set 2.2.png")], "", None
+    [ # Input method, dialogue mode, files, text, api_key
+        "Upload Files", "Normal", [str(examples_dir / "DSE 2019 Paper 4 Set 2.2.png")], "", None
     ],
     [
-        "Upload Files", [str(examples_dir / "DSE 2023 Paper 4 Set 1.1.png")], "", None
+        "Upload Files", "Simpler", [str(examples_dir / "DSE 2023 Paper 4 Set 1.1.png")], "", None
     ]
 ]
 
@@ -796,10 +796,10 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
         fn=generate_audio,
         inputs=[ # Order must match generate_audio parameters
             input_method_radio,
+            dialogue_mode_radio,
             file_input,
             text_input,
-            api_key_input,
-            dialogue_mode_radio
+            api_key_input
         ],
         outputs=[audio_output, transcript_output, js_trigger_data_textbox, temp_audio_file_output_for_url],
         api_name="generate_audio"
@@ -809,10 +809,10 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
         examples=examples,
         inputs=[ # Ensure order matches generate_audio parameters for examples
             input_method_radio,
+            dialogue_mode_radio,
             file_input,
             text_input,
-            api_key_input,
-            dialogue_mode_radio
+            api_key_input
         ],
         # Examples won't trigger the history save directly unless we adapt the example fn or outputs
         # For now, history save is only for manual generation.
