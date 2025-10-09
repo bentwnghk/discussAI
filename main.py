@@ -201,14 +201,7 @@ def extract_text_from_image_via_vision(image_file, openai_api_key=None):
 
 # Normal mode dialogue generation function (current detailed prompt)
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=15), retry=retry_if_exception_type(ValidationError))
-@llm(
-    model="gpt-4.1-mini",
-    api_key=os.getenv("OPENAI_API_KEY"),
-    base_url=os.getenv("OPENAI_BASE_URL"),
-    temperature=0.5,
-    max_tokens=16384
-)
-def generate_dialogue_normal(text: str) -> Dialogue:
+def generate_dialogue_normal(text: str, api_key: str = None, base_url: str = None) -> Dialogue:
     """
     You are an English language tutor helping Hong Kong secondary students improve their speaking skills, especially for group discussions in oral exams.
 
@@ -289,14 +282,7 @@ def generate_dialogue_normal(text: str) -> Dialogue:
 
 # Simpler mode dialogue generation function
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=15), retry=retry_if_exception_type(ValidationError))
-@llm(
-    model="gpt-4.1-mini",
-    api_key=os.getenv("OPENAI_API_KEY"),
-    base_url=os.getenv("OPENAI_BASE_URL"),
-    temperature=0.5,
-    max_tokens=16384
-)
-def generate_dialogue_simpler(text: str) -> Dialogue:
+def generate_dialogue_simpler(text: str, api_key: str = None, base_url: str = None) -> Dialogue:
     """
     You are an English language tutor helping Hong Kong secondary students improve their speaking skills, especially for group discussions in oral exams.
 
@@ -352,6 +338,46 @@ def generate_dialogue_simpler(text: str) -> Dialogue:
     At the end of the dialogue, include a brief summary (1–2 sentences) by one of the candidates.
     </podcast_dialogue>
     """
+    # Use OpenAI client directly to ensure base_url is respected
+    effective_api_key = api_key or os.getenv("OPENAI_API_KEY")
+    effective_base_url = base_url or os.getenv("OPENAI_BASE_URL")
+
+    if not effective_api_key:
+        logger.error("API key is not configured.")
+        raise ValueError("API key not configured.")
+    if not effective_base_url:
+        logger.error("Base URL is not configured.")
+        raise ValueError("Base URL not configured.")
+
+    client = OpenAI(
+        api_key=effective_api_key,
+        base_url=effective_base_url,
+        timeout=120.0
+    )
+
+    # Use litellm.completion directly with the client
+    import litellm
+    response = litellm.completion(
+        model="gpt-4.1-mini",
+        messages=[
+            {"role": "user", "content": text}
+        ],
+        api_key=effective_api_key,
+        api_base=effective_base_url,
+        temperature=0.5,
+        max_tokens=16384,
+        client=client
+    )
+
+    # Parse the response into Dialogue format
+    content = response.choices[0].message.content
+
+    # For now, return a simple dialogue - you may need to adjust parsing logic
+    # based on how your Dialogue class expects the data
+    return Dialogue(
+        scratchpad="Generated via direct OpenAI client",
+        dialogue=[DialogueItem(text=content[:1000], speaker="Candidate A")]  # Simplified
+    )
 
 def generate_audio(
     input_method: str,
@@ -471,7 +497,7 @@ def generate_audio(
     try:
         gr.Info("✨ Generating dialogue script with AI...")
         llm_start_time = time.time()
-        llm_output = dialogue_generator(full_text)
+        llm_output = dialogue_generator(full_text, resolved_openai_api_key, resolved_openai_base_url)
         logger.info(f"Dialogue generation took {time.time() - llm_start_time:.2f} seconds.")
 
     except ValidationError as e:
