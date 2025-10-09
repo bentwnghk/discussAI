@@ -203,12 +203,12 @@ def extract_text_from_image_via_vision(image_file, openai_api_key=None):
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=15), retry=retry_if_exception_type(ValidationError))
 @llm(
     model="gpt-4.1-mini",
-    api_key=os.getenv("OPENAI_API_KEY"),
-    base_url=os.getenv("OPENAI_BASE_URL"),
+    api_key=None,  # Will be set dynamically
+    base_url=None,  # Will be set dynamically
     temperature=0.5,
     max_tokens=16384
 )
-def generate_dialogue_normal(text: str) -> Dialogue:
+def generate_dialogue_normal(text: str, api_key: str = None, base_url: str = None) -> Dialogue:
     """
     You are an English language tutor helping Hong Kong secondary students improve their speaking skills, especially for group discussions in oral exams.
 
@@ -291,12 +291,12 @@ def generate_dialogue_normal(text: str) -> Dialogue:
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=15), retry=retry_if_exception_type(ValidationError))
 @llm(
     model="gpt-4.1-mini",
-    api_key=os.getenv("OPENAI_API_KEY"),
-    base_url=os.getenv("OPENAI_BASE_URL"),
+    api_key=None,  # Will be set dynamically
+    base_url=None,  # Will be set dynamically
     temperature=0.5,
     max_tokens=16384
 )
-def generate_dialogue_simpler(text: str) -> Dialogue:
+def generate_dialogue_simpler(text: str, api_key: str = None, base_url: str = None) -> Dialogue:
     """
     You are an English language tutor helping Hong Kong secondary students improve their speaking skills, especially for group discussions in oral exams.
 
@@ -471,7 +471,8 @@ def generate_audio(
     try:
         gr.Info("✨ Generating dialogue script with AI...")
         llm_start_time = time.time()
-        llm_output = dialogue_generator(full_text)
+        # Pass the resolved API key and base URL to the dialogue generator
+        llm_output = dialogue_generator(full_text, resolved_openai_api_key, resolved_openai_base_url)
         logger.info(f"Dialogue generation took {time.time() - llm_start_time:.2f} seconds.")
 
     except ValidationError as e:
