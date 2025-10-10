@@ -199,7 +199,7 @@ def extract_text_from_image_via_vision(image_file, openai_api_key=None):
         raise # Reraise for retry
 
 
-# Normal mode dialogue generation function (current detailed prompt)
+# Normal mode dialogue generation function
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=15), retry=retry_if_exception_type(ValidationError))
 @llm(
     model="gpt-4.1-mini",
@@ -209,6 +209,72 @@ def extract_text_from_image_via_vision(image_file, openai_api_key=None):
     max_tokens=16384
 )
 def generate_dialogue_normal(text: str) -> Dialogue:
+    """
+    You are an English language tutor helping Hong Kong secondary students improve their speaking skills, especially for group discussions in oral exams.
+
+    Your task is to take the input text provided and create a realistic group discussion in English between four students (Candidate A, B, C, D) on the topic provided in the input text. Don't worry about the formatting issues or any irrelevant information; your goal is to extract the discussion topic and question prompts as well as any relevant key points or interesting facts from the input text for the group discussion.
+
+    Important: The ENTIRE dialogue (including brainstorming, scratchpad, and actual dialogue) should be written in English.
+
+    Here is the input text you will be working with:
+
+    <input_text>
+    {text}
+    </input_text>
+
+    First, carefully read through the input text and identify the discussion topic and question prompts, as well as any relevant key points or interesting facts from the text accompanying the discussion topic.
+
+    <scratchpad>
+    Brainstorm ideas and outline the discussion. Make sure your discussion follows the question prompts you identified in the input text.
+
+    Express a range of well-developed ideas clearly, with elaboration and detail.
+
+    Model an authentic discussion and interaction among 4 students, and include the following strategies:
+    - Strategies for initiating a group discussion (e.g. Alright, we are here to discuss the proposal to ... | Let's begin by talking about the reasons why ...).
+    - Strategies for maintaining a group discussion (e.g. What do you think? | Any thoughts, Candidate C?).
+    - Strategies for transitioning in a group discussion (e.g. Does anyone have anything else to add? If not, shall we move on to discuss ...?).
+    - Strategies for responding in a group discussion (e.g. I agree. | That's an interesting suggestion, but I'm a bit worried that ... | Sorry, I disagree.).
+    - Strategies for rephrasing a group discussion (e.g. I see what you mean. You were saying that ...).
+    - Strategies for asking for clarification in a group discussion (e.g. I'm not sure if I understood you correctly. Did you mean that ...?).
+
+    Use natural, accurate vocabulary and expressions suitable for Hong Kong secondary students.
+
+    Write your brainstorming ideas and discussion outline here.
+    </scratchpad>
+
+    Now that you have brainstormed ideas and created an outline, it's time to write the full dialogue.
+
+    <podcast_dialogue>
+    Write an engaging, informative dialogue here.
+
+    Use a conversational tone.
+
+    Include elaboration, clarification, and questioning strategies.
+
+    Use 'Candidate A', 'Candidate B', 'Candidate C', 'Candidate D' to identify the 4 speakers. Do not include any bracketed placeholders like [Candidate A] or [Candidate B].
+
+    Alternate speakers naturally.
+
+    Design your output to be read aloud -- it will be directly converted into audio.
+
+    Assign appropriate speakers (Candidate A, Candidate B, Candidate C, Candidate D) to each line. Ensure the output strictly adheres to the required format: a list of objects, each with 'text' and 'speaker' fields.
+
+    Make the dialogue 8-10 minutes long.
+
+    At the end of the dialogue, include a brief summary (1–2 sentences) by one of the candidates.
+    </podcast_dialogue>
+    """
+
+# Deeper mode dialogue generation function
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=15), retry=retry_if_exception_type(ValidationError))
+@llm(
+    model="gpt-4.1-mini",
+    api_key=os.getenv("OPENAI_API_KEY"),
+    base_url=os.getenv("OPENAI_BASE_URL"),
+    temperature=0.5,
+    max_tokens=16384
+)
+def generate_dialogue_deeper(text: str) -> Dialogue:
     """
     You are an English language tutor helping Hong Kong secondary students improve their speaking skills, especially for group discussions in oral exams.
 
@@ -282,72 +348,6 @@ def generate_dialogue_normal(text: str) -> Dialogue:
     - Include relevant examples and scenarios for each question prompt
     - Ensure each speaker contributes meaningful content (180-275 words per speaker)
     - Include natural pauses for thinking and clarification requests
-
-    At the end of the dialogue, include a brief summary (1–2 sentences) by one of the candidates.
-    </podcast_dialogue>
-    """
-
-# Simpler mode dialogue generation function
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=15), retry=retry_if_exception_type(ValidationError))
-@llm(
-    model="gpt-4.1-mini",
-    api_key=os.getenv("OPENAI_API_KEY"),
-    base_url=os.getenv("OPENAI_BASE_URL"),
-    temperature=0.5,
-    max_tokens=16384
-)
-def generate_dialogue_simpler(text: str) -> Dialogue:
-    """
-    You are an English language tutor helping Hong Kong secondary students improve their speaking skills, especially for group discussions in oral exams.
-
-    Your task is to take the input text provided and create a realistic group discussion in English between four students (Candidate A, B, C, D) on the topic provided in the input text. Don't worry about the formatting issues or any irrelevant information; your goal is to extract the discussion topic and question prompts as well as any relevant key points or interesting facts from the input text for the group discussion.
-
-    Important: The ENTIRE dialogue (including brainstorming, scratchpad, and actual dialogue) should be written in English.
-
-    Here is the input text you will be working with:
-
-    <input_text>
-    {text}
-    </input_text>
-
-    First, carefully read through the input text and identify the discussion topic and question prompts, as well as any relevant key points or interesting facts from the text accompanying the discussion topic.
-
-    <scratchpad>
-    Brainstorm ideas and outline the discussion. Make sure your discussion follows the question prompts you identified in the input text.
-
-    Express a range of well-developed ideas clearly, with elaboration and detail.
-
-    Model an authentic discussion and interaction among 4 students, and include the following strategies:
-    - Strategies for initiating a group discussion (e.g. Alright, we are here to discuss the proposal to ... | Let's begin by talking about the reasons why ...).
-    - Strategies for maintaining a group discussion (e.g. What do you think? | Any thoughts, Candidate C?).
-    - Strategies for transitioning in a group discussion (e.g. Does anyone have anything else to add? If not, shall we move on to discuss ...?).
-    - Strategies for responding in a group discussion (e.g. I agree. | That's an interesting suggestion, but I'm a bit worried that ... | Sorry, I disagree.).
-    - Strategies for rephrasing a group discussion (e.g. I see what you mean. You were saying that ...).
-    - Strategies for asking for clarification in a group discussion (e.g. I'm not sure if I understood you correctly. Did you mean that ...?).
-
-    Use natural, accurate vocabulary and expressions suitable for Hong Kong secondary students.
-
-    Write your brainstorming ideas and discussion outline here.
-    </scratchpad>
-
-    Now that you have brainstormed ideas and created an outline, it's time to write the full dialogue.
-
-    <podcast_dialogue>
-    Write an engaging, informative dialogue here.
-
-    Use a conversational tone.
-
-    Include elaboration, clarification, and questioning strategies.
-
-    Use 'Candidate A', 'Candidate B', 'Candidate C', 'Candidate D' to identify the 4 speakers. Do not include any bracketed placeholders like [Candidate A] or [Candidate B].
-
-    Alternate speakers naturally.
-
-    Design your output to be read aloud -- it will be directly converted into audio.
-
-    Assign appropriate speakers (Candidate A, Candidate B, Candidate C, Candidate D) to each line. Ensure the output strictly adheres to the required format: a list of objects, each with 'text' and 'speaker' fields.
-
-    Make the dialogue 8-10 minutes long.
 
     At the end of the dialogue, include a brief summary (1–2 sentences) by one of the candidates.
     </podcast_dialogue>
@@ -463,8 +463,8 @@ def generate_audio(
         raise gr.Error("No text content to process. Please provide valid input.")
 
     # Choose dialogue generation function based on mode
-    if dialogue_mode == "Simpler":
-        dialogue_generator = generate_dialogue_simpler
+    if dialogue_mode == "Deeper":
+        dialogue_generator = generate_dialogue_deeper
     else:
         dialogue_generator = generate_dialogue_normal
 
@@ -676,10 +676,10 @@ allowed_extensions = [
 examples_dir = Path("examples")
 examples = [
     [ # Input method, dialogue mode, files, text, api_key
-        "Upload Files", [str(examples_dir / "DSE 2019 Paper 4 Set 2.2.png")], "", "Normal", None
+        "Upload Files", [str(examples_dir / "DSE 2019 Paper 4 Set 2.2.png")], "", "Deeper", None
     ],
     [
-        "Upload Files", [str(examples_dir / "DSE 2023 Paper 4 Set 1.1.png")], "", "Simpler",  None
+        "Upload Files", [str(examples_dir / "DSE 2023 Paper 4 Set 1.1.png")], "", "Normal",  None
     ]
 ]
 
@@ -725,10 +725,10 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
 
     with gr.Row():
         dialogue_mode_radio = gr.Radio(
-            ["Normal", "Simpler"],
-            label="🎯 Level of Complexity",
+            ["Normal", "Deeper"],
+            label="🎯 Depth of Discussion",
             value="Normal",
-            info="Normal: Detailed discussion with elaborations (6-8 min). Simpler: Concise discussion with key points (4-5 min)."
+            info="Select 'Deeper' if you prefer a more detailed discussion with further elaborations"
         )
 
     API_KEY_URL = "https://api.mr5ai.com"
