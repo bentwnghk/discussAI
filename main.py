@@ -237,6 +237,8 @@ def generate_dialogue_normal(text: str) -> Dialogue:
     - Strategies for rephrasing a group discussion (e.g. I see what you mean. You were saying that ...).
     - Strategies for asking for clarification in a group discussion (e.g. I'm not sure if I understood you correctly. Did you mean that ...?).
 
+    Ensure every student speaks 4-5 times throughout the discussion.
+
     Use natural, accurate vocabulary and expressions suitable for Hong Kong secondary students.
 
     Write your brainstorming ideas and discussion outline here.
@@ -245,7 +247,7 @@ def generate_dialogue_normal(text: str) -> Dialogue:
     Now that you have brainstormed ideas and created an outline, it's time to write the full dialogue.
 
     <podcast_dialogue>
-    Write an engaging, informative dialogue here.
+    Write an engaging, informative dialogue here that will be 5-7 minutes long when spoken at a natural pace.
 
     Use a conversational tone.
 
@@ -253,13 +255,13 @@ def generate_dialogue_normal(text: str) -> Dialogue:
 
     Use 'Candidate A', 'Candidate B', 'Candidate C', 'Candidate D' to identify the 4 speakers. Do not include any bracketed placeholders like [Candidate A] or [Candidate B].
 
-    Alternate speakers naturally.
+    Alternate speakers naturally, ensuring every candidate speaks 4-5 times throughout the discussion.
 
     Design your output to be read aloud -- it will be directly converted into audio.
 
     Assign appropriate speakers (Candidate A, Candidate B, Candidate C, Candidate D) to each line. Ensure the output strictly adheres to the required format: a list of objects, each with 'text' and 'speaker' fields.
 
-    Make the dialogue 8-10 minutes long.
+    Make the dialogue 5-7 minutes long when spoken at a natural pace (approximately 120-150 words per minute).
 
     At the end of the dialogue, include a brief summary (1–2 sentences) by one of the candidates.
     </podcast_dialogue>
