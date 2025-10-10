@@ -527,8 +527,7 @@ def generate_audio(
                 audio_chunk = future.result()
                 results[index] = (transcript_line, audio_chunk)
                 processed_count += 1
-                if processed_count % 10 == 0 or processed_count == total_lines: 
-                     gr.Info(f"🪄 Generated audio for {processed_count}/{total_lines} lines...")
+                gr.Info(f"🪄 Generated audio for {processed_count}/{total_lines} lines...")
             except Exception as exc:
                  logger.error(f'TTS generation failed for line {index+1} after retries: {exc}')
                  error_msg = f"[TTS Error: Failed audio for line {index+1}]"
