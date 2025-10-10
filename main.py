@@ -237,7 +237,7 @@ def generate_dialogue_normal(text: str) -> Dialogue:
     - Strategies for rephrasing a group discussion (e.g. I see what you mean. You were saying that ...).
     - Strategies for asking for clarification in a group discussion (e.g. I'm not sure if I understood you correctly. Did you mean that ...?).
 
-    Ensure every student speaks 4-5 times throughout the discussion.
+    Ensure every student contributes their ideas to every question prompt.
 
     Use natural, accurate vocabulary and expressions suitable for Hong Kong secondary students.
 
@@ -251,7 +251,7 @@ def generate_dialogue_normal(text: str) -> Dialogue:
 
     Use a conversational tone.
 
-    Include initiating, elaborating, maintaining, transitioning, responding, rephrasing, questioning, and clarifying strategies to extend the discussion naturally.
+    Include initiating, elaborating, maintaining, transitioning, responding, rephrasing, questioning, and clarifying strategies to extend the interaction naturally.
 
     Use 'Candidate A', 'Candidate B', 'Candidate C', 'Candidate D' to identify the 4 speakers. Do not include any bracketed placeholders like [Candidate A] or [Candidate B].
 
