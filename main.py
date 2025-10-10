@@ -251,7 +251,7 @@ def generate_dialogue_normal(text: str) -> Dialogue:
 
     Use a conversational tone.
 
-    Include elaboration, clarification, and questioning strategies.
+    Include initiating, elaborating, maintaining, transitioning, responding, rephrasing, questioning, and clarifying strategies to extend the discussion naturally.
 
     Use 'Candidate A', 'Candidate B', 'Candidate C', 'Candidate D' to identify the 4 speakers. Do not include any bracketed placeholders like [Candidate A] or [Candidate B].
 
@@ -331,7 +331,7 @@ def generate_dialogue_deeper(text: str) -> Dialogue:
 
     Use a conversational tone with natural pacing and detailed discussions.
 
-    Include elaboration, clarification, and questioning strategies throughout to extend the discussion naturally.
+    Include initiating, elaborating, maintaining, transitioning, responding, rephrasing, questioning, and clarifying strategies throughout to extend the discussion naturally.
 
     Use 'Candidate A', 'Candidate B', 'Candidate C', 'Candidate D' to identify the 4 speakers. Do not include any bracketed placeholders like [Candidate A] or [Candidate B].
 
