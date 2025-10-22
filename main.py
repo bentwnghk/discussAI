@@ -202,7 +202,7 @@ def extract_text_from_image_via_vision(image_file, openai_api_key=None):
 # Normal mode dialogue generation function
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=15), retry=retry_if_exception_type(ValidationError))
 @llm(
-    model="gpt-4.1-mini",
+    model=os.getenv("OPENAI_MODEL"),
     api_key=os.getenv("OPENAI_API_KEY"),
     base_url=os.getenv("OPENAI_BASE_URL"),
     temperature=0.5,
@@ -270,7 +270,7 @@ def generate_dialogue_normal(text: str) -> Dialogue:
 # Deeper mode dialogue generation function
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=15), retry=retry_if_exception_type(ValidationError))
 @llm(
-    model="gpt-4.1-mini",
+    model=os.getenv("OPENAI_MODEL"),
     api_key=os.getenv("OPENAI_API_KEY"),
     base_url=os.getenv("OPENAI_BASE_URL"),
     temperature=0.5,
