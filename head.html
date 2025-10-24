@@ -60,6 +60,32 @@
   }
   // --- End IndexedDB Setup ---
 
+  // Function to convert plain transcript to HTML for color-coded display
+  function convertTranscriptToHTML(plainTranscript) {
+      const colors = {
+          "Candidate A": "#E3F2FD",
+          "Candidate B": "#FFFDE7",
+          "Candidate C": "#E8F5E8",
+          "Candidate D": "#FDECEA"
+      };
+      const lines = plainTranscript.split('\n\n');
+      let htmlLines = [];
+      lines.forEach(line => {
+          if (line.trim() === '') return;
+          const colonIndex = line.indexOf(': ');
+          if (colonIndex > 0) {
+              const speaker = line.substring(0, colonIndex);
+              const text = line.substring(colonIndex + 2);
+              const color = colors[speaker] || "#FFFFFF";
+              const htmlLine = `<div style="background-color: ${color}; padding: 10px; margin: 5px 0; border-radius: 10px; color: black; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"><strong>${speaker}:</strong> ${text}</div>`;
+              htmlLines.push(htmlLine);
+          } else {
+              htmlLines.push(`<div>${line}</div>`);
+          }
+      });
+      return `<div style="max-height: 400px; overflow-y: auto; background-color: #f9f9f9; padding: 10px; border-radius: 5px;">${htmlLines.join('')}</div>`;
+  }
+
   // --- localStorage for Metadata List ---
   function getPodcastMetadataHistory() {
     try {
@@ -192,7 +218,7 @@
             if (podcast && podcast.audioBlob) { // Check for audioBlob
                 console.log(`[LOAD_HISTORY] Found discussion in IndexedDB: ${podcast.title}`);
                 const audioWrapper = document.getElementById('podcast_audio_player');
-                const transcriptDisplayElement = document.querySelector('#podcast_transcript_display textarea');
+                const transcriptDisplayElement = document.getElementById('podcast_transcript_display');
                 let audioPlayerElement = audioWrapper ? audioWrapper.querySelector('audio') : null;
 
                 if (!audioWrapper) {
@@ -217,7 +243,8 @@
                 console.log(`[LOAD_HISTORY] Audio player src set to object URL for ${podcast.title}`);
 
                 if (transcriptDisplayElement) {
-                    transcriptDisplayElement.value = podcast.transcript;
+                    const htmlTranscript = convertTranscriptToHTML(podcast.transcript);
+                    transcriptDisplayElement.value = htmlTranscript;
                     transcriptDisplayElement.dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));
                 }
                 window.scrollTo({ top: 0, behavior: 'smooth' });
