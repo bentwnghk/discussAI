@@ -105,7 +105,7 @@
           }
       });
       const bgColor = document.body.classList.contains('dark') ? '#27272A' : '#f9f9f9';
-      return `<div style="max-height: 400px; overflow-y: auto; background-color: ${bgColor}; padding: 10px; border-radius: 5px;">${htmlLines.join('')}</div>`;
+      return `<div class="transcript-container" style="max-height: 400px; overflow-y: auto; background-color: ${bgColor}; padding: 10px; border-radius: 5px;">${htmlLines.join('')}</div>`;
   }
 
   // --- localStorage for Metadata List ---
@@ -544,11 +544,9 @@
   function updateTranscriptBackgrounds() {
     const isDark = document.body.classList.contains('dark');
     const bgColor = isDark ? '#27272A' : '#f9f9f9';
-    const containers = document.querySelectorAll('div[style*="max-height: 400px"]');
+    const containers = document.querySelectorAll('.transcript-container');
     containers.forEach(container => {
-      if (container.style.backgroundColor === '#f9f9f9' || container.style.backgroundColor === 'rgb(249, 249, 249)' || container.style.backgroundColor === '#27272A') {
-        container.style.backgroundColor = bgColor;
-      }
+      container.style.backgroundColor = bgColor;
     });
   }
 
