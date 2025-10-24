@@ -24,12 +24,20 @@ from mimetypes import guess_type
 import docx # Added for DOCX support
 import pytz
 import requests
+import html
 
 OPENAI_VOICE_MAPPINGS = {
     "Candidate A": "nova",
     "Candidate B": "alloy",
     "Candidate C": "fable",
     "Candidate D": "echo",
+}
+
+TRANSCRIPT_COLORS = {
+    "Candidate A": "#FF6B6B",
+    "Candidate B": "#4ECDC4",
+    "Candidate C": "#45B7D1",
+    "Candidate D": "#FFA07A",
 }
 
 if sentry_dsn := os.getenv("SENTRY_DSN"):
@@ -565,6 +573,19 @@ def generate_audio(
     audio = b"".join(final_audio_chunks)
     transcript = "\n\n".join(final_transcript_lines)
 
+    # Build HTML transcript for color-coded display
+    html_transcript_lines = []
+    for line in final_transcript_lines:
+        if ": " in line:
+            speaker, text = line.split(": ", 1)
+            color = TRANSCRIPT_COLORS.get(speaker, "#000000")
+            escaped_text = html.escape(text)
+            html_line = f'<span style="color: {color}; font-weight: bold;">{speaker}:</span> {escaped_text}'
+            html_transcript_lines.append(html_line)
+        else:
+            html_transcript_lines.append(html.escape(line))
+    html_transcript = f'<div style="max-height: 400px; overflow-y: auto; background-color: #f9f9f9; padding: 10px; border-radius: 5px;">{"<br>".join(html_transcript_lines)}</div>'
+
     logger.info(f"Successfully generated audio for {successful_lines}/{total_lines} lines.")
 
     temporary_directory = "./gradio_cached_files/tmp/" 
@@ -659,14 +680,14 @@ def generate_audio(
         "title": final_podcast_title,
         # "audio_url": gradio_file_url, # REMOVED - JS will get this from hidden gr.File
         "audio_file_component_id": "temp_audio_file_url_holder", # ID of the hidden gr.File
-        "transcript": transcript,
+        "transcript": escaped_transcript,
         "tts_cost": f"{tts_cost:.2f}" # Added tts_cost, formatted as string
     }
     json_data_string = json.dumps(data_to_send)
     
     logger.debug(f"Returning JSON data for JS trigger (no audio_url, JS will fetch from component): {json_data_string[:200]}...")
 
-    return temp_file_path, transcript, json_data_string, temp_file_path # 4th item for hidden gr.File
+    return temp_file_path, html_transcript, json_data_string, temp_file_path # 4th item for hidden gr.File
 
 
 # --- Gradio UI Definition ---
@@ -749,7 +770,7 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
 
     with gr.Column():
         audio_output = gr.Audio(label="🔊 Audio", type="filepath", elem_id="podcast_audio_player") # Keep existing elem_id
-        transcript_output = gr.Textbox(label="📃 Transcript", lines=15, show_copy_button=True, autoscroll=False, elem_id="podcast_transcript_display") # Keep existing elem_id
+        transcript_output = gr.HTML(label="📃 Transcript", elem_id="podcast_transcript_display") # Keep existing elem_id
 
     with gr.Accordion("📜 Archives (Stored in your browser)", open=False): # Keep existing Accordion
         # This HTML component will be populated by JavaScript from head.html
