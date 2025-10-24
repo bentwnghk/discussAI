@@ -232,7 +232,10 @@
             if (podcast && podcast.audioBlob) { // Check for audioBlob
                 console.log(`[LOAD_HISTORY] Found discussion in IndexedDB: ${podcast.title}`);
                 const audioWrapper = document.getElementById('podcast_audio_player');
-                const transcriptDisplayElement = document.querySelector('#podcast_transcript_display input[type="hidden"]');
+                let transcriptDisplayElement = document.querySelector('#podcast_transcript_display input[type="hidden"]');
+                if (!transcriptDisplayElement) {
+                    transcriptDisplayElement = document.querySelector('#podcast_transcript_display');
+                }
                 let audioPlayerElement = audioWrapper ? audioWrapper.querySelector('audio') : null;
 
                 if (!audioWrapper) {
@@ -258,8 +261,29 @@
 
                 if (transcriptDisplayElement) {
                     const htmlTranscript = convertTranscriptToHTML(podcast.transcript);
-                    transcriptDisplayElement.value = htmlTranscript;
-                    transcriptDisplayElement.dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));
+                    console.log(`[LOAD_HISTORY] Setting transcript HTML for ${podcast.title}`);
+                    
+                    // Try multiple approaches to set the content
+                    if (transcriptDisplayElement.tagName === 'INPUT') {
+                        transcriptDisplayElement.value = htmlTranscript;
+                        transcriptDisplayElement.dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));
+                        transcriptDisplayElement.dispatchEvent(new Event('change', { bubbles: true, cancelable: true }));
+                    } else {
+                        // If it's a div or other element, try innerHTML
+                        const contentDiv = transcriptDisplayElement.querySelector('.contain') || transcriptDisplayElement;
+                        contentDiv.innerHTML = htmlTranscript;
+                    }
+                    
+                    // Force a re-render by triggering Gradio's update mechanism
+                    setTimeout(() => {
+                        const event = new CustomEvent('gradio:update', {
+                            detail: { value: htmlTranscript },
+                            bubbles: true
+                        });
+                        transcriptDisplayElement.dispatchEvent(event);
+                    }, 100);
+                } else {
+                    console.error("[LOAD_HISTORY] Transcript display element not found");
                 }
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
