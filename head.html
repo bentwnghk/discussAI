@@ -551,14 +551,23 @@
   }
 
   // Observe body for dark mode changes
-  const observer = new MutationObserver(mutations => {
+  const bodyObserver = new MutationObserver(mutations => {
     mutations.forEach(mutation => {
       if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
         updateTranscriptBackgrounds();
       }
     });
   });
-  observer.observe(document.body, { attributes: true });
+  bodyObserver.observe(document.body, { attributes: true });
+
+  // Observe transcript display for new content
+  const transcriptDisplay = document.querySelector('#podcast_transcript_display');
+  if (transcriptDisplay) {
+    const transcriptObserver = new MutationObserver(() => {
+      updateTranscriptBackgrounds();
+    });
+    transcriptObserver.observe(transcriptDisplay, { childList: true, subtree: true });
+  }
 
   // Initial update
   setTimeout(updateTranscriptBackgrounds, 1000);
