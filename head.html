@@ -91,7 +91,7 @@
               const speaker = line.substring(0, colonIndex);
               const text = line.substring(colonIndex + 2);
               const color = colors[speaker] || "#FFFFFF";
-              const htmlLine = `<div style="background-color: ${color}; padding: 10px; margin: 5px 0; border-radius: 10px; color: black; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"><strong>${speaker}:</strong> ${escapeHtml(text)}</div>`;
+              const htmlLine = `<div style="background-color: ${color}; padding: 10px; margin: 10px 0; border-radius: 10px; color: black; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"><strong>${speaker}:</strong> ${escapeHtml(text)}</div>`;
               htmlLines.push(htmlLine);
           } else {
               htmlLines.push(`<div>${escapeHtml(line)}</div>`);
