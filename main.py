@@ -34,10 +34,10 @@ OPENAI_VOICE_MAPPINGS = {
 }
 
 TRANSCRIPT_COLORS = {
-    "Candidate A": "#FF6B6B",
-    "Candidate B": "#4ECDC4",
-    "Candidate C": "#45B7D1",
-    "Candidate D": "#FFA07A",
+    "Candidate A": "#E3F2FD",  # Light blue
+    "Candidate B": "#FFFDE7",  # Light yellow
+    "Candidate C": "#E8F5E8",  # Light green
+    "Candidate D": "#FDECEA",  # Light pink
 }
 
 if sentry_dsn := os.getenv("SENTRY_DSN"):
@@ -580,7 +580,7 @@ def generate_audio(
             speaker, text = line.split(": ", 1)
             color = TRANSCRIPT_COLORS.get(speaker, "#000000")
             escaped_text = html.escape(text)
-            html_line = f'<span style="color: {color}; font-weight: bold;">{speaker}:</span> {escaped_text}'
+            html_line = f'<div style="background-color: {color}; padding: 10px; margin: 5px 0; border-radius: 10px; color: black; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"><strong>{speaker}:</strong> {escaped_text}</div>'
             html_transcript_lines.append(html_line)
         else:
             html_transcript_lines.append(html.escape(line))
