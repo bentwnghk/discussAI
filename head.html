@@ -74,6 +74,8 @@
 
   // Function to convert plain transcript to HTML for color-coded display
   function convertTranscriptToHTML(plainTranscript) {
+      // Unescape the transcript
+      plainTranscript = plainTranscript.replace(/\\\\/g, '\\').replace(/\\n/g, '\n').replace(/\\r/g, '\r').replace(/\\"/g, '"').replace(/\\'/g, "'");
       const colors = {
           "Candidate A": "#E3F2FD",
           "Candidate B": "#FFFDE7",
@@ -255,9 +257,9 @@
                 console.log(`[LOAD_HISTORY] Audio player src set to object URL for ${podcast.title}`);
 
                 if (transcriptDisplayElement) {
-                    const containDiv = transcriptDisplayElement.querySelector('.contain') || transcriptDisplayElement;
                     const htmlTranscript = convertTranscriptToHTML(podcast.transcript);
-                    containDiv.innerHTML = htmlTranscript;
+                    transcriptDisplayElement.value = htmlTranscript;
+                    transcriptDisplayElement.dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));
                 }
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
