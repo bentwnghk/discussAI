@@ -584,7 +584,7 @@ def generate_audio(
             html_transcript_lines.append(html_line)
         else:
             html_transcript_lines.append(html.escape(line))
-    html_transcript = f'<div class="transcript-container" style="max-height: 400px; overflow-y: auto; background-color: #f9f9f9; padding: 10px; border-radius: 5px;">{"<br>".join(html_transcript_lines)}</div>'
+    html_transcript = f'<div class="transcript-container" style="max-height: 400px; overflow-y: auto; background-color: #f9f9f9; padding: 10px; border-radius: 5px;">{"<br>".join(html_transcript_lines)}</div><script>document.querySelector(".transcript-container").style.backgroundColor = document.body.classList.contains("dark") ? "#27272A" : "#f9f9f9";</script>'
 
     logger.info(f"Successfully generated audio for {successful_lines}/{total_lines} lines.")
 
