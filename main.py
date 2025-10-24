@@ -580,7 +580,7 @@ def generate_audio(
             speaker, text = line.split(": ", 1)
             color = TRANSCRIPT_COLORS.get(speaker, "#000000")
             escaped_text = html.escape(text)
-            html_line = f'<div style="background-color: {color}; padding: 10px; margin: 0; border-radius: 10px; color: black !important; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"><strong>{speaker}:</strong> {escaped_text}</div>'
+            html_line = f'<div class="transcript-bubble" style="background-color: {color}; padding: 10px; margin: 0; border-radius: 10px; color: black !important; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"><strong>{speaker}:</strong> {escaped_text}</div>'
             html_transcript_lines.append(html_line)
         else:
             html_transcript_lines.append(html.escape(line))
