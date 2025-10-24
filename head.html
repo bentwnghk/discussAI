@@ -60,6 +60,18 @@
   }
   // --- End IndexedDB Setup ---
 
+  // Function to escape HTML
+  function escapeHtml(text) {
+      const map = {
+          '&': '&',
+          '<': '<',
+          '>': '>',
+          '"': '"',
+          "'": '&#039;'
+      };
+      return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+  }
+
   // Function to convert plain transcript to HTML for color-coded display
   function convertTranscriptToHTML(plainTranscript) {
       const colors = {
@@ -77,10 +89,10 @@
               const speaker = line.substring(0, colonIndex);
               const text = line.substring(colonIndex + 2);
               const color = colors[speaker] || "#FFFFFF";
-              const htmlLine = `<div style="background-color: ${color}; padding: 10px; margin: 5px 0; border-radius: 10px; color: black; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"><strong>${speaker}:</strong> ${text}</div>`;
+              const htmlLine = `<div style="background-color: ${color}; padding: 10px; margin: 5px 0; border-radius: 10px; color: black; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"><strong>${speaker}:</strong> ${escapeHtml(text)}</div>`;
               htmlLines.push(htmlLine);
           } else {
-              htmlLines.push(`<div>${line}</div>`);
+              htmlLines.push(`<div>${escapeHtml(line)}</div>`);
           }
       });
       return `<div style="max-height: 400px; overflow-y: auto; background-color: #f9f9f9; padding: 10px; border-radius: 5px;">${htmlLines.join('')}</div>`;
@@ -243,9 +255,9 @@
                 console.log(`[LOAD_HISTORY] Audio player src set to object URL for ${podcast.title}`);
 
                 if (transcriptDisplayElement) {
+                    const containDiv = transcriptDisplayElement.querySelector('.contain') || transcriptDisplayElement;
                     const htmlTranscript = convertTranscriptToHTML(podcast.transcript);
-                    transcriptDisplayElement.value = htmlTranscript;
-                    transcriptDisplayElement.dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));
+                    containDiv.innerHTML = htmlTranscript;
                 }
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
