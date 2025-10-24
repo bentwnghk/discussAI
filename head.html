@@ -106,14 +106,13 @@
               const speaker = line.substring(0, colonIndex);
               const text = line.substring(colonIndex + 2);
               const color = colors[speaker] || "#FFFFFF";
-              const htmlLine = `<div class="transcript-bubble" style="background-color: ${color}; padding: 10px; margin: 10px 0; border-radius: 10px; color: black !important; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"><strong>${speaker}:</strong> ${escapeHtml(text)}</div>`;
+              const htmlLine = `<div class="transcript-bubble" style="background-color: ${color}; padding: 10px; margin: 15px 0; border-radius: 10px; color: black; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"><strong>${speaker}:</strong> ${escapeHtml(text)}</div>`;
               htmlLines.push(htmlLine);
           } else {
               htmlLines.push(`<div>${escapeHtml(line)}</div>`);
           }
       });
-      const bgColor = document.body.classList.contains('dark') ? '#27272A' : '#f9f9f9';
-      return `<div class="transcript-container" style="max-height: 400px; overflow-y: auto; background-color: ${bgColor}; padding: 10px; border-radius: 5px;">${htmlLines.join('')}</div>`;
+      return `<div class="transcript-container" style="max-height: 400px; overflow-y: auto; background-color: #f9f9f9; padding: 10px; border-radius: 5px;">${htmlLines.join('')}</div>`;
   }
 
   // --- localStorage for Metadata List ---
@@ -548,37 +547,6 @@
   waitForGradioElements();
   console.log("[HEAD_SCRIPT] Script block parsing finished. Polling for Gradio elements initiated.");
 
-  // Function to update transcript background based on dark mode
-  function updateTranscriptBackgrounds() {
-    const isDark = document.body.classList.contains('dark');
-    const bgColor = isDark ? '#27272A' : '#f9f9f9';
-    const containers = document.querySelectorAll('.transcript-container');
-    containers.forEach(container => {
-      container.style.backgroundColor = bgColor;
-    });
-  }
-
-  // Observe body for dark mode changes
-  const bodyObserver = new MutationObserver(mutations => {
-    mutations.forEach(mutation => {
-      if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-        updateTranscriptBackgrounds();
-      }
-    });
-  });
-  bodyObserver.observe(document.body, { attributes: true });
-
-  // Observe transcript display for new content
-  const transcriptDisplay = document.querySelector('#podcast_transcript_display');
-  if (transcriptDisplay) {
-    const transcriptObserver = new MutationObserver(() => {
-      updateTranscriptBackgrounds();
-    });
-    transcriptObserver.observe(transcriptDisplay, { childList: true, subtree: true });
-  }
-
-  // Initial update
-  setTimeout(updateTranscriptBackgrounds, 1000);
 
   function setupApiKeyStorage() {
     const apiKeyElementId = 'mr_ng_ai_hub_api_key_input';
