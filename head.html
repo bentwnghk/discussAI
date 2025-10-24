@@ -104,7 +104,8 @@
               htmlLines.push(`<div>${escapeHtml(line)}</div>`);
           }
       });
-      return `<div style="max-height: 400px; overflow-y: auto; background-color: #f9f9f9; padding: 10px; border-radius: 5px;">${htmlLines.join('')}</div>`;
+      const bgColor = document.body.classList.contains('dark') ? '#27272A' : '#f9f9f9';
+      return `<div style="max-height: 400px; overflow-y: auto; background-color: ${bgColor}; padding: 10px; border-radius: 5px;">${htmlLines.join('')}</div>`;
   }
 
   // --- localStorage for Metadata List ---
@@ -538,6 +539,31 @@
 
   waitForGradioElements();
   console.log("[HEAD_SCRIPT] Script block parsing finished. Polling for Gradio elements initiated.");
+
+  // Function to update transcript background based on dark mode
+  function updateTranscriptBackgrounds() {
+    const isDark = document.body.classList.contains('dark');
+    const bgColor = isDark ? '#27272A' : '#f9f9f9';
+    const containers = document.querySelectorAll('div[style*="max-height: 400px"]');
+    containers.forEach(container => {
+      if (container.style.backgroundColor === '#f9f9f9' || container.style.backgroundColor === 'rgb(249, 249, 249)' || container.style.backgroundColor === '#27272A') {
+        container.style.backgroundColor = bgColor;
+      }
+    });
+  }
+
+  // Observe body for dark mode changes
+  const observer = new MutationObserver(mutations => {
+    mutations.forEach(mutation => {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+        updateTranscriptBackgrounds();
+      }
+    });
+  });
+  observer.observe(document.body, { attributes: true });
+
+  // Initial update
+  setTimeout(updateTranscriptBackgrounds, 1000);
 
   function setupApiKeyStorage() {
     const apiKeyElementId = 'mr_ng_ai_hub_api_key_input';
