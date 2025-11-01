@@ -240,7 +240,7 @@ def generate_dialogue_normal(text: str) -> Dialogue:
     Model an authentic discussion and interaction among 4 students, and include the following strategies:
     - Strategies for initiating a group discussion (e.g. Alright, we are here to discuss the proposal to ... | Let's begin by talking about the reasons why ...).
     - Strategies for maintaining a group discussion (e.g. What do you think? | Any thoughts, Candidate C?).
-    - Strategies for transitioning in a group discussion (e.g. Does anyone have anything else to add? If not, shall we move on to discuss ...?).
+    - Strategies for transitioning in a group discussion (e.g. Does anyone have anything else to add? If not, shall we move on and discuss ...?).
     - Strategies for responding in a group discussion (e.g. I agree. | That's an interesting suggestion, but I'm a bit worried that ... | Sorry, I disagree.).
     - Strategies for rephrasing a group discussion (e.g. I see what you mean. You were saying that ...).
     - Strategies for asking for clarification in a group discussion (e.g. I'm not sure if I understood you correctly. Did you mean that ...?).
@@ -255,7 +255,7 @@ def generate_dialogue_normal(text: str) -> Dialogue:
     Now that you have brainstormed ideas and created an outline, it's time to write the full dialogue.
 
     <podcast_dialogue>
-    Write an engaging, informative dialogue here that will be 5-7 minutes long when spoken at a natural pace.
+    Write an engaging, informative dialogue here that will be 6-7 minutes long when spoken at a natural pace.
 
     Use a conversational tone.
 
@@ -263,13 +263,13 @@ def generate_dialogue_normal(text: str) -> Dialogue:
 
     Use 'Candidate A', 'Candidate B', 'Candidate C', 'Candidate D' to identify the 4 speakers. Do not include any bracketed placeholders like [Candidate A] or [Candidate B].
 
-    Alternate speakers naturally, ensuring every candidate speaks 4-5 times throughout the discussion.
+    Alternate speakers naturally, ensuring every candidate speaks 4-6 times throughout the discussion.
 
     Design your output to be read aloud -- it will be directly converted into audio.
 
     Assign appropriate speakers (Candidate A, Candidate B, Candidate C, Candidate D) to each line. Ensure the output strictly adheres to the required format: a list of objects, each with 'text' and 'speaker' fields.
 
-    Make the dialogue 5-7 minutes long when spoken at a natural pace (approximately 120-150 words per minute).
+    Make the dialogue 6-7 minutes long when spoken at a natural pace (approximately 120-150 words per minute).
 
     At the end of the dialogue, include a brief summary (1–2 sentences) by one of the candidates.
     </podcast_dialogue>
@@ -315,7 +315,7 @@ def generate_dialogue_deeper(text: str) -> Dialogue:
     Model an authentic discussion and interaction among 4 students, and include the following strategies:
     - Strategies for initiating a group discussion (e.g. Alright, we are here to discuss the proposal to ... | Let's begin by talking about the reasons why ...).
     - Strategies for maintaining a group discussion (e.g. What do you think? | Any thoughts, Candidate C?).
-    - Strategies for transitioning in a group discussion (e.g. Does anyone have anything else to add? If not, shall we move on to discuss ...?).
+    - Strategies for transitioning in a group discussion (e.g. Does anyone have anything else to add? If not, shall we move on and discuss ...?).
     - Strategies for responding in a group discussion (e.g. I agree. | That's an interesting suggestion, but I'm a bit worried that ... | Sorry, I disagree.).
     - Strategies for rephrasing a group discussion (e.g. I see what you mean. You were saying that ...).
     - Strategies for asking for clarification in a group discussion (e.g. I'm not sure if I understood you correctly. Did you mean that ...?).
@@ -699,10 +699,10 @@ allowed_extensions = [
 examples_dir = Path("examples")
 examples = [
     [ # Input method, dialogue mode, files, text, api_key
-        "Upload Files", [str(examples_dir / "DSE 2019 Paper 4 Set 2.2.png")], "", "Deeper", None
+        "Upload Files", [str(examples_dir / "DSE 2023 Paper 4 Set 1.2.png")], "", "Deeper", None
     ],
     [
-        "Upload Files", [str(examples_dir / "DSE 2023 Paper 4 Set 1.1.png")], "", "Normal",  None
+        "Upload Files", [str(examples_dir / "DSE 2024 Paper 4 Set 5.2.png")], "", "Normal",  None
     ]
 ]
 
@@ -859,8 +859,8 @@ app = gr.mount_gradio_app(app, demo, path="/")
 if __name__ == "__main__":
     examples_dir.mkdir(exist_ok=True)
     example_files = [
-        "DSE 2019 Paper 4 Set 2.2.png",
-        "DSE 2023 Paper 4 Set 1.1.png"
+        "DSE 2023 Paper 4 Set 1.2.png",
+        "DSE 2024 Paper 4 Set 5.2.png"
     ]
     for fname in example_files:
         fpath = examples_dir / fname
