@@ -30,18 +30,9 @@
 }
 </style>
 
-<script type="module">
-  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-  mermaid.initialize({
-    startOnLoad: true,
-    theme: 'default',
-    mindmap: {
-      padding: 20,
-      useMaxWidth: true
-    }
-  });
-  window.mermaid = mermaid;
-</script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="https://cdn.jsdelivr.net/npm/markmap-lib@0.17.0/dist/browser/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markmap-view@0.17.0/dist/browser/index.js"></script>
 
 <script>
   console.log("[HEAD_SCRIPT] Script block parsing started.");
@@ -632,5 +623,6 @@
     window.addEventListener('load', setupApiKeyStorage);
   }
 
-  console.log("[HEAD_SCRIPT] Mermaid library loaded for mindmap rendering");
+  // Markmap rendering is now handled inline in the generated HTML
+  console.log("[HEAD_SCRIPT] Markmap libraries loaded");
 </script>
