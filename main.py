@@ -363,37 +363,13 @@ def generate_dialogue_deeper(text: str) -> Dialogue:
     </podcast_dialogue>
     """
 
-@llm(
-    model=os.getenv("OPENAI_MODEL"),
-    api_key=os.getenv("OPENAI_API_KEY"),
-    base_url=os.getenv("OPENAI_BASE_URL"),
-    temperature=0.5,
-    max_tokens=4096
-)
-def generate_mindmap(dialogue: str) -> str:
-    """
-    Generate a mindmap from the dialogue.
-    """
-    return f"""
-    You are a mindmap generator. Create a mindmap from the following dialogue.
-
-    <dialogue>
-    {dialogue}
-    </dialogue>
-
-    <mindmap>
-    Use Markdown to create a mindmap that helps users organize and visualize the ideas in the discussion in a clear way.
-    Use colors to aid the organization and visualization.
-    </mindmap>
-    """
-
 def generate_audio(
     input_method: str,
     files: Optional[List[str]],
     input_text: Optional[str],
     dialogue_mode: str = "Normal",
     openai_api_key: str = None,
-) -> (str, str, str, str, str): # Added 5th str for the mindmap
+) -> (str, str, str, str): # Added 4th str for the hidden gr.File component
     """Generates audio from uploaded files or direct text input."""
     start_time = time.time()
     
@@ -597,23 +573,6 @@ def generate_audio(
     audio = b"".join(final_audio_chunks)
     transcript = "\n\n".join(final_transcript_lines)
 
-    # Generate mindmap
-    try:
-        gr.Info("🧠 Generating mindmap...")
-        mindmap_markdown = generate_mindmap(transcript)
-        mindmap_html = f"""<div class="markmap-container" style="height: 500px; border: 1px solid #ddd; border-radius: 5px;">
-<script type="text/template">
-{mindmap_markdown}
-</script>
-</div>
-<script>
-    renderMindmap(`{mindmap_markdown}`);
-</script>
-"""
-    except Exception as e:
-        logger.error(f"Error generating mindmap: {e}")
-        mindmap_html = "<p>Could not generate mindmap.</p>"
-
     # Build HTML transcript for color-coded display
     html_transcript_lines = []
     for line in final_transcript_lines:
@@ -728,7 +687,7 @@ def generate_audio(
     
     logger.debug(f"Returning JSON data for JS trigger (no audio_url, JS will fetch from component): {json_data_string[:200]}...")
 
-    return temp_file_path, html_transcript, json_data_string, temp_file_path, mindmap_html # 5th item for mindmap
+    return temp_file_path, html_transcript, json_data_string, temp_file_path # 4th item for hidden gr.File
 
 
 # --- Gradio UI Definition ---
@@ -812,7 +771,6 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
     with gr.Column():
         audio_output = gr.Audio(label="🔊 Audio", type="filepath", elem_id="podcast_audio_player") # Keep existing elem_id
         transcript_output = gr.HTML(label="📃 Transcript", elem_id="podcast_transcript_display") # Keep existing elem_id
-        mindmap_output = gr.HTML(label="🧠 Mindmap", elem_id="mindmap_display")
 
     with gr.Accordion("📜 Archives (Stored in your browser)", open=False): # Keep existing Accordion
         # This HTML component will be populated by JavaScript from head.html
@@ -864,7 +822,7 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
             dialogue_mode_radio,
             api_key_input
         ],
-        outputs=[audio_output, transcript_output, js_trigger_data_textbox, temp_audio_file_output_for_url, mindmap_output],
+        outputs=[audio_output, transcript_output, js_trigger_data_textbox, temp_audio_file_output_for_url],
         api_name="generate_audio"
     )
 
@@ -879,7 +837,7 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
         ],
         # Examples won't trigger the history save directly unless we adapt the example fn or outputs
         # For now, history save is only for manual generation.
-        outputs=[audio_output, transcript_output, js_trigger_data_textbox, temp_audio_file_output_for_url, mindmap_output],
+        outputs=[audio_output, transcript_output, js_trigger_data_textbox, temp_audio_file_output_for_url],
         fn=generate_audio,
         cache_examples=True,
         run_on_click=True,
