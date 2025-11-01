@@ -623,9 +623,19 @@
   }
 
   function renderMindmap(markdown) {
-    if (markdown && markdown.trim()) {
-      const { markmap } = window;
-      markmap.autoLoader.renderAll();
-    }
+    if (!markdown || !markdown.trim()) return;
+
+    const render = () => {
+        if (window.markmap && window.markmap.autoLoader) {
+            console.log("Markmap autoloader found, rendering all.");
+            window.markmap.autoLoader.renderAll();
+        } else {
+            console.warn("Markmap autoloader not found.");
+        }
+    };
+
+    // The script is executed right after the element is added to DOM.
+    // A small delay might help ensure everything is ready.
+    setTimeout(render, 100);
   }
 </script>

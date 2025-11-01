@@ -601,7 +601,8 @@ def generate_audio(
     try:
         gr.Info("🧠 Generating mindmap...")
         mindmap_markdown = generate_mindmap(transcript)
-        mindmap_html = f"""<div class="markmap-container" style="height: 500px; border: 1px solid #ddd; border-radius: 5px;">
+        logger.info(f"Generated mindmap markdown: {mindmap_markdown}")
+        mindmap_html = f"""<div class="markmap" style="height: 500px; border: 1px solid #ddd; border-radius: 5px;">
 <script type="text/template">
 {mindmap_markdown}
 </script>
