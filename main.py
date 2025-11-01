@@ -363,6 +363,7 @@ def generate_dialogue_deeper(text: str) -> Dialogue:
     </podcast_dialogue>
     """
 
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=15), retry=retry_if_exception_type(ValidationError))
 @llm(
     model=os.getenv("OPENAI_MODEL"),
     api_key=os.getenv("OPENAI_API_KEY"),
@@ -372,19 +373,32 @@ def generate_dialogue_deeper(text: str) -> Dialogue:
 )
 def generate_mindmap(dialogue: str) -> str:
     """
-    Generate a mindmap from the dialogue.
-    """
-    return f"""
-    You are a mindmap generator. Create a mindmap from the following dialogue.
+    You are a mindmap generator. Create a mindmap from the following dialogue to help users organize and visualize the ideas in the discussion.
 
-    <dialogue>
+    Here is the dialogue:
+
     {dialogue}
-    </dialogue>
 
-    <mindmap>
-    Use Markdown to create a mindmap that helps users organize and visualize the ideas in the discussion in a clear way.
-    Use colors to aid the organization and visualization.
-    </mindmap>
+    Create a hierarchical mindmap in Markdown format that:
+    1. Identifies the main discussion topic as the root
+    2. Organizes key points and arguments as main branches
+    3. Shows supporting details and examples as sub-branches
+    4. Uses clear, concise language
+    5. Captures the flow and structure of the discussion
+
+    Return ONLY the markdown mindmap structure, starting with a single # heading for the main topic, then using ## for main branches, ### for sub-branches, etc.
+
+    Example format:
+    # Main Discussion Topic
+    ## Key Point 1
+    ### Supporting Detail A
+    ### Supporting Detail B
+    ## Key Point 2
+    ### Example 1
+    ### Example 2
+    ## Key Point 3
+    ### Argument For
+    ### Argument Against
     """
 
 def generate_audio(
@@ -601,19 +615,55 @@ def generate_audio(
     try:
         gr.Info("🧠 Generating mindmap...")
         mindmap_markdown = generate_mindmap(transcript)
-        logger.info(f"Generated mindmap markdown: {mindmap_markdown}")
-        mindmap_html = f"""<div class="markmap" style="height: 500px; border: 1px solid #ddd; border-radius: 5px;">
-<script type="text/template">
+        logger.info(f"Generated mindmap markdown length: {len(mindmap_markdown)} characters")
+        
+        # Escape the markdown for safe embedding in HTML
+        escaped_markdown = html.escape(mindmap_markdown)
+        
+        # Create a unique ID for this mindmap
+        mindmap_id = f"mindmap_{int(time.time())}"
+        
+        mindmap_html = f"""
+<div id="{mindmap_id}" style="height: 500px; border: 1px solid #ddd; border-radius: 5px; background: white;">
+    <svg width="100%" height="100%"></svg>
+</div>
+<script type="text/template" id="{mindmap_id}_data">
 {mindmap_markdown}
 </script>
-</div>
 <script>
-    renderMindmap(`{mindmap_markdown}`);
+(function() {{
+    const mindmapData = `{escaped_markdown}`;
+    const container = document.getElementById('{mindmap_id}');
+    const svg = container.querySelector('svg');
+    
+    if (window.markmap && window.markmap.Markmap) {{
+        try {{
+            const {{ Transformer }} = window.markmap;
+            const transformer = new Transformer();
+            const {{ root, features }} = transformer.transform(mindmapData);
+            const {{ Markmap, loadCSS, loadJS }} = window.markmap;
+            
+            // Load required assets
+            if (features.styles) loadCSS(features.styles);
+            if (features.scripts) loadJS(features.scripts);
+            
+            // Create the mindmap
+            Markmap.create(svg, null, root);
+            console.log('Mindmap rendered successfully');
+        }} catch (error) {{
+            console.error('Error rendering mindmap:', error);
+            container.innerHTML = '<p style="padding: 20px; text-align: center;">Error rendering mindmap: ' + error.message + '</p>';
+        }}
+    }} else {{
+        console.warn('Markmap library not loaded');
+        container.innerHTML = '<p style="padding: 20px; text-align: center;">Mindmap library not loaded</p>';
+    }}
+}})();
 </script>
 """
     except Exception as e:
         logger.error(f"Error generating mindmap: {e}")
-        mindmap_html = "<p>Could not generate mindmap.</p>"
+        mindmap_html = f"<p style='padding: 20px; text-align: center; color: red;'>Could not generate mindmap: {str(e)}</p>"
 
     # Build HTML transcript for color-coded display
     html_transcript_lines = []
