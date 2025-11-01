@@ -379,26 +379,34 @@ def generate_mindmap(dialogue: str) -> str:
 
     {dialogue}
 
-    Create a hierarchical mindmap in Markdown format that:
+    Create a hierarchical mindmap in Mermaid mindmap syntax that:
     1. Identifies the main discussion topic as the root
     2. Organizes key points and arguments as main branches
     3. Shows supporting details and examples as sub-branches
     4. Uses clear, concise language
     5. Captures the flow and structure of the discussion
 
-    Return ONLY the markdown mindmap structure, starting with a single # heading for the main topic, then using ## for main branches, ### for sub-branches, etc.
+    Return ONLY the Mermaid mindmap code, starting with "mindmap" and using proper indentation.
 
     Example format:
-    # Main Discussion Topic
-    ## Key Point 1
-    ### Supporting Detail A
-    ### Supporting Detail B
-    ## Key Point 2
-    ### Example 1
-    ### Example 2
-    ## Key Point 3
-    ### Argument For
-    ### Argument Against
+    mindmap
+      root((Main Topic))
+        Key Point 1
+          Supporting Detail A
+          Supporting Detail B
+        Key Point 2
+          Example 1
+          Example 2
+        Key Point 3
+          Argument For
+          Argument Against
+
+    Important:
+    - Start with "mindmap" on the first line
+    - Use root((text)) for the main topic
+    - Use proper indentation (2 spaces per level)
+    - Keep node text concise (under 50 characters)
+    - Do not use special characters that need escaping
     """
 
 def generate_audio(
@@ -614,49 +622,33 @@ def generate_audio(
     # Generate mindmap
     try:
         gr.Info("🧠 Generating mindmap...")
-        mindmap_markdown = generate_mindmap(transcript)
-        logger.info(f"Generated mindmap markdown length: {len(mindmap_markdown)} characters")
-        
-        # Escape the markdown for safe embedding in HTML
-        escaped_markdown = html.escape(mindmap_markdown)
+        mindmap_code = generate_mindmap(transcript)
+        logger.info(f"Generated mindmap code length: {len(mindmap_code)} characters")
+        logger.debug(f"Mindmap code preview: {mindmap_code[:200]}...")
         
         # Create a unique ID for this mindmap
         mindmap_id = f"mindmap_{int(time.time())}"
         
         mindmap_html = f"""
-<div id="{mindmap_id}" style="height: 500px; border: 1px solid #ddd; border-radius: 5px; background: white;">
-    <svg width="100%" height="100%"></svg>
+<div style="background: white; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+    <pre class="mermaid" id="{mindmap_id}">
+{mindmap_code}
+    </pre>
 </div>
-<script type="text/template" id="{mindmap_id}_data">
-{mindmap_markdown}
-</script>
 <script>
 (function() {{
-    const mindmapData = `{escaped_markdown}`;
-    const container = document.getElementById('{mindmap_id}');
-    const svg = container.querySelector('svg');
-    
-    if (window.markmap && window.markmap.Markmap) {{
+    console.log('Attempting to render mindmap with ID: {mindmap_id}');
+    if (window.mermaid) {{
         try {{
-            const {{ Transformer }} = window.markmap;
-            const transformer = new Transformer();
-            const {{ root, features }} = transformer.transform(mindmapData);
-            const {{ Markmap, loadCSS, loadJS }} = window.markmap;
-            
-            // Load required assets
-            if (features.styles) loadCSS(features.styles);
-            if (features.scripts) loadJS(features.scripts);
-            
-            // Create the mindmap
-            Markmap.create(svg, null, root);
+            window.mermaid.run({{
+                nodes: [document.getElementById('{mindmap_id}')]
+            }});
             console.log('Mindmap rendered successfully');
         }} catch (error) {{
             console.error('Error rendering mindmap:', error);
-            container.innerHTML = '<p style="padding: 20px; text-align: center;">Error rendering mindmap: ' + error.message + '</p>';
         }}
     }} else {{
-        console.warn('Markmap library not loaded');
-        container.innerHTML = '<p style="padding: 20px; text-align: center;">Mindmap library not loaded</p>';
+        console.warn('Mermaid library not loaded yet, will auto-render on load');
     }}
 }})();
 </script>
