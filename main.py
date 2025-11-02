@@ -301,7 +301,7 @@ def generate_dialogue_normal(text: str) -> Dialogue:
     • Main point 2<br><br>
 
     **2. Language Section:**
-    Identify 8-12 useful vocabulary words from the dialogue. For each item:
+    Identify 10-15 useful vocabulary words from the dialogue. For each item:
     - Provide the English word/phrase
     - Give the Traditional Chinese translation (繁體中文)
     - Show how it was used in the dialogue with a brief example
@@ -726,7 +726,7 @@ def generate_audio(
     # Build learning notes HTML
     learning_notes_html = f"""
     <div class="learning-notes-container" style="margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
-        <h2 style="color: white; text-align: center; margin-bottom: 25px; font-size: 28px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">📚 Learning Notes 學習筆記</h2>
+        <h2 style="color: white; text-align: center; margin-bottom: 25px; font-size: 28px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">📚 Study Notes 學習筆記</h2>
         
         <!-- Ideas Section -->
         <div class="notes-section" style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
