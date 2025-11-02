@@ -805,8 +805,9 @@ def generate_audio(
     # Format the Hong Kong time
     final_podcast_title = f"{podcast_title_base} - {hk_now.strftime('%Y-%m-%d %H:%M')}"
     
-    # Escape transcript for JavaScript string literal
-    escaped_transcript = transcript.replace('\\', '\\\\').replace("'", "\\'").replace('"', '\\"').replace('\n', '\\n').replace('\r', '\\r')
+    # Escape HTML transcript (with learning notes) for JavaScript string literal
+    # We need to escape the full HTML version so it includes learning notes when saved
+    escaped_html_transcript = html_transcript.replace('\\', '\\\\').replace("'", "\\'").replace('"', '\\"').replace('\n', '\\n').replace('\r', '\\r')
 
     # Create JavaScript to call the save function in head.html
     # The audio file path needs to be accessible by the client's browser.
@@ -848,7 +849,7 @@ def generate_audio(
         "title": final_podcast_title,
         # "audio_url": gradio_file_url, # REMOVED - JS will get this from hidden gr.File
         "audio_file_component_id": "temp_audio_file_url_holder", # ID of the hidden gr.File
-        "transcript": escaped_transcript,
+        "transcript": escaped_html_transcript,  # Now includes learning notes
         "tts_cost": f"{tts_cost:.2f}" # Added tts_cost, formatted as string
     }
     json_data_string = json.dumps(data_to_send)

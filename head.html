@@ -430,7 +430,15 @@
                 console.log(`[LOAD_HISTORY] Audio player src set to object URL for ${podcast.title}`);
 
                 if (transcriptDisplayElement) {
-                    const htmlTranscript = convertTranscriptToHTML(podcast.transcript);
+                    // The transcript is now stored as HTML (including learning notes)
+                    // Check if it's already HTML or plain text
+                    let htmlTranscript = podcast.transcript;
+                    
+                    // If it doesn't contain HTML tags, convert it (for backwards compatibility with old saves)
+                    if (!htmlTranscript.includes('<div class="transcript-container"')) {
+                        htmlTranscript = convertTranscriptToHTML(podcast.transcript);
+                    }
+                    
                     console.log(`[LOAD_HISTORY] Setting transcript HTML for ${podcast.title}`);
                     
                     // Try multiple approaches to set the content
