@@ -243,7 +243,7 @@ def generate_dialogue_normal(text: str) -> Dialogue:
 
     Express a range of well-developed ideas clearly, with elaboration and detail.
 
-    Model an authentic discussion and interaction among 4 students, and include the following strategies:
+    Model an authentic discussion and interaction among 4 students, and include all the following interaction strategies:
     - Strategies for initiating a group discussion (e.g. Alright, we are here to discuss the proposal to ... | Let's begin by talking about the reasons why ...).
     - Strategies for maintaining a group discussion (e.g. What do you think? | Any thoughts, Candidate C?).
     - Strategies for transitioning in a group discussion (e.g. Does anyone have anything else to add? If not, shall we move on and discuss ...?).
@@ -265,7 +265,7 @@ def generate_dialogue_normal(text: str) -> Dialogue:
 
     Use a conversational tone.
 
-    Include various strategies to extend the interaction naturally.
+    Include all the above interaction strategies to extend the interaction naturally.
 
     Use 'Candidate A', 'Candidate B', 'Candidate C', 'Candidate D' to identify the 4 speakers. Do not include any bracketed placeholders like [Candidate A] or [Candidate B].
 
@@ -382,7 +382,7 @@ def generate_dialogue_deeper(text: str) -> Dialogue:
     - Each speaker should contribute 180-275 words of meaningful content
     - Include 1-2 discussion rounds per main question prompt (initial thoughts → key examples → agreements/disagreements)
 
-    Model an authentic discussion and interaction among 4 students, and include the following strategies:
+    Model an authentic discussion and interaction among 4 students, and include all the following interaction strategies:
     - Strategies for initiating a group discussion (e.g. Alright, we are here to discuss the proposal to ... | Let's begin by talking about the reasons why ...).
     - Strategies for maintaining a group discussion (e.g. What do you think? | Any thoughts, Candidate C?).
     - Strategies for transitioning in a group discussion (e.g. Does anyone have anything else to add? If not, shall we move on and discuss ...?).
@@ -409,7 +409,7 @@ def generate_dialogue_deeper(text: str) -> Dialogue:
 
     Use a conversational tone with natural pacing and detailed discussions.
 
-    Include a wide variety of strategies throughout to extend the discussion naturally.
+    Include all the above interaction strategies throughout to extend the discussion naturally.
 
     Use 'Candidate A', 'Candidate B', 'Candidate C', 'Candidate D' to identify the 4 speakers. Do not include any bracketed placeholders like [Candidate A] or [Candidate B].
 
