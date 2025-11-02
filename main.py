@@ -291,6 +291,7 @@ def generate_dialogue_normal(text: str) -> Dialogue:
     - Use bullet points (•) or numbered lists with <br> after each item
     - Create clear hierarchy with indentation using &nbsp;&nbsp;&nbsp;&nbsp; for sub-points
     - Reference the question prompts from the input text and show how the discussion addressed each one
+    - Include Traditional Chinese explanations
     
     Example format:
     <strong>Question 1: [Topic]</strong><br><br>
@@ -443,6 +444,7 @@ def generate_dialogue_deeper(text: str) -> Dialogue:
     - Create clear hierarchy with indentation using &nbsp;&nbsp;&nbsp;&nbsp; for sub-points
     - Reference the question prompts from the input text and show how the discussion addressed each one
     - Since this is a deeper discussion, ensure the outline captures the elaborations and examples provided
+    - Include Traditional Chinese explanations
     
     Example format:
     <strong>Question 1: [Topic]</strong><br><br>
