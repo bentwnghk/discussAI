@@ -16,13 +16,35 @@
 <link rel="icon" href="/static/icon.png" type="image/png" />
 
 <style>
-.transcript-bubble,
+/* Transcript styling */
+.transcript-bubble {
+  color: black !important;
+}
+
+.transcript-bubble strong {
+  font-weight: 600 !important;
+}
+
 .transcript-bubble * {
   color: black !important;
+  font-weight: normal !important;
+}
+
+.transcript-bubble strong {
+  font-weight: 600 !important;
 }
 
 .transcript-container {
   background-color: #f9f9f9 !important;
+  font-weight: normal !important;
+}
+
+.transcript-container * {
+  font-weight: normal !important;
+}
+
+.transcript-container strong {
+  font-weight: 600 !important;
 }
 
 .dark .transcript-container {
@@ -32,15 +54,23 @@
 /* Learning Notes Styling */
 .learning-notes-container {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-weight: normal !important;
+}
+
+.learning-notes-container * {
+  font-weight: normal !important;
 }
 
 .learning-notes-container h2 {
   animation: fadeInDown 0.6s ease-out;
+  font-weight: 600 !important;
+  color: white !important;
 }
 
 .learning-notes-container .notes-section {
   animation: fadeInUp 0.6s ease-out;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  font-weight: normal !important;
 }
 
 .learning-notes-container .notes-section:hover {
@@ -50,7 +80,7 @@
 
 .learning-notes-container h3 {
   font-size: 22px;
-  font-weight: 600;
+  font-weight: 600 !important;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -106,13 +136,14 @@
 }
 
 .learning-notes-container strong {
-  color: #667eea;
-  font-weight: 600;
+  color: #667eea !important;
+  font-weight: 600 !important;
 }
 
 .learning-notes-container em {
-  color: #764ba2;
-  font-style: italic;
+  color: #764ba2 !important;
+  font-style: italic !important;
+  font-weight: normal !important;
 }
 
 .learning-notes-container code {
@@ -127,11 +158,19 @@
 /* Ensure proper spacing for line breaks in learning notes */
 .learning-notes-container .notes-section > div {
   white-space: normal;
+  color: #333 !important;
+  font-weight: normal !important;
 }
 
 .learning-notes-container .notes-section p {
   margin: 10px 0;
   line-height: 1.8;
+  color: #333 !important;
+  font-weight: normal !important;
+}
+
+.learning-notes-container .notes-section div {
+  color: #333 !important;
 }
 
 @keyframes fadeInDown {
@@ -160,15 +199,23 @@
 .dark .learning-notes-container .notes-section {
   background: #1e1e1e !important;
   color: #e0e0e0 !important;
+  font-weight: normal !important;
 }
 
 .dark .learning-notes-container .notes-section h3 {
   color: #a78bfa !important;
+  font-weight: 600 !important;
+}
+
+.dark .learning-notes-container .notes-section > div {
+  color: #e0e0e0 !important;
+  font-weight: normal !important;
 }
 
 .dark .learning-notes-container table td {
   color: #e0e0e0 !important;
   border-bottom-color: #333 !important;
+  font-weight: normal !important;
 }
 
 .dark .learning-notes-container table tr:nth-child(even) {
@@ -182,6 +229,18 @@
 .dark .learning-notes-container li,
 .dark .learning-notes-container div {
   color: #e0e0e0 !important;
+  font-weight: normal !important;
+}
+
+.dark .learning-notes-container strong {
+  color: #a78bfa !important;
+  font-weight: 600 !important;
+}
+
+.dark .learning-notes-container em {
+  color: #c4b5fd !important;
+  font-style: italic !important;
+  font-weight: normal !important;
 }
 </style>
 
