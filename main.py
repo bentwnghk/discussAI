@@ -284,31 +284,61 @@ def generate_dialogue_normal(text: str) -> Dialogue:
     Now create comprehensive learning notes for Hong Kong secondary students based on the dialogue you just generated. The learning notes should have three sections:
 
     **1. Ideas Section:**
-    Create a structured outline showing the main ideas discussed in the dialogue. Use bullet points and sub-points to show the hierarchy of ideas. Reference the question prompts from the input text and show how the discussion addressed each one.
+    Create a structured outline showing the main ideas discussed in the dialogue. Format this as HTML with proper structure:
+    - Use <strong> tags to bold main question prompts or key topics
+    - Use <em> tags to italicize important concepts or emphasis
+    - Use <br><br> for line breaks between major points
+    - Use bullet points (•) or numbered lists with <br> after each item
+    - Create clear hierarchy with indentation using &nbsp;&nbsp;&nbsp;&nbsp; for sub-points
+    - Reference the question prompts from the input text and show how the discussion addressed each one
+    
+    Example format:
+    <strong>Question 1: [Topic]</strong><br><br>
+    • Main point 1<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;- Sub-point with <em>emphasis</em><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;- Another sub-point<br>
+    • Main point 2<br><br>
 
     **2. Language Section:**
-    Identify 8-12 useful vocabulary words and 4-6 sentence patterns from the dialogue. For each item:
+    Identify 8-12 useful vocabulary words from the dialogue. For each item:
     - Provide the English word/phrase
     - Give the Traditional Chinese translation (繁體中文)
     - Show how it was used in the dialogue with a brief example
     - Explain its meaning or usage in Traditional Chinese
 
-    Format this as an HTML table with columns for English, Chinese, and Usage Example.
+    Format this as an HTML table with proper structure:
+    <table>
+    <tr><th>English</th><th>中文</th><th>Usage Example</th></tr>
+    <tr><td><strong>word/phrase</strong></td><td>中文翻譯</td><td>Example sentence from dialogue</td></tr>
+    </table>
 
     **3. Communication Strategies Section:**
-    List and explain 6-8 interaction strategies that were demonstrated in the dialogue, such as:
-    - Initiating discussion
-    - Maintaining discussion
-    - Transitioning between topics
-    - Responding and agreeing/disagreeing
-    - Asking for clarification
-    - Rephrasing
-    - Summarizing
+    List and explain 6-8 interaction strategies that were demonstrated in the dialogue. Format this as HTML with proper structure:
+    - Use <strong> tags to bold strategy names
+    - Use <em> tags to italicize example phrases from the dialogue
+    - Use <br><br> for line breaks between different strategies
+    - Use <br> after each example phrase
+    - Include Traditional Chinese explanations
+    
+    Example format:
+    <strong>1. Initiating Discussion (開始討論)</strong><br>
+    • <em>"Alright, let's begin by..."</em><br>
+    • <em>"Shall we start with..."</em><br>
+    用於開始討論的策略，幫助引導話題方向。<br><br>
 
-    For each strategy, provide:
-    - The strategy name
-    - 2-3 example phrases from the dialogue
-    - Brief explanation in Traditional Chinese of when and how to use it
+    <strong>2. Maintaining Discussion (維持討論)</strong><br>
+    • <em>"What do you think?"</em><br>
+    • <em>"Any thoughts on this?"</em><br>
+    用於鼓勵其他人參與討論。<br><br>
+
+    Strategies to include:
+    - Initiating discussion (開始討論)
+    - Maintaining discussion (維持討論)
+    - Transitioning between topics (轉換話題)
+    - Responding and agreeing/disagreeing (回應及表達同意/不同意)
+    - Asking for clarification (要求澄清)
+    - Rephrasing (重新表述)
+    - Summarizing (總結)
 
     Write all learning notes content in a mix of English and Traditional Chinese to facilitate Hong Kong students' learning.
     </learning_notes>
@@ -405,33 +435,65 @@ def generate_dialogue_deeper(text: str) -> Dialogue:
     Now create comprehensive learning notes for Hong Kong secondary students based on the dialogue you just generated. The learning notes should have three sections:
 
     **1. Ideas Section:**
-    Create a structured outline showing the main ideas discussed in the dialogue. Use bullet points and sub-points to show the hierarchy of ideas. Reference the question prompts from the input text and show how the discussion addressed each one. Since this is a deeper discussion, ensure the outline captures the elaborations and examples provided.
+    Create a structured outline showing the main ideas discussed in the dialogue. Format this as HTML with proper structure:
+    - Use <strong> tags to bold main question prompts or key topics
+    - Use <em> tags to italicize important concepts or emphasis
+    - Use <br><br> for line breaks between major points
+    - Use bullet points (•) or numbered lists with <br> after each item
+    - Create clear hierarchy with indentation using &nbsp;&nbsp;&nbsp;&nbsp; for sub-points
+    - Reference the question prompts from the input text and show how the discussion addressed each one
+    - Since this is a deeper discussion, ensure the outline captures the elaborations and examples provided
+    
+    Example format:
+    <strong>Question 1: [Topic]</strong><br><br>
+    • Main point 1<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;- Sub-point with <em>emphasis</em><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;- Another sub-point with example<br>
+    • Main point 2<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;- Elaboration<br><br>
 
     **2. Language Section:**
-    Identify 10-15 useful vocabulary words and 5-8 sentence patterns from the dialogue. For each item:
+    Identify 10-15 useful vocabulary words from the dialogue. For each item:
     - Provide the English word/phrase
     - Give the Traditional Chinese translation (繁體中文)
     - Show how it was used in the dialogue with a brief example
     - Explain its meaning or usage in Traditional Chinese
 
-    Format this as an HTML table with columns for English, Chinese, and Usage Example.
+    Format this as an HTML table with proper structure:
+    <table>
+    <tr><th>English</th><th>中文</th><th>Usage Example</th></tr>
+    <tr><td><strong>word/phrase</strong></td><td>中文翻譯</td><td>Example sentence from dialogue</td></tr>
+    </table>
 
     **3. Communication Strategies Section:**
-    List and explain 8-10 interaction strategies that were demonstrated in the dialogue, such as:
-    - Initiating discussion
-    - Maintaining discussion
-    - Transitioning between topics
-    - Responding and agreeing/disagreeing
-    - Asking for clarification
-    - Rephrasing
-    - Summarizing
-    - Elaborating with examples
-    - Building on others' ideas
+    List and explain 8-10 interaction strategies that were demonstrated in the dialogue. Format this as HTML with proper structure:
+    - Use <strong> tags to bold strategy names
+    - Use <em> tags to italicize example phrases from the dialogue
+    - Use <br><br> for line breaks between different strategies
+    - Use <br> after each example phrase
+    - Include Traditional Chinese explanations
+    
+    Example format:
+    <strong>1. Initiating Discussion (開始討論)</strong><br>
+    • <em>"Alright, let's begin by..."</em><br>
+    • <em>"Shall we start with..."</em><br>
+    用於開始討論的策略，幫助引導話題方向。<br><br>
 
-    For each strategy, provide:
-    - The strategy name
-    - 2-3 example phrases from the dialogue
-    - Brief explanation in Traditional Chinese of when and how to use it
+    <strong>2. Maintaining Discussion (維持討論)</strong><br>
+    • <em>"What do you think?"</em><br>
+    • <em>"Any thoughts on this?"</em><br>
+    用於鼓勵其他人參與討論。<br><br>
+
+    Strategies to include:
+    - Initiating discussion (開始討論)
+    - Maintaining discussion (維持討論)
+    - Transitioning between topics (轉換話題)
+    - Responding and agreeing/disagreeing (回應及表達同意/不同意)
+    - Asking for clarification (要求澄清)
+    - Rephrasing (重新表述)
+    - Summarizing (總結)
+    - Elaborating with examples (舉例說明)
+    - Building on others' ideas (延伸他人想法)
 
     Write all learning notes content in a mix of English and Traditional Chinese to facilitate Hong Kong students' learning.
     </learning_notes>
