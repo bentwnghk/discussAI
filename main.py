@@ -58,9 +58,15 @@ class DialogueItem(BaseModel):
         return OPENAI_VOICE_MAPPINGS[self.speaker]
 
 
+class LearningNotes(BaseModel):
+    ideas: str  # Structured outline of ideas
+    language: str  # Vocabulary and sentence patterns with Traditional Chinese
+    communication_strategies: str  # Interaction strategies used
+
 class Dialogue(BaseModel):
     scratchpad: str
     dialogue: List[DialogueItem]
+    learning_notes: LearningNotes
 
 
 # Add retry mechanism to TTS calls for resilience
@@ -273,6 +279,39 @@ def generate_dialogue_normal(text: str) -> Dialogue:
 
     At the end of the dialogue, include a brief summary (1–2 sentences) by one of the candidates.
     </podcast_dialogue>
+
+    <learning_notes>
+    Now create comprehensive learning notes for Hong Kong secondary students based on the dialogue you just generated. The learning notes should have three sections:
+
+    **1. Ideas Section:**
+    Create a structured outline showing the main ideas discussed in the dialogue. Use bullet points and sub-points to show the hierarchy of ideas. Reference the question prompts from the input text and show how the discussion addressed each one.
+
+    **2. Language Section:**
+    Identify 8-12 useful vocabulary words and 4-6 sentence patterns from the dialogue. For each item:
+    - Provide the English word/phrase
+    - Give the Traditional Chinese translation (繁體中文)
+    - Show how it was used in the dialogue with a brief example
+    - Explain its meaning or usage in Traditional Chinese
+
+    Format this as an HTML table with columns for English, Chinese, and Usage Example.
+
+    **3. Communication Strategies Section:**
+    List and explain 6-8 interaction strategies that were demonstrated in the dialogue, such as:
+    - Initiating discussion
+    - Maintaining discussion
+    - Transitioning between topics
+    - Responding and agreeing/disagreeing
+    - Asking for clarification
+    - Rephrasing
+    - Summarizing
+
+    For each strategy, provide:
+    - The strategy name
+    - 2-3 example phrases from the dialogue
+    - Brief explanation in Traditional Chinese of when and how to use it
+
+    Write all learning notes content in a mix of English and Traditional Chinese to facilitate Hong Kong students' learning.
+    </learning_notes>
     """
 
 # Deeper mode dialogue generation function
@@ -361,6 +400,41 @@ def generate_dialogue_deeper(text: str) -> Dialogue:
 
     At the end of the dialogue, include a brief summary (1–2 sentences) by one of the candidates.
     </podcast_dialogue>
+
+    <learning_notes>
+    Now create comprehensive learning notes for Hong Kong secondary students based on the dialogue you just generated. The learning notes should have three sections:
+
+    **1. Ideas Section:**
+    Create a structured outline showing the main ideas discussed in the dialogue. Use bullet points and sub-points to show the hierarchy of ideas. Reference the question prompts from the input text and show how the discussion addressed each one. Since this is a deeper discussion, ensure the outline captures the elaborations and examples provided.
+
+    **2. Language Section:**
+    Identify 10-15 useful vocabulary words and 5-8 sentence patterns from the dialogue. For each item:
+    - Provide the English word/phrase
+    - Give the Traditional Chinese translation (繁體中文)
+    - Show how it was used in the dialogue with a brief example
+    - Explain its meaning or usage in Traditional Chinese
+
+    Format this as an HTML table with columns for English, Chinese, and Usage Example.
+
+    **3. Communication Strategies Section:**
+    List and explain 8-10 interaction strategies that were demonstrated in the dialogue, such as:
+    - Initiating discussion
+    - Maintaining discussion
+    - Transitioning between topics
+    - Responding and agreeing/disagreeing
+    - Asking for clarification
+    - Rephrasing
+    - Summarizing
+    - Elaborating with examples
+    - Building on others' ideas
+
+    For each strategy, provide:
+    - The strategy name
+    - 2-3 example phrases from the dialogue
+    - Brief explanation in Traditional Chinese of when and how to use it
+
+    Write all learning notes content in a mix of English and Traditional Chinese to facilitate Hong Kong students' learning.
+    </learning_notes>
     """
 
 def generate_audio(
@@ -584,7 +658,39 @@ def generate_audio(
             html_transcript_lines.append(html_line)
         else:
             html_transcript_lines.append(html.escape(line))
-    html_transcript = f'<div class="transcript-container" style="max-height: 400px; overflow-y: auto; background-color: #f9f9f9; padding: 10px; border-radius: 5px;">{"<br>".join(html_transcript_lines)}</div>'
+    
+    # Build learning notes HTML
+    learning_notes_html = f"""
+    <div class="learning-notes-container" style="margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+        <h2 style="color: white; text-align: center; margin-bottom: 25px; font-size: 28px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">📚 Learning Notes 學習筆記</h2>
+        
+        <!-- Ideas Section -->
+        <div class="notes-section" style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <h3 style="color: #667eea; border-bottom: 3px solid #667eea; padding-bottom: 10px; margin-bottom: 15px;">💡 Ideas 討論要點</h3>
+            <div style="line-height: 1.8; color: #333;">
+                {llm_output.learning_notes.ideas}
+            </div>
+        </div>
+        
+        <!-- Language Section -->
+        <div class="notes-section" style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <h3 style="color: #764ba2; border-bottom: 3px solid #764ba2; padding-bottom: 10px; margin-bottom: 15px;">📖 Language 語言學習</h3>
+            <div style="overflow-x: auto;">
+                {llm_output.learning_notes.language}
+            </div>
+        </div>
+        
+        <!-- Communication Strategies Section -->
+        <div class="notes-section" style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <h3 style="color: #f093fb; border-bottom: 3px solid #f093fb; padding-bottom: 10px; margin-bottom: 15px;">💬 Communication Strategies 溝通策略</h3>
+            <div style="line-height: 1.8; color: #333;">
+                {llm_output.learning_notes.communication_strategies}
+            </div>
+        </div>
+    </div>
+    """
+    
+    html_transcript = f'<div class="transcript-container" style="max-height: 400px; overflow-y: auto; background-color: #f9f9f9; padding: 10px; border-radius: 5px;">{"<br>".join(html_transcript_lines)}</div>{learning_notes_html}'
 
     logger.info(f"Successfully generated audio for {successful_lines}/{total_lines} lines.")
 
