@@ -521,7 +521,7 @@ def generate_audio(
     resolved_openai_base_url = os.getenv("OPENAI_BASE_URL")
     
     full_text = ""
-    gr.Info("📦 Processing input...")
+    gr.Info(🔍 Analysing group interaction task...")
     podcast_title_base = "Group Discussion" # Default title base
 
     if input_method == "Upload Files":
@@ -617,7 +617,7 @@ def generate_audio(
         dialogue_generator = generate_dialogue_normal
 
     try:
-        gr.Info("✨ Generating dialogue script with AI...")
+        gr.Info("✨ Generating dialogue and study notes with AI...")
         llm_start_time = time.time()
         llm_output = dialogue_generator(full_text)
         logger.info(f"Dialogue generation took {time.time() - llm_start_time:.2f} seconds.")
@@ -793,9 +793,9 @@ def generate_audio(
         logger.warning(f"Error during old temp file cleanup: {e}")
 
     total_duration = time.time() - start_time
-    tts_cost = (characters / 1_000_000) * 15
+    tts_cost = (characters / 1_000_000) * 15 * 7.8
     gr.Info(f"🎉 Audio generation complete! Total time: {total_duration:.2f} seconds.")
-    gr.Info(f"💸 This audio generation costs US${tts_cost:.2f}.")
+    gr.Info(f"💸 This audio generation costs HK${tts_cost:.2f}.")
 
     # Prepare audio title for history
     # Get current time in UTC
@@ -937,7 +937,7 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
                 elem_id="mr_ng_ai_hub_api_key_input"
         )
 
-    submit_button = gr.Button("✨ Generate Discussion with Audio", variant="primary")
+    submit_button = gr.Button("✨ Generate Discussion with Audio and Study Notes", variant="primary")
 
     with gr.Column():
         audio_output = gr.Audio(label="🔊 Audio", type="filepath", elem_id="podcast_audio_player") # Keep existing elem_id
