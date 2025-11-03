@@ -521,7 +521,7 @@ def generate_audio(
     resolved_openai_base_url = os.getenv("OPENAI_BASE_URL")
     
     full_text = ""
-    gr.Info(🔍 Analysing group interaction task...")
+    gr.Info("🔍 Analysing group interaction task...")
     podcast_title_base = "Group Discussion" # Default title base
 
     if input_method == "Upload Files":
