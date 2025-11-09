@@ -58,9 +58,15 @@ class DialogueItem(BaseModel):
         return OPENAI_VOICE_MAPPINGS[self.speaker]
 
 
+class LearningNotes(BaseModel):
+    ideas: str  # Structured outline of ideas
+    language: str  # Vocabulary and sentence patterns with Traditional Chinese
+    communication_strategies: str  # Interaction strategies used
+
 class Dialogue(BaseModel):
     scratchpad: str
     dialogue: List[DialogueItem]
+    learning_notes: LearningNotes
 
 
 # Add retry mechanism to TTS calls for resilience
@@ -237,7 +243,7 @@ def generate_dialogue_normal(text: str) -> Dialogue:
 
     Express a range of well-developed ideas clearly, with elaboration and detail.
 
-    Model an authentic discussion and interaction among 4 students, and include the following strategies:
+    Model an authentic discussion and interaction among 4 students, and include all the following interaction strategies:
     - Strategies for initiating a group discussion (e.g. Alright, we are here to discuss the proposal to ... | Let's begin by talking about the reasons why ...).
     - Strategies for maintaining a group discussion (e.g. What do you think? | Any thoughts, Candidate C?).
     - Strategies for transitioning in a group discussion (e.g. Does anyone have anything else to add? If not, shall we move on and discuss ...?).
@@ -259,7 +265,7 @@ def generate_dialogue_normal(text: str) -> Dialogue:
 
     Use a conversational tone.
 
-    Include various strategies to extend the interaction naturally.
+    Include all the above interaction strategies to extend the interaction naturally.
 
     Use 'Candidate A', 'Candidate B', 'Candidate C', 'Candidate D' to identify the 4 speakers. Do not include any bracketed placeholders like [Candidate A] or [Candidate B].
 
@@ -273,6 +279,70 @@ def generate_dialogue_normal(text: str) -> Dialogue:
 
     At the end of the dialogue, include a brief summary (1–2 sentences) by one of the candidates.
     </podcast_dialogue>
+
+    <learning_notes>
+    Now create comprehensive learning notes for Hong Kong secondary students based on the dialogue you just generated. The learning notes should have three sections:
+
+    **1. Ideas Section:**
+    Create a structured outline showing the main ideas discussed in the dialogue. Format this as HTML with proper structure:
+    - Use <strong> tags to bold main question prompts or key topics
+    - Use <em> tags to italicize important concepts or emphasis
+    - Use <br><br> for line breaks between major points
+    - Use bullet points (•) or numbered lists with <br> after each item
+    - Create clear hierarchy with indentation using &nbsp;&nbsp;&nbsp;&nbsp; for sub-points
+    - Reference the question prompts from the input text and show how the discussion addressed each one
+    - Include Traditional Chinese translations for all major points and sub-points
+    
+    Example format:
+    <strong>Question 1: [Topic]</strong><br><br>
+    • Main point 1<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;- Sub-point with <em>emphasis</em><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;- Another sub-point<br>
+    • Main point 2<br><br>
+
+    **2. Language Section:**
+    Identify 10-15 useful vocabulary words from the dialogue. For each item:
+    - Provide the English word/phrase
+    - Give the Traditional Chinese translation (繁體中文)
+    - Show how it was used in the dialogue with a brief example
+    - Explain its meaning or usage in Traditional Chinese
+
+    Format this as an HTML table with proper structure:
+    <table>
+    <tr><th>English</th><th>中文</th><th>Usage Example</th></tr>
+    <tr><td><strong>word/phrase</strong></td><td>中文翻譯</td><td>Example sentence from dialogue</td></tr>
+    </table>
+
+    **3. Communication Strategies Section:**
+    List and explain 6-8 interaction strategies that were demonstrated in the dialogue. Format this as HTML with proper structure:
+    - Use <strong> tags to bold strategy names
+    - Use <em> tags to italicize example phrases from the dialogue
+    - Use <br><br> for line breaks between different strategies
+    - Use <br> after each example phrase
+    - Include Traditional Chinese explanations
+    
+    Example format:
+    <strong>1. Initiating Discussion (開始討論)</strong><br>
+    • <em>"Alright, let's begin by..."</em><br>
+    • <em>"Shall we start with..."</em><br>
+    用於開始討論的策略，幫助引導話題方向。<br><br>
+
+    <strong>2. Maintaining Discussion (維持討論)</strong><br>
+    • <em>"What do you think?"</em><br>
+    • <em>"Any thoughts on this?"</em><br>
+    用於鼓勵其他人參與討論。<br><br>
+
+    Strategies to include:
+    - Initiating discussion (開始討論)
+    - Maintaining discussion (維持討論)
+    - Transitioning between topics (轉換話題)
+    - Responding and agreeing/disagreeing (回應及表達同意/不同意)
+    - Asking for clarification (要求澄清)
+    - Rephrasing (重新表述)
+    - Summarizing (總結)
+
+    Write all learning notes content in a mix of English and Traditional Chinese to facilitate Hong Kong students' learning.
+    </learning_notes>
     """
 
 # Deeper mode dialogue generation function
@@ -312,7 +382,7 @@ def generate_dialogue_deeper(text: str) -> Dialogue:
     - Each speaker should contribute 180-275 words of meaningful content
     - Include 1-2 discussion rounds per main question prompt (initial thoughts → key examples → agreements/disagreements)
 
-    Model an authentic discussion and interaction among 4 students, and include the following strategies:
+    Model an authentic discussion and interaction among 4 students, and include all the following interaction strategies:
     - Strategies for initiating a group discussion (e.g. Alright, we are here to discuss the proposal to ... | Let's begin by talking about the reasons why ...).
     - Strategies for maintaining a group discussion (e.g. What do you think? | Any thoughts, Candidate C?).
     - Strategies for transitioning in a group discussion (e.g. Does anyone have anything else to add? If not, shall we move on and discuss ...?).
@@ -339,7 +409,7 @@ def generate_dialogue_deeper(text: str) -> Dialogue:
 
     Use a conversational tone with natural pacing and detailed discussions.
 
-    Include a wide variety of strategies throughout to extend the discussion naturally.
+    Include all the above interaction strategies throughout to extend the discussion naturally.
 
     Use 'Candidate A', 'Candidate B', 'Candidate C', 'Candidate D' to identify the 4 speakers. Do not include any bracketed placeholders like [Candidate A] or [Candidate B].
 
@@ -361,6 +431,74 @@ def generate_dialogue_deeper(text: str) -> Dialogue:
 
     At the end of the dialogue, include a brief summary (1–2 sentences) by one of the candidates.
     </podcast_dialogue>
+
+    <learning_notes>
+    Now create comprehensive learning notes for Hong Kong secondary students based on the dialogue you just generated. The learning notes should have three sections:
+
+    **1. Ideas Section:**
+    Create a structured outline showing the main ideas discussed in the dialogue. Format this as HTML with proper structure:
+    - Use <strong> tags to bold main question prompts or key topics
+    - Use <em> tags to italicize important concepts or emphasis
+    - Use <br><br> for line breaks between major points
+    - Use bullet points (•) or numbered lists with <br> after each item
+    - Create clear hierarchy with indentation using &nbsp;&nbsp;&nbsp;&nbsp; for sub-points
+    - Reference the question prompts from the input text and show how the discussion addressed each one
+    - Since this is a deeper discussion, ensure the outline captures the elaborations and examples provided
+    - Include Traditional Chinese translations for all major points and sub-points
+    
+    Example format:
+    <strong>Question 1: [Topic]</strong><br><br>
+    • Main point 1<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;- Sub-point with <em>emphasis</em><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;- Another sub-point with example<br>
+    • Main point 2<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;- Elaboration<br><br>
+
+    **2. Language Section:**
+    Identify 10-15 useful vocabulary words from the dialogue. For each item:
+    - Provide the English word/phrase
+    - Give the Traditional Chinese translation (繁體中文)
+    - Show how it was used in the dialogue with a brief example
+    - Explain its meaning or usage in Traditional Chinese
+
+    Format this as an HTML table with proper structure:
+    <table>
+    <tr><th>English</th><th>中文</th><th>Usage Example</th></tr>
+    <tr><td><strong>word/phrase</strong></td><td>中文翻譯</td><td>Example sentence from dialogue</td></tr>
+    </table>
+
+    **3. Communication Strategies Section:**
+    List and explain 8-10 interaction strategies that were demonstrated in the dialogue. Format this as HTML with proper structure:
+    - Use <strong> tags to bold strategy names
+    - Use <em> tags to italicize example phrases from the dialogue
+    - Use <br><br> for line breaks between different strategies
+    - Use <br> after each example phrase
+    - Include Traditional Chinese explanations
+    
+    Example format:
+    <strong>1. Initiating Discussion (開始討論)</strong><br>
+    • <em>"Alright, let's begin by..."</em><br>
+    • <em>"Shall we start with..."</em><br>
+    用於開始討論的策略，幫助引導話題方向。<br><br>
+
+    <strong>2. Maintaining Discussion (維持討論)</strong><br>
+    • <em>"What do you think?"</em><br>
+    • <em>"Any thoughts on this?"</em><br>
+    用於鼓勵其他人參與討論。<br><br>
+
+    Strategies to include:
+    - Initiating discussion (開始討論)
+    - Maintaining discussion (維持討論)
+    - Transitioning between topics (轉換話題)
+    - Responding and agreeing/disagreeing (回應及表達同意/不同意)
+    - Asking for clarification (要求澄清)
+    - Rephrasing (重新表述)
+    - Summarizing (總結)
+    - Elaborating with examples (舉例說明)
+    - Building on others' ideas (延伸他人想法)
+
+    Write all learning notes content in a mix of English and Traditional Chinese to facilitate Hong Kong students' learning.
+    </learning_notes>
     """
 
 def generate_audio(
@@ -383,7 +521,7 @@ def generate_audio(
     resolved_openai_base_url = os.getenv("OPENAI_BASE_URL")
     
     full_text = ""
-    gr.Info("📦 Processing input...")
+    gr.Info("🔍 Analysing group interaction task...")
     podcast_title_base = "Group Discussion" # Default title base
 
     if input_method == "Upload Files":
@@ -479,7 +617,7 @@ def generate_audio(
         dialogue_generator = generate_dialogue_normal
 
     try:
-        gr.Info("✨ Generating dialogue script with AI...")
+        gr.Info("✨ Generating dialogue and study notes with AI...")
         llm_start_time = time.time()
         llm_output = dialogue_generator(full_text)
         logger.info(f"Dialogue generation took {time.time() - llm_start_time:.2f} seconds.")
@@ -584,7 +722,39 @@ def generate_audio(
             html_transcript_lines.append(html_line)
         else:
             html_transcript_lines.append(html.escape(line))
-    html_transcript = f'<div class="transcript-container" style="max-height: 400px; overflow-y: auto; background-color: #f9f9f9; padding: 10px; border-radius: 5px;">{"<br>".join(html_transcript_lines)}</div>'
+    
+    # Build learning notes HTML
+    learning_notes_html = f"""
+    <div class="learning-notes-container" style="margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+        <h2 style="color: white; text-align: center; margin-bottom: 25px; font-size: 28px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">📚 Study Notes 學習筆記</h2>
+        
+        <!-- Ideas Section -->
+        <div class="notes-section" style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <h3 style="color: #667eea; border-bottom: 3px solid #667eea; padding-bottom: 10px; margin-bottom: 15px;">💡 Ideas 討論要點</h3>
+            <div style="line-height: 1.8; color: #333;">
+                {llm_output.learning_notes.ideas}
+            </div>
+        </div>
+        
+        <!-- Language Section -->
+        <div class="notes-section" style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <h3 style="color: #764ba2; border-bottom: 3px solid #764ba2; padding-bottom: 10px; margin-bottom: 15px;">📖 Language 語言學習</h3>
+            <div style="overflow-x: auto;">
+                {llm_output.learning_notes.language}
+            </div>
+        </div>
+        
+        <!-- Communication Strategies Section -->
+        <div class="notes-section" style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <h3 style="color: #f093fb; border-bottom: 3px solid #f093fb; padding-bottom: 10px; margin-bottom: 15px;">💬 Communication Strategies 溝通策略</h3>
+            <div style="line-height: 1.8; color: #333;">
+                {llm_output.learning_notes.communication_strategies}
+            </div>
+        </div>
+    </div>
+    """
+    
+    html_transcript = f'<div class="transcript-container" style="max-height: 400px; overflow-y: auto; background-color: #f9f9f9; padding: 10px; border-radius: 5px;">{"<br>".join(html_transcript_lines)}</div>{learning_notes_html}'
 
     logger.info(f"Successfully generated audio for {successful_lines}/{total_lines} lines.")
 
@@ -623,9 +793,9 @@ def generate_audio(
         logger.warning(f"Error during old temp file cleanup: {e}")
 
     total_duration = time.time() - start_time
-    tts_cost = (characters / 1_000_000) * 15
+    tts_cost = (characters / 1_000_000) * 15 * 7.8
     gr.Info(f"🎉 Audio generation complete! Total time: {total_duration:.2f} seconds.")
-    gr.Info(f"💸 This audio generation costs US${tts_cost:.2f}.")
+    gr.Info(f"💸 This audio generation costs HK${tts_cost:.2f}.")
 
     # Prepare audio title for history
     # Get current time in UTC
@@ -637,8 +807,9 @@ def generate_audio(
     # Format the Hong Kong time
     final_podcast_title = f"{podcast_title_base} - {hk_now.strftime('%Y-%m-%d %H:%M')}"
     
-    # Escape transcript for JavaScript string literal
-    escaped_transcript = transcript.replace('\\', '\\\\').replace("'", "\\'").replace('"', '\\"').replace('\n', '\\n').replace('\r', '\\r')
+    # Escape HTML transcript (with learning notes) for JavaScript string literal
+    # We need to escape the full HTML version so it includes learning notes when saved
+    escaped_html_transcript = html_transcript.replace('\\', '\\\\').replace("'", "\\'").replace('"', '\\"').replace('\n', '\\n').replace('\r', '\\r')
 
     # Create JavaScript to call the save function in head.html
     # The audio file path needs to be accessible by the client's browser.
@@ -680,7 +851,7 @@ def generate_audio(
         "title": final_podcast_title,
         # "audio_url": gradio_file_url, # REMOVED - JS will get this from hidden gr.File
         "audio_file_component_id": "temp_audio_file_url_holder", # ID of the hidden gr.File
-        "transcript": escaped_transcript,
+        "transcript": escaped_html_transcript,  # Now includes learning notes
         "tts_cost": f"{tts_cost:.2f}" # Added tts_cost, formatted as string
     }
     json_data_string = json.dumps(data_to_send)
@@ -734,7 +905,7 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
 
     with gr.Group(visible=True) as file_upload_group:
         file_input = gr.Files(
-            label="Upload Group Interaction Task",
+            label="📸 Upload Group Interaction Task",
             file_types=allowed_extensions,
             file_count="multiple",
         )
@@ -766,7 +937,7 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
                 elem_id="mr_ng_ai_hub_api_key_input"
         )
 
-    submit_button = gr.Button("✨ Generate Discussion with Audio", variant="primary")
+    submit_button = gr.Button("✨ Generate Discussion with Audio and Study Notes", variant="primary")
 
     with gr.Column():
         audio_output = gr.Audio(label="🔊 Audio", type="filepath", elem_id="podcast_audio_player") # Keep existing elem_id

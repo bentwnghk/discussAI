@@ -16,17 +16,231 @@
 <link rel="icon" href="/static/icon.png" type="image/png" />
 
 <style>
-.transcript-bubble,
+/* Transcript styling */
+.transcript-bubble {
+  color: black !important;
+}
+
+.transcript-bubble strong {
+  font-weight: 600 !important;
+}
+
 .transcript-bubble * {
   color: black !important;
+  font-weight: normal !important;
+}
+
+.transcript-bubble strong {
+  font-weight: 600 !important;
 }
 
 .transcript-container {
   background-color: #f9f9f9 !important;
+  font-weight: normal !important;
+}
+
+.transcript-container * {
+  font-weight: normal !important;
+}
+
+.transcript-container strong {
+  font-weight: 600 !important;
 }
 
 .dark .transcript-container {
   background-color: #27272A !important;
+}
+
+/* Learning Notes Styling */
+.learning-notes-container {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-weight: normal !important;
+}
+
+.learning-notes-container * {
+  font-weight: normal !important;
+}
+
+.learning-notes-container h2 {
+  animation: fadeInDown 0.6s ease-out;
+  font-weight: 600 !important;
+  color: white !important;
+}
+
+.learning-notes-container .notes-section {
+  animation: fadeInUp 0.6s ease-out;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  font-weight: normal !important;
+}
+
+.learning-notes-container .notes-section:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.15) !important;
+}
+
+.learning-notes-container h3 {
+  font-size: 22px;
+  font-weight: 600 !important;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.learning-notes-container table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.learning-notes-container table th {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.learning-notes-container table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #e0e0e0;
+  color: #333;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.learning-notes-container table tr:last-child td {
+  border-bottom: none;
+}
+
+.learning-notes-container table tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+.learning-notes-container table tr:hover {
+  background-color: #f0f0f0;
+}
+
+.learning-notes-container ul, .learning-notes-container ol {
+  margin: 10px 0;
+  padding-left: 25px;
+}
+
+.learning-notes-container li {
+  margin: 8px 0;
+  line-height: 1.6;
+}
+
+.learning-notes-container strong {
+  color: #667eea !important;
+  font-weight: 600 !important;
+}
+
+.learning-notes-container em {
+  color: #764ba2 !important;
+  font-style: italic !important;
+  font-weight: normal !important;
+}
+
+.learning-notes-container code {
+  background-color: #f4f4f4;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: #d63384;
+}
+
+/* Ensure proper spacing for line breaks in learning notes */
+.learning-notes-container .notes-section > div {
+  white-space: normal;
+  color: #333 !important;
+  font-weight: normal !important;
+}
+
+.learning-notes-container .notes-section p {
+  margin: 10px 0;
+  line-height: 1.8;
+  color: #333 !important;
+  font-weight: normal !important;
+}
+
+.learning-notes-container .notes-section div {
+  color: #333 !important;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Dark mode support for learning notes */
+.dark .learning-notes-container .notes-section {
+  background: #1e1e1e !important;
+  color: #e0e0e0 !important;
+  font-weight: normal !important;
+}
+
+.dark .learning-notes-container .notes-section h3 {
+  color: #a78bfa !important;
+  font-weight: 600 !important;
+}
+
+.dark .learning-notes-container .notes-section > div {
+  color: #e0e0e0 !important;
+  font-weight: normal !important;
+}
+
+.dark .learning-notes-container table td {
+  color: #e0e0e0 !important;
+  border-bottom-color: #333 !important;
+  font-weight: normal !important;
+}
+
+.dark .learning-notes-container table tr:nth-child(even) {
+  background-color: #2a2a2a !important;
+}
+
+.dark .learning-notes-container table tr:hover {
+  background-color: #333 !important;
+}
+
+.dark .learning-notes-container li,
+.dark .learning-notes-container div {
+  color: #e0e0e0 !important;
+  font-weight: normal !important;
+}
+
+.dark .learning-notes-container strong {
+  color: #a78bfa !important;
+  font-weight: 600 !important;
+}
+
+.dark .learning-notes-container em {
+  color: #c4b5fd !important;
+  font-style: italic !important;
+  font-weight: normal !important;
 }
 </style>
 
@@ -171,7 +385,7 @@
             dateSpan.style.marginBottom = '5px'; // Adjusted margin
 
             const costSpan = document.createElement('span');
-            costSpan.textContent = podcastMeta.tts_cost ? `Cost: US$${podcastMeta.tts_cost}` : 'Cost: N/A';
+            costSpan.textContent = podcastMeta.tts_cost ? `Cost: HK$${podcastMeta.tts_cost}` : 'Cost: N/A';
             costSpan.style.fontSize = '0.9em';
             costSpan.style.color = '#666';
             costSpan.style.marginBottom = '8px';
@@ -275,7 +489,15 @@
                 console.log(`[LOAD_HISTORY] Audio player src set to object URL for ${podcast.title}`);
 
                 if (transcriptDisplayElement) {
-                    const htmlTranscript = convertTranscriptToHTML(podcast.transcript);
+                    // The transcript is now stored as HTML (including learning notes)
+                    // Check if it's already HTML or plain text
+                    let htmlTranscript = podcast.transcript;
+                    
+                    // If it doesn't contain HTML tags, convert it (for backwards compatibility with old saves)
+                    if (!htmlTranscript.includes('<div class="transcript-container"')) {
+                        htmlTranscript = convertTranscriptToHTML(podcast.transcript);
+                    }
+                    
                     console.log(`[LOAD_HISTORY] Setting transcript HTML for ${podcast.title}`);
                     
                     // Try multiple approaches to set the content
