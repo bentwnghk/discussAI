@@ -60,7 +60,7 @@ class DialogueItem(BaseModel):
 
 class LearningNotes(BaseModel):
     ideas: str  # Structured outline of ideas
-    language: str  # Vocabulary and sentence patterns with Traditional Chinese
+    language: str  # Vocabulary
     communication_strategies: str  # Interaction strategies used
 
 class Dialogue(BaseModel):
@@ -305,7 +305,6 @@ def generate_dialogue_normal(text: str) -> Dialogue:
     - Provide the English word/phrase
     - Give the Traditional Chinese translation (繁體中文)
     - Show how it was used in the dialogue with a brief example
-    - Explain its meaning or usage in Traditional Chinese
 
     Format this as an HTML table with proper structure:
     <table>
@@ -323,8 +322,8 @@ def generate_dialogue_normal(text: str) -> Dialogue:
     
     Example format:
     <strong>1. Initiating Discussion (開始討論)</strong><br>
-    • <em>"Alright, let's begin by..."</em><br>
-    • <em>"Shall we start with..."</em><br>
+    • <em>"Alright, we’re here to discuss [whether our school should serve plant-based meats in the canteen on Green Mondays]."</em><br>
+    • <em>"Maybe we can start by talking about [why plant-based meats are becoming so popular these days]."</em><br>
     用於開始討論的策略，幫助引導話題方向。<br><br>
 
     <strong>2. Maintaining Discussion (維持討論)</strong><br>
@@ -459,7 +458,6 @@ def generate_dialogue_deeper(text: str) -> Dialogue:
     - Provide the English word/phrase
     - Give the Traditional Chinese translation (繁體中文)
     - Show how it was used in the dialogue with a brief example
-    - Explain its meaning or usage in Traditional Chinese
 
     Format this as an HTML table with proper structure:
     <table>
@@ -477,8 +475,8 @@ def generate_dialogue_deeper(text: str) -> Dialogue:
     
     Example format:
     <strong>1. Initiating Discussion (開始討論)</strong><br>
-    • <em>"Alright, let's begin by..."</em><br>
-    • <em>"Shall we start with..."</em><br>
+    • <em>"Alright, we’re here to discuss [whether our school should serve plant-based meats in the canteen on Green Mondays]."</em><br>
+    • <em>"Maybe we can start by talking about [why plant-based meats are becoming so popular these days]."</em><br>
     用於開始討論的策略，幫助引導話題方向。<br><br>
 
     <strong>2. Maintaining Discussion (維持討論)</strong><br>
