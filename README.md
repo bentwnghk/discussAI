@@ -12,22 +12,112 @@
 
 - **🎓 Educational Focus:** Designed specifically for Hong Kong secondary students to practice group discussion skills for HKDSE oral exams
 - **👥 4-Student Dialogues:** Generates realistic conversations between Candidates A, B, C, and D with authentic interaction patterns
-- **🗣️ Communication Strategies:** Incorporates essential discussion skills - initiating, maintaining, responding, and rephrasing ideas
+- **🗣️ Communication Strategies:** Incorporates essential discussion skills - initiating, maintaining, transitioning, responding, rephrasing, and clarifying ideas
 - **📁 Multiple Input Methods:** Upload documents (PDF, DOCX, TXT), images with OCR (JPG, JPEG, PNG), or paste discussion topics directly
 - **🤖 AI-Powered Generation:** Uses OpenAI's GPT-4.1-mini to create engaging, topic-relevant dialogues with proper brainstorming and structure
-- **🎵 Audio Narration:** High-quality text-to-speech with natural voices through Mr.🆖 AI Hub for immersive practice sessions
-- **🌐 Multi-Language Support:** Practice in English, Chinese (Traditional), or Cantonese - perfect for Hong Kong's linguistic diversity
-- **⏱️ Exam-Length Practice:** Generates 8-10 minute discussions matching typical HKDSE oral exam duration
-- **💰 Cost Transparency:** Real-time TTS cost calculation and tracking for different languages
-- **💾 Practice History:** Save and review previous discussion sessions with full transcripts and audio
+- **🎵 Audio Narration:** High-quality text-to-speech with natural voices (Nova, Alloy, Fable, Echo) through Mr.🆖 AI Hub for immersive practice sessions
+- **🌈 Color-Coded Transcripts:** Each candidate's dialogue is displayed in a distinct color bubble for easy reading and review
+- **📚 Comprehensive Study Notes:** Every session generates structured learning materials including:
+  - Ideas outline with Traditional Chinese translations
+  - Vocabulary table with English terms, Chinese meanings, and usage examples
+  - Communication strategies with HKDSE-relevant patterns and examples
+- **⏱️ Exam-Length Practice:** Generates 6-10 minute discussions matching typical HKDSE oral exam duration
+- **🎚️ Two Dialogue Modes:**
+  - **Normal Mode:** Clear, exam-style conversations (6-7 minutes) for quick practice
+  - **Deeper Mode:** More detailed discussions with elaborations and richer vocabulary (6-8 minutes, 800-1100 words)
+- **💰 Cost Transparency:** Real-time TTS cost calculation and tracking
+- **💾 Practice History:** Save and review previous discussion sessions with full transcripts and audio in your browser
+
+## How It Works
+
+1. **Choose Input Method:**
+   - Upload HKDSE exam papers or study materials (PDF, DOCX, TXT, images)
+   - Or enter your own discussion topic directly
+
+2. **Select Dialogue Depth:**
+   - **Normal:** Standard exam-style discussions for efficient practice
+   - **Deeper:** Extended discussions with more examples and elaboration for comprehensive review
+
+3. **Enter API Key:**
+   - Get your API key from [Mr.🆖 AI Hub](https://api.mr5ai.com)
+   - Or set it as an environment variable
+
+4. **Generate & Listen:**
+   - AI generates authentic 4-student group discussion
+   - Each candidate has a unique voice (powered by OpenAI TTS)
+   - View color-coded transcript with speaker bubbles
+   - Review comprehensive study notes below the transcript
+
+5. **Review History:**
+   - All sessions are saved in your browser
+   - Access previous discussions anytime from the Archives section
+
+## Output Components
+
+Every generation includes:
+
+### 🎙️ Audio Discussion
+- Authentic HKDSE-style group discussion
+- 4 distinct AI voices (Nova, Alloy, Fable, Echo)
+- 6-10 minutes duration matching real exam length
+- Natural conversation flow with proper pacing
+
+### 📃 Color-Coded Transcript
+- Speaker bubbles in distinct colors:
+  - Candidate A: Light Blue
+  - Candidate B: Light Yellow
+  - Candidate C: Light Green
+  - Candidate D: Light Pink
+- Easy to follow and review
+
+### 📚 Study Notes (English + Traditional Chinese)
+
+**1. Ideas Section (💡 討論要點)**
+- Structured outline of main discussion points
+- Shows how each question prompt was addressed
+- Traditional Chinese translations for all key concepts
+- Clear hierarchy with main points and sub-points
+
+**2. Language Section (📖 語言學習)**
+- 10-15 useful vocabulary words from the dialogue
+- English terms with Traditional Chinese translations
+- Usage examples from the actual discussion
+- Formatted as an easy-to-read table
+
+**3. Communication Strategies Section (💬 溝通策略)**
+- 6-10 interaction strategies demonstrated in the dialogue
+- Real examples from the generated discussion
+- Traditional Chinese explanations
+- HKDSE-relevant patterns including:
+  - Initiating discussion (開始討論)
+  - Maintaining discussion (維持討論)
+  - Transitioning between topics (轉換話題)
+  - Responding and agreeing/disagreeing (回應及表達同意/不同意)
+  - Asking for clarification (要求澄清)
+  - Rephrasing (重新表述)
+  - Summarizing (總結)
+  - Elaborating with examples (舉例說明) - in Deeper mode
+  - Building on others' ideas (延伸他人想法) - in Deeper mode
 
 ## Demo Examples
 
 The project includes sample HKDSE exam materials:
-- **DSE 2019 Paper 4 Set 2.2.png** - Sample group discussion exam paper for practice
-- **DSE 2023 Paper 4 Set 1.1.png** - Additional HKDSE oral exam materials
+
+- **DSE 2023 Paper 4 Set 1.2.png** - Sample group discussion exam paper for practice
+- **DSE 2024 Paper 4 Set 5.2.png** - Additional HKDSE oral exam materials
 
 These examples demonstrate how to transform exam topics into interactive group discussions for oral practice.
+
+## Dialogue Modes Comparison
+
+| Feature | Normal Mode | Deeper Mode |
+|---------|-------------|-------------|
+| Duration | 6-7 minutes | 6-8 minutes |
+| Word Count | ~700-900 words | ~800-1100 words |
+| Detail Level | Clear, focused | More elaboration |
+| Examples | Key examples | Multiple examples per point |
+| Best For | Quick practice, time efficiency | Comprehensive review, vocabulary building |
+| Learning Notes | 6-8 strategies | 8-10 strategies |
 
 ## Installation
 
@@ -39,140 +129,119 @@ These examples demonstrate how to transform exam topics into interactive group d
 ### Quick Setup
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/bentwnghk/discussAI.git
    cd discussAI
    ```
 
 2. **Install dependencies:**
+
    ```bash
    uv sync
    ```
 
 3. **Environment Setup:**
+
    - Get an API key from [Mr.🆖 AI Hub](https://api.mr5ai.com)
    - Set environment variables:
-     ```bash
-     export OPENAI_API_KEY="your-api-key-here"
-     export OPENAI_BASE_URL="https://api.mr5ai.com/v1"  # Mr.🆖 AI Hub endpoint
-     ```
+
+   ```bash
+   export OPENAI_API_KEY="your-api-key-here"
+   export OPENAI_BASE_URL="https://api.mr5ai.com/v1"  # Mr.🆖 AI Hub endpoint
+   export OPENAI_MODEL="gpt-4.1-mini"  # Optional, defaults to gpt-4.1-mini
+   ```
+
    - Optional: Configure Sentry for error monitoring:
-     ```bash
-     export SENTRY_DSN="your-sentry-dsn"
-     ```
+
+   ```bash
+   export SENTRY_DSN="your-sentry-dsn"  # Optional
+   ```
 
 ## Usage
 
-### Quick Start
+### Run the Application
 
-1. **Launch the Application:**
-   ```bash
-   uv run python main.py
-   ```
-   The Gradio interface will open in your browser at http://localhost:8000
+```bash
+# Using uv (recommended)
+uv run python main.py
 
-2. **Generate Group Discussions:**
-   - **Upload HKDSE Materials:** Use sample exam papers or upload your own study materials (PDF, DOCX, TXT, or images)
-   - **Enter Discussion Topics:** Paste exam topics or practice questions directly
-   - **Select Language:** Choose English, Chinese (Traditional), or Cantonese for practice
-   - **Enter API Key:** Add your Mr.🆖 AI Hub API key (auto-saved to browser)
-   - **Click "Generate Discussion"**
-
-3. **Practice & Review:**
-   - **Listen to Audio:** Hear realistic 4-student discussions with natural conversation flow
-   - **Study Transcripts:** Review dialogue structure and communication strategies
-   - **Track Costs:** Monitor TTS expenses for different languages
-   - **Build Practice History:** Save and revisit previous sessions for continued improvement
-
-### Input Methods
-
-#### 1. HKDSE Study Materials
-- **PDF:** Exam papers, study guides, and practice materials
-- **DOCX:** Word documents with discussion topics and questions
-- **TXT:** Practice questions and topic outlines
-- **Images:** Scanned exam papers and study materials (JPG/PNG with OCR)
-
-#### 2. Direct Topic Input
-- **Discussion Topics:** Paste exam questions or practice topics directly
-- **Custom Scenarios:** Create your own discussion situations
-- **Text Length:** Supports comprehensive topics for 8-10 minute dialogues
-
-#### 3. Educational Content
-- **Study Materials:** Convert any educational content into discussion practice
-- **Exam Questions:** Transform test questions into interactive group discussions
-- **Practice Scenarios:** Create realistic oral exam situations
-
-### Language Options
-
-Perfect for Hong Kong's multilingual environment:
-
-- **English:** Practice for HKDSE English Language Paper 4 (School-based Assessment)
-- **Chinese (繁體):** Traditional Chinese discussions for Chinese Language oral exams
-- **Cantonese:** Native Hong Kong Cantonese for authentic local language practice
-
-Each language includes culturally appropriate communication strategies and exam-relevant vocabulary.
-
-## Architecture
-
-**Designed for Educational Excellence:**
-
-- **Frontend:** Intuitive Gradio web interface optimized for student learning
-- **Backend:** FastAPI server with robust async processing for reliable generation
-- **AI Engine:** OpenAI GPT-4.1-mini specialized for educational dialogue creation
-- **Voice Synthesis:** Premium TTS through Mr.🆖 AI Hub with multi-language support
-- **Storage:** Browser-based history system for tracking practice progress
-- **Deployment:** Production-ready with Docker support for institutional use
-
-## Educational Investment
-
-**Transparent Pricing for Quality Learning:**
-
-TTS costs vary by language and are clearly displayed after each generation:
-- **English:** ~$0.15 per 1M characters (standard rate)
-- **Chinese:** ~$0.30 per 1M characters (2x multiplier for Traditional Chinese)
-- **Cantonese:** ~$0.75 per 1M characters (8x multiplier for native Hong Kong Cantonese)
-
-*Typical 8-10 minute discussion: $0.05-0.25 depending on language choice*
-
-## Project Structure
-
-```
-.
-├── main.py              # Main application with AI dialogue generation
-├── description.md        # Educational UI descriptions and messaging
-├── head.html             # Advanced browser features for practice history
-├── static/               # Web assets (logo, educational icons)
-├── examples/             # HKDSE sample papers for demonstration
-├── pyproject.toml        # Educational AI and web framework dependencies
-├── uv.lock              # Locked dependency versions
-├── Dockerfile           # Container for institutional deployment
-├── docker-compose.yml   # Complete deployment configuration
-├── LICENSE              # Apache 2.0 License
-└── README.md            # Educational project documentation
+# Or with standard Python
+python main.py
 ```
 
-## Configuration
+The application will start on `http://0.0.0.0:8000`
 
-### Environment Variables
+### Using the Web Interface
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `OPENAI_API_KEY` | Mr.🆖 AI Hub API key | Yes |
-| `OPENAI_BASE_URL` | Mr.🆖 AI Hub endpoint URL | Yes |
-| `SENTRY_DSN` | Sentry monitoring DSN | No |
+1. Open your browser to `http://localhost:8000`
+2. Choose your input method:
+   - **Upload Files:** Drag and drop HKDSE papers or study materials
+   - **Enter Topic:** Type or paste discussion topics directly
+3. Select dialogue depth (Normal or Deeper)
+4. Enter your Mr.🆖 AI Hub API key (if not set in environment)
+5. Click "Generate Discussion with Audio and Study Notes"
+6. Listen to the audio, read the color-coded transcript, and review study notes
+7. Access previous sessions in the Archives section
 
-### Custom API Endpoints
+## Technical Features
 
-The application is designed to work with Mr.🆖 AI Hub compatible endpoints. Set `OPENAI_BASE_URL` to:
-- Production: `https://api.mr5ai.com/v1`
-- Local: `http://localhost:3000/v1` (if running locally)
+- **Concurrent Audio Generation:** Uses ThreadPoolExecutor for parallel TTS processing (10 workers)
+- **Retry Mechanisms:** Built-in retry logic with exponential backoff for API calls (3 attempts)
+- **Multiple File Format Support:**
+  - PDF: Text extraction with PyPDF
+  - DOCX: Document parsing with python-docx
+  - Images: OCR with OpenAI Vision API (GPT-4.1-mini)
+  - TXT: Direct text input
+- **Cost Tracking:** Real-time TTS cost calculation in HKD
+- **Browser-Based Storage:** Practice history saved in localStorage
+- **Automatic Cleanup:** Old temporary audio files removed after 24 hours
+- **Timezone Support:** Timestamps in Hong Kong timezone (Asia/Hong_Kong)
+- **Error Handling:** Comprehensive error handling with detailed logging via Loguru
+
+## API Integration
+
+This application uses Mr.🆖 AI Hub's OpenAI-compatible API:
+
+- **Dialogue Generation:** GPT-4.1-mini with structured output (Pydantic models)
+- **Text-to-Speech:** OpenAI TTS-1 with 4 distinct voices
+- **Vision OCR:** GPT-4.1-mini vision model for image text extraction
+
+## File Structure
+
+```
+discussAI/
+├── main.py                 # Main application file
+├── description.md          # App description for UI
+├── footer.md              # Footer content for UI
+├── head.html              # Custom HTML/JS for browser storage
+├── examples/              # Sample HKDSE exam papers
+│   ├── DSE 2023 Paper 4 Set 1.2.png
+│   └── DSE 2024 Paper 4 Set 5.2.png
+├── gradio_cached_files/   # Temporary audio files
+└── pyproject.toml         # Dependencies
+```
+
+## Dependencies
+
+Key dependencies:
+- `gradio` - Web UI framework
+- `openai` - OpenAI API client
+- `promptic` - LLM decorator for structured outputs
+- `pydantic` - Data validation and structured models
+- `pypdf` - PDF text extraction
+- `python-docx` - DOCX document parsing
+- `tenacity` - Retry mechanisms
+- `fastapi` - Web framework
+- `loguru` - Logging
+- `pytz` - Timezone support
 
 ## Troubleshooting
 
 ### Common Issues for Students & Teachers
 
 - **API Key Issues:** Ensure your Mr.🆖 AI Hub key is valid and has sufficient credits for TTS generation
-- **Study Material Upload:** Check that HKDSE papers and study materials are in supported formats (PDF, DOCX, TXT, JPG, PNG)
+- **Study Material Upload:** Check that HKDSE papers and study materials are in supported formats (PDF, DOCX, TXT, JPG, JPEG, PNG)
 - **Content Extraction:** Some scanned documents might need better quality images for accurate text extraction
 - **Generation Timeouts:** Complex topics might take longer - the app has retry mechanisms built-in
 - **Audio Quality:** Ensure stable internet connection for consistent TTS generation
@@ -200,6 +269,4 @@ Licensed under the Apache License 2.0. See [LICENSE](LICENSE) for details.
 
 ---
 
-<div align="center">
-  <strong>Empower Hong Kong students with AI-enhanced speaking practice</strong> 🇭🇰🗣️
-</div>
+**Made with ❤️ for Hong Kong students preparing for HKDSE oral exams**
