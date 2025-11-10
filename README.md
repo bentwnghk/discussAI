@@ -1,7 +1,7 @@
 # Mr.🆖 DiscussAI 🎙️🎧
 
 <p align="center">
-  <strong>AI Language Tutor for Hong Kong Students 🇭🇰</strong>
+  <strong>AI Speaking Tutor for Hong Kong Students 🇭🇰</strong>
 </p>
 
 <p align="center">
@@ -14,8 +14,8 @@
 - **👥 4-Student Dialogues:** Generates realistic conversations between Candidates A, B, C, and D with authentic interaction patterns
 - **🗣️ Communication Strategies:** Incorporates essential discussion skills - initiating, maintaining, transitioning, responding, rephrasing, and clarifying ideas
 - **📁 Multiple Input Methods:** Upload documents (PDF, DOCX, TXT), images with OCR (JPG, JPEG, PNG), or paste discussion topics directly
-- **🤖 AI-Powered Generation:** Uses OpenAI's GPT-4.1-mini to create engaging, topic-relevant dialogues with proper brainstorming and structure
-- **🎵 Audio Narration:** High-quality text-to-speech with natural voices (Nova, Alloy, Fable, Echo) through Mr.🆖 AI Hub for immersive practice sessions
+- **🤖 AI-Powered Generation:** Uses OpenAI's top-tier LLMs to create engaging, topic-relevant dialogues with proper brainstorming and structure
+- **🎵 Audio Narration:** High-quality text-to-speech with natural voices through Mr.🆖 AI Hub for immersive practice sessions
 - **🌈 Color-Coded Transcripts:** Each candidate's dialogue is displayed in a distinct color bubble for easy reading and review
 - **📚 Comprehensive Study Notes:** Every session generates structured learning materials including:
   - Ideas outline with Traditional Chinese translations
@@ -58,7 +58,7 @@ Every generation includes:
 
 ### 🎙️ Audio Discussion
 - Authentic HKDSE-style group discussion
-- 4 distinct AI voices (Nova, Alloy, Fable, Echo)
+- 4 distinct AI voices
 - 6-10 minutes duration matching real exam length
 - Natural conversation flow with proper pacing
 
@@ -149,7 +149,7 @@ These examples demonstrate how to transform exam topics into interactive group d
    ```bash
    export OPENAI_API_KEY="your-api-key-here"
    export OPENAI_BASE_URL="https://api.mr5ai.com/v1"  # Mr.🆖 AI Hub endpoint
-   export OPENAI_MODEL="gpt-4.1-mini"  # Optional, defaults to gpt-4.1-mini
+   export OPENAI_MODEL="gpt-5"  # Optional, defaults to gpt-5
    ```
 
    - Optional: Configure Sentry for error monitoring:
@@ -203,7 +203,7 @@ The application will start on `http://0.0.0.0:8000`
 
 This application uses Mr.🆖 AI Hub's OpenAI-compatible API:
 
-- **Dialogue Generation:** GPT-4.1-mini with structured output (Pydantic models)
+- **Dialogue Generation:** GPT-5 with structured output (Pydantic models)
 - **Text-to-Speech:** OpenAI TTS-1 with 4 distinct voices
 - **Vision OCR:** GPT-4.1-mini vision model for image text extraction
 
