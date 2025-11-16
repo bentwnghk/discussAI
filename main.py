@@ -859,173 +859,6 @@ def generate_audio(
     return temp_file_path, html_transcript, json_data_string, temp_file_path # 4th item for hidden gr.File
 
 
-def generate_word_document(transcript_html: str, audio_url: str, title: str) -> str:
-    """
-    Generates a Word document containing the dialogue transcript, study notes, and audio URL.
-    Returns the path to the generated Word document.
-    """
-    from docx import Document
-    from docx.shared import Inches, Pt
-    from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
-    from docx.oxml.shared import OxmlElement, qn
-    import re
-    from bs4 import BeautifulSoup
-    
-    # Create a new Document
-    doc = Document()
-    
-    # Add title
-    title_paragraph = doc.add_heading(title, level=1)
-    title_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-    
-    # Add a separator
-    doc.add_paragraph("=" * 50)
-    
-    # Add audio URL section
-    doc.add_heading("Audio Download Link", level=2)
-    audio_para = doc.add_paragraph()
-    audio_para.add_run("Audio URL: ").bold = True
-    audio_para.add_run(audio_url)
-    
-    # Add another separator
-    doc.add_paragraph("=" * 50)
-    
-    # Parse HTML transcript to extract content
-    soup = BeautifulSoup(transcript_html, 'html.parser')
-    
-    # Add transcript section
-    doc.add_heading("Dialogue Transcript", level=2)
-    
-    # Find transcript container
-    transcript_container = soup.find('div', class_='transcript-container')
-    if transcript_container:
-        # Extract transcript bubbles
-        transcript_bubbles = transcript_container.find_all('div', class_='transcript-bubble')
-        
-        for bubble in transcript_bubbles:
-            # Extract speaker and text
-            bubble_text = bubble.get_text()
-            if ':' in bubble_text:
-                speaker, text = bubble_text.split(':', 1)
-                
-                # Add speaker with bold formatting
-                speaker_para = doc.add_paragraph()
-                speaker_run = speaker_para.add_run(speaker.strip() + ":")
-                speaker_run.bold = True
-                
-                # Add dialogue text
-                text_para = doc.add_paragraph(text.strip())
-                text_para.left_indent = Inches(0.25)
-                
-                # Add some spacing
-                doc.add_paragraph()
-    
-    # Add study notes section
-    learning_notes_container = soup.find('div', class_='learning-notes-container')
-    if learning_notes_container:
-        # Add separator before study notes
-        doc.add_paragraph("=" * 50)
-        doc.add_heading("Study Notes", level=1)
-        
-        # Extract ideas section
-        ideas_section = learning_notes_container.find('h3', string=lambda text: text and 'Ideas' in text)
-        if ideas_section:
-            doc.add_heading("💡 Ideas 討論要點", level=2)
-            ideas_div = ideas_section.find_next('div', class_='notes-section')
-            if ideas_div:
-                ideas_content = ideas_div.get_text()
-                for line in ideas_content.split('\n'):
-                    if line.strip():
-                        doc.add_paragraph(line.strip())
-        
-        # Extract language section
-        language_section = learning_notes_container.find('h3', string=lambda text: text and 'Language' in text)
-        if language_section:
-            doc.add_heading("📖 Language 語言學習", level=2)
-            language_div = language_section.find_next('div', class_='notes-section')
-            if language_div:
-                # Try to extract table
-                table = language_div.find('table')
-                if table:
-                    # Create Word table
-                    word_table = doc.add_table(rows=1, cols=3)
-                    word_table.style = 'Table Grid'
-                    hdr_cells = word_table.rows[0].cells
-                    hdr_cells[0].text = 'English'
-                    hdr_cells[1].text = '中文'
-                    hdr_cells[2].text = 'Usage Example'
-                    
-                    # Extract table rows
-                    for row in table.find_all('tr')[1:]:  # Skip header row
-                        cells = row.find_all('td')
-                        if len(cells) >= 3:
-                            row_cells = word_table.add_row().cells
-                            row_cells[0].text = cells[0].get_text().strip()
-                            row_cells[1].text = cells[1].get_text().strip()
-                            row_cells[2].text = cells[2].get_text().strip()
-                else:
-                    # If no table, add as paragraph
-                    language_content = language_div.get_text()
-                    for line in language_content.split('\n'):
-                        if line.strip():
-                            doc.add_paragraph(line.strip())
-        
-        # Extract communication strategies section
-        strategies_section = learning_notes_container.find('h3', string=lambda text: text and 'Communication' in text)
-        if strategies_section:
-            doc.add_heading("💬 Communication Strategies 溝通策略", level=2)
-            strategies_div = strategies_section.find_next('div', class_='notes-section')
-            if strategies_div:
-                strategies_content = strategies_div.get_text()
-                for line in strategies_content.split('\n'):
-                    if line.strip():
-                        doc.add_paragraph(line.strip())
-    
-    # Add footer with generation info
-    doc.add_paragraph("=" * 50)
-    footer_para = doc.add_paragraph()
-    footer_para.add_run("Generated by Mr.🆖 DiscussAI on ").italic = True
-    from datetime import datetime
-    import pytz
-    hk_tz = pytz.timezone('Asia/Hong_Kong')
-    hk_now = datetime.now(hk_tz)
-    footer_para.add_run(hk_now.strftime('%Y-%m-%d %H:%M:%S')).italic = True
-    
-    # Save the document
-    temporary_directory = "./gradio_cached_files/tmp/"
-    os.makedirs(temporary_directory, exist_ok=True)
-    
-    doc_filename = f"discussion_notes_{int(time.time())}.docx"
-    doc_path = os.path.join(temporary_directory, doc_filename)
-    
-    doc.save(doc_path)
-    logger.info(f"Word document saved to: {doc_path}")
-    
-    return doc_path
-
-
-def download_word_document(transcript_html: str, audio_file_path: str, title: str) -> str:
-    """
-    Creates and returns a Word document for download.
-    This function is called when the download button is clicked.
-    """
-    # Get the audio URL from the file path
-    try:
-        # Convert the audio file path to a URL that can be accessed by the browser
-        temp_file_path_obj = Path(audio_file_path)
-        app_root = Path.cwd()
-        relative_temp_path = temp_file_path_obj.relative_to(app_root)
-        audio_url = f"/file={relative_temp_path}"
-    except ValueError:
-        # Fallback if relative_to fails
-        audio_url = f"/file={audio_file_path}"
-    
-    # Generate the Word document
-    doc_path = generate_word_document(transcript_html, audio_url, title)
-    
-    return doc_path
-
-
 # --- Gradio UI Definition ---
 
 allowed_extensions = [
@@ -1107,9 +940,6 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
     with gr.Column():
         audio_output = gr.Audio(label="🔊 Audio", type="filepath", elem_id="podcast_audio_player") # Keep existing elem_id
         transcript_output = gr.HTML(label="📃 Transcript", elem_id="podcast_transcript_display") # Keep existing elem_id
-        
-        # Add download Word document button
-        download_word_btn = gr.Button("📄 Download Word Document", variant="secondary", elem_id="download_word_btn")
 
     with gr.Accordion("📜 Archives (Stored in your browser)", open=False): # Keep existing Accordion
         # This HTML component will be populated by JavaScript from head.html
@@ -1163,14 +993,6 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
         ],
         outputs=[audio_output, transcript_output, js_trigger_data_textbox, temp_audio_file_output_for_url],
         api_name="generate_audio"
-    )
-    
-    # Connect download button to Word document generation function
-    download_word_btn.click(
-        fn=download_word_document,
-        inputs=[transcript_output, temp_audio_file_output_for_url, js_trigger_data_textbox],
-        outputs=[gr.File(label="📄 Word Document", visible=True)],
-        api_name="download_word"
     )
 
     gr.Examples(
