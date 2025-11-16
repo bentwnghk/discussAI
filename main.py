@@ -967,28 +967,88 @@ def generate_word_document(transcript_html: str, title: str = "Group Discussion 
                                     if cell.name == 'th':
                                         word_table.cell(i, j).paragraphs[0].runs[0].bold = True
                     else:
-                        # Handle regular text content
-                        content_text = section_content.get_text()
-                        # Split by paragraphs and add them
-                        paragraphs = content_text.split('\n')
-                        for para_text in paragraphs:
-                            if para_text.strip():
-                                # Handle bullet points
-                                if para_text.strip().startswith('•'):
-                                    para = doc.add_paragraph(para_text.strip(), style='List Bullet')
-                                # Handle numbered lists
-                                elif para_text.strip() and para_text.strip()[0].isdigit() and '.' in para_text.strip()[:3]:
-                                    para = doc.add_paragraph(para_text.strip(), style='List Number')
+                        # Handle regular text content with better line break processing
+                        # First, try to preserve HTML structure
+                        html_content = str(section_content)
+                        
+                        # Process HTML content to preserve formatting and line breaks
+                        from bs4 import BeautifulSoup
+                        content_soup = BeautifulSoup(html_content, 'html.parser')
+                        
+                        # Process each element in the content
+                        for element in content_soup.find_all(['p', 'div', 'br', 'strong', 'em']):
+                            if element.name == 'br':
+                                # Add a line break
+                                doc.add_paragraph()  # Empty paragraph for spacing
+                            elif element.name in ['p', 'div']:
+                                # Process paragraph or div content
+                                text = element.get_text().strip()
+                                if text:
+                                    # Handle bullet points
+                                    if text.startswith('•'):
+                                        para = doc.add_paragraph(text, style='List Bullet')
+                                    # Handle numbered lists
+                                    elif text and text[0].isdigit() and '.' in text[:3]:
+                                        para = doc.add_paragraph(text, style='List Number')
+                                    else:
+                                        para = doc.add_paragraph(text)
+                                    
+                                    # Apply formatting for emphasis
+                                    strong_elements = element.find_all('strong')
+                                    em_elements = element.find_all('em')
+                                    
+                                    # If there are formatting tags, we need to handle them specially
+                                    if strong_elements or em_elements:
+                                        # Clear the paragraph and rebuild with formatted runs
+                                        para.clear()
+                                        current_text = str(element)
+                                        
+                                        # Simple approach: add the text with basic formatting
+                                        if strong_elements:
+                                            for strong in strong_elements:
+                                                strong_text = strong.get_text()
+                                                run = para.add_run(strong_text)
+                                                run.bold = True
+                                        elif em_elements:
+                                            for em in em_elements:
+                                                em_text = em.get_text()
+                                                run = para.add_run(em_text)
+                                                run.italic = True
+                                        else:
+                                            para.add_run(text)
+                            elif element.name == 'strong':
+                                # Handle standalone strong elements
+                                text = element.get_text().strip()
+                                if text:
+                                    para = doc.add_paragraph()
+                                    run = para.add_run(text)
+                                    run.bold = True
+                            elif element.name == 'em':
+                                # Handle standalone em elements
+                                text = element.get_text().strip()
+                                if text:
+                                    para = doc.add_paragraph()
+                                    run = para.add_run(text)
+                                    run.italic = True
+                        
+                        # If no HTML structure was found, fall back to text processing
+                        if not content_soup.find_all(['p', 'div', 'br', 'strong', 'em']):
+                            content_text = section_content.get_text()
+                            # Split by line breaks and add them with proper spacing
+                            lines = content_text.split('\n')
+                            for line in lines:
+                                if line.strip():
+                                    # Handle bullet points
+                                    if line.strip().startswith('•'):
+                                        para = doc.add_paragraph(line.strip(), style='List Bullet')
+                                    # Handle numbered lists
+                                    elif line.strip() and line.strip()[0].isdigit() and '.' in line.strip()[:3]:
+                                        para = doc.add_paragraph(line.strip(), style='List Number')
+                                    else:
+                                        para = doc.add_paragraph(line.strip())
                                 else:
-                                    para = doc.add_paragraph(para_text.strip())
-                                
-                                # Apply formatting for emphasis
-                                for run in para.runs:
-                                    # Check for strong/em tags in original HTML and apply formatting
-                                    if any(tag in section_content.decode_contents() for tag in ['<strong>', '<em>']):
-                                        # This is a simplified approach - in a real implementation,
-                                        # you'd need more sophisticated parsing to preserve formatting
-                                        pass
+                                    # Add empty paragraph for line breaks
+                                    doc.add_paragraph()
         
         # Save the document
         temporary_directory = "./gradio_cached_files/tmp/"
