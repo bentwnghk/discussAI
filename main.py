@@ -870,6 +870,10 @@ def generate_word_document(transcript_html: str, title: str = "Group Discussion 
     Returns the path to the generated Word document.
     """
     try:
+        import re
+        from datetime import datetime
+        from bs4 import BeautifulSoup
+        
         # Create a new Word document
         doc = docx.Document()
         
@@ -878,14 +882,12 @@ def generate_word_document(transcript_html: str, title: str = "Group Discussion 
         title_para.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
         
         # Add timestamp
-        from datetime import datetime
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         timestamp_para = doc.add_paragraph(f"Generated on: {timestamp}")
         timestamp_para.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
         doc.add_paragraph()  # Add a blank line
         
         # Parse the HTML to extract transcript and learning notes
-        from bs4 import BeautifulSoup
         soup = BeautifulSoup(transcript_html, 'html.parser')
         
         # Find transcript container
@@ -941,8 +943,8 @@ def generate_word_document(transcript_html: str, title: str = "Group Discussion 
             for section in sections:
                 # Get section heading
                 section_heading = section.find('h3')
+                heading_text = section_heading.get_text() if section_heading else ""
                 if section_heading:
-                    heading_text = section_heading.get_text()
                     doc.add_heading(heading_text, level=2)
                 
                 # Process section content
@@ -954,165 +956,110 @@ def generate_word_document(transcript_html: str, title: str = "Group Discussion 
                         for table in tables:
                             # Create Word table
                             rows = table.find_all('tr')
-                            word_table = doc.add_table(rows=len(rows), cols=len(rows[0].find_all(['th', 'td'])))
-                            word_table.style = 'Table Grid'
-                            word_table.alignment = WD_TABLE_ALIGNMENT.CENTER
-                            
-                            for i, row in enumerate(rows):
-                                cells = row.find_all(['th', 'td'])
-                                for j, cell in enumerate(cells):
-                                    word_table.cell(i, j).text = cell.get_text().strip()
-                                    
-                                    # Make header cells bold
-                                    if cell.name == 'th':
-                                        word_table.cell(i, j).paragraphs[0].runs[0].bold = True
-                    else:
-                        # Handle regular text content with better line break processing
-                        # Get the raw HTML content
-                        html_content = str(section_content)
-                        
-                        # Process HTML content to preserve formatting and line breaks
-                        from bs4 import BeautifulSoup
-                        import re  # Import re here to make it available throughout the function
-                        content_soup = BeautifulSoup(html_content, 'html.parser')
-                        
-                        # First, let's try to process the content more intelligently
-                        # Get all text content and look for patterns
-                        full_text = section_content.get_text()
-                        
-                        # Check if this is the Communication Strategies section
-                        if "Communication Strategies" in heading_text or "溝通策略" in heading_text:
-                            # Special handling for Communication Strategies
-                            # Split by numbered strategy patterns
-                            strategy_pattern = r'(\d+\.\s+[^:]+:?\s*[^.]*\.?)'
-                            strategies = re.split(strategy_pattern, full_text)
-                            
-                            # Clean up the strategies list
-                            strategies = [s.strip() for s in strategies if s.strip()]
-                            
-                            # Process each strategy
-                            for i, strategy in enumerate(strategies):
-                                if strategy:
-                                    # Check if it starts with a number
-                                    if re.match(r'^\d+\.', strategy):
-                                        # Extract the strategy name (number and title)
-                                        strategy_title = re.match(r'^\d+\.\s+[^:]+:', strategy)
-                                        if strategy_title:
-                                            title_text = strategy_title.group().strip()
-                                            # Add the numbered strategy title
-                                            para = doc.add_paragraph(title_text, style='List Number')
-                                            run = para.runs[0]
-                                            run.bold = True
-                                            
-                                            # Extract the rest of the content (examples and explanations)
-                                            rest_content = strategy[len(title_text):].strip()
-                                            if rest_content:
-                                                # Split by bullet points or examples
-                                                example_pattern = r'(•\s+[^•]*|"[^"]*"|用於[^。]*。?)'
-                                                examples = re.findall(example_pattern, rest_content)
-                                                
-                                                for example in examples:
-                                                    if example.strip():
-                                                        # Add as indented bullet point
-                                                        example_para = doc.add_paragraph(example.strip(), style='List Bullet')
-                                                        example_para.paragraph_format.left_indent = Inches(0.25)
-                                        else:
-                                            # Fallback for strategy without proper format
-                                            para = doc.add_paragraph(strategy, style='List Number')
-                                    else:
-                                        # This might be a continuation, add it as an indented bullet
-                                        continuation_para = doc.add_paragraph(strategy.strip(), style='List Bullet')
-                                        continuation_para.paragraph_format.left_indent = Inches(0.25)
-                        
-                        else:
-                            # Handle other sections (like Ideas)
-                            # Look for <strong> tags which might indicate questions
-                            strong_tags = content_soup.find_all('strong')
-                            if strong_tags:
-                                for strong in strong_tags:
-                                    text = strong.get_text().strip()
-                                    if text:
-                                        # Add the question
-                                        para = doc.add_paragraph()
-                                        run = para.add_run(text)
-                                        run.bold = True
-                                        
-                                        # Look for content after this strong tag
-                                        next_sibling = strong.next_sibling
-                                        content_after = ""
-                                        
-                                        # Collect all text content after this strong tag until the next strong tag
-                                        while next_sibling and next_sibling.name != 'strong':
-                                            if hasattr(next_sibling, 'get_text'):
-                                                content_after += next_sibling.get_text() + " "
-                                            elif hasattr(next_sibling, 'string'):
-                                                content_after += next_sibling.string + " "
-                                            next_sibling = next_sibling.next_sibling
-                                        
-                                        if content_after.strip():
-                                            # Process the content after the question
-                                            content_text = content_after.strip()
-                                            
-                                            # Split by bullet points
-                                            bullet_points = re.split(r'(•\s+[^•]*)', content_text)
-                                            
-                                            for i, point in enumerate(bullet_points):
-                                                if point.strip():
-                                                    if point.startswith('•'):
-                                                        # Remove the redundant dot and add as regular paragraph
-                                                        clean_point = point.strip()[1:].strip()
-                                                        main_para = doc.add_paragraph(clean_point)
-                                                        
-                                                        # Look for sub-points (indented content)
-                                                        # Check if there are indented parts in the original HTML
-                                                        next_sibling_check = strong.next_sibling
-                                                        while next_sibling_check and next_sibling_check.name != 'strong':
-                                                            if hasattr(next_sibling_check, 'get_text') and '&nbsp;' in str(next_sibling_check):
-                                                                # This might be an indented sub-point
-                                                                sub_text = next_sibling_check.get_text().strip()
-                                                                if sub_text and sub_text.startswith('-'):
-                                                                    sub_para = doc.add_paragraph(sub_text[1:].strip(), style='List Bullet')
-                                                                    sub_para.paragraph_format.left_indent = Inches(0.5)
-                                                            next_sibling_check = next_sibling_check.next_sibling
-                                                    else:
-                                                        # Regular content
-                                                        content_para = doc.add_paragraph(point.strip())
-                            
-                            else:
-                                # Fallback: process by <br> tags
-                                br_tags = content_soup.find_all('br')
-                                if br_tags:
-                                    # Split content by <br> tags
-                                    parts = str(content_soup).split('<br/>')
-                                    for part in parts:
-                                        part_soup = BeautifulSoup(part, 'html.parser')
-                                        text = part_soup.get_text().strip()
-                                        if text:
-                                            # Handle bullet points (remove redundant dot)
-                                            if text.startswith('•'):
-                                                clean_text = text[1:].strip()  # Remove the bullet
-                                                para = doc.add_paragraph(clean_text)
-                                            # Handle numbered lists
-                                            elif text and text[0].isdigit() and '.' in text[:3]:
-                                                para = doc.add_paragraph(text, style='List Number')
-                                            else:
-                                                para = doc.add_paragraph(text)
+                            if rows and rows[0].find_all(['th', 'td']):
+                                word_table = doc.add_table(rows=len(rows), cols=len(rows[0].find_all(['th', 'td'])))
+                                word_table.style = 'Table Grid'
+                                word_table.alignment = WD_TABLE_ALIGNMENT.CENTER
                                 
-                                # Final fallback: text processing
-                                else:
-                                    # Split by double line breaks which might indicate separate points
-                                    paragraphs = full_text.split('\n\n')
-                                    for para_text in paragraphs:
-                                        if para_text.strip():
-                                            # Handle bullet points (remove redundant dot)
-                                            if para_text.strip().startswith('•'):
-                                                clean_text = para_text.strip()[1:].strip()
-                                                para = doc.add_paragraph(clean_text)
-                                            # Handle numbered lists
-                                            elif para_text.strip() and para_text.strip()[0].isdigit() and '.' in para_text.strip()[:3]:
-                                                para = doc.add_paragraph(para_text.strip(), style='List Number')
-                                            else:
-                                                para = doc.add_paragraph(para_text.strip())
+                                for i, row in enumerate(rows):
+                                    cells = row.find_all(['th', 'td'])
+                                    for j, cell in enumerate(cells):
+                                        word_table.cell(i, j).text = cell.get_text().strip()
+                                        
+                                        # Make header cells bold
+                                        if cell.name == 'th' and word_table.cell(i, j).paragraphs[0].runs:
+                                            word_table.cell(i, j).paragraphs[0].runs[0].bold = True
+                    
+                    # Handle Communication Strategies section
+                    elif "Communication Strategies" in heading_text or "溝通策略" in heading_text:
+                        # Parse HTML content to extract strategies
+                        html_str = str(section_content)
+                        
+                        # Split by <strong> tags to find strategy titles
+                        strategy_parts = re.split(r'<strong>(\d+\.\s+[^<]+)</strong>', html_str)
+                        
+                        for i in range(1, len(strategy_parts), 2):
+                            if i < len(strategy_parts):
+                                # Strategy title
+                                strategy_title = strategy_parts[i].strip()
+                                para = doc.add_paragraph(strategy_title, style='List Number')
+                                if para.runs:
+                                    para.runs[0].bold = True
+                                
+                                # Strategy content (examples and explanations)
+                                if i + 1 < len(strategy_parts):
+                                    content = strategy_parts[i + 1]
+                                    
+                                    # Extract examples (text in <em> tags) and Chinese explanations
+                                    examples = re.findall(r'<em>"([^"]+)"</em>', content)
+                                    chinese_text = re.findall(r'用於[^<。]+。?', content)
+                                    
+                                    # Add examples as indented bullet points
+                                    for example in examples:
+                                        example_para = doc.add_paragraph(f'"{example}"', style='List Bullet')
+                                        example_para.paragraph_format.left_indent = Inches(0.5)
+                                    
+                                    # Add Chinese explanation as indented bullet point
+                                    for chinese in chinese_text:
+                                        chinese_para = doc.add_paragraph(chinese, style='List Bullet')
+                                        chinese_para.paragraph_format.left_indent = Inches(0.5)
+                    
+                    # Handle Ideas section
+                    elif "Ideas" in heading_text or "討論要點" in heading_text:
+                        # Parse HTML content to extract questions and points
+                        html_str = str(section_content)
+                        
+                        # Split by <strong> tags to find questions
+                        question_parts = re.split(r'<strong>([^<]+)</strong>', html_str)
+                        
+                        for i in range(1, len(question_parts), 2):
+                            if i < len(question_parts):
+                                # Question title
+                                question_title = question_parts[i].strip()
+                                para = doc.add_paragraph()
+                                run = para.add_run(question_title)
+                                run.bold = True
+                                
+                                # Question content (main points and sub-points)
+                                if i + 1 < len(question_parts):
+                                    content = question_parts[i + 1]
+                                    
+                                    # Split by <br> to get individual lines
+                                    lines = re.split(r'<br\s*/?>', content)
+                                    
+                                    for line in lines:
+                                        # Clean HTML tags
+                                        clean_line = re.sub(r'<[^>]+>', '', line).strip()
+                                        clean_line = clean_line.replace('&nbsp;', ' ')
+                                        
+                                        if not clean_line:
+                                            continue
+                                        
+                                        # Check if it's a main point (starts with •)
+                                        if clean_line.startswith('•'):
+                                            # Remove the bullet and add as regular paragraph
+                                            main_point = clean_line[1:].strip()
+                                            doc.add_paragraph(main_point)
+                                        
+                                        # Check if it's a sub-point (starts with -)
+                                        elif clean_line.strip().startswith('-'):
+                                            # Remove the dash and add as indented bullet
+                                            sub_point = clean_line.strip()[1:].strip()
+                                            sub_para = doc.add_paragraph(sub_point, style='List Bullet')
+                                            sub_para.paragraph_format.left_indent = Inches(0.5)
+                                        
+                                        # Check if line has multiple spaces (indicating indentation)
+                                        elif '    ' in clean_line or clean_line.startswith('  '):
+                                            # This is likely a sub-point
+                                            sub_point = clean_line.strip()
+                                            if sub_point.startswith('-'):
+                                                sub_point = sub_point[1:].strip()
+                                            sub_para = doc.add_paragraph(sub_point, style='List Bullet')
+                                            sub_para.paragraph_format.left_indent = Inches(0.5)
+                                        
+                                        # Otherwise, it's a regular paragraph
+                                        elif clean_line:
+                                            doc.add_paragraph(clean_line)
         
         # Save the document
         temporary_directory = "./gradio_cached_files/tmp/"
