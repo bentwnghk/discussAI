@@ -864,7 +864,7 @@ def generate_audio(
     return temp_file_path, html_transcript, json_data_string, temp_file_path # 4th item for hidden gr.File
 
 
-def generate_word_document(transcript_html: str, title: str = "Group Discussion Transcript") -> str:
+def generate_word_document(transcript_html: str, title: str = "Group Discussion Notes") -> str:
     """
     Generates a Word document from the transcript and study notes HTML.
     Returns the path to the generated Word document.
@@ -1024,6 +1024,10 @@ def generate_word_document(transcript_html: str, title: str = "Group Discussion 
                         
                         for i in range(1, len(question_parts), 2):
                             if i < len(question_parts):
+                                # Add spacing before each question (except the first one)
+                                if i > 1:
+                                    doc.add_paragraph()  # Add blank line for spacing
+                                
                                 # Question title
                                 question_title = question_parts[i].strip()
                                 para = doc.add_paragraph()
@@ -1171,7 +1175,7 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
         
         # Add download button for Word document
         with gr.Row():
-            download_word_btn = gr.Button("📄 Download Transcript & Notes as Word Document", variant="secondary")
+            download_word_btn = gr.Button("📄 Download Transcript & Notes as Word Document", variant="primary")
             word_doc_output = gr.File(label="Word Document", visible=True)
 
     with gr.Accordion("📜 Archives (Stored in your browser)", open=False): # Keep existing Accordion
@@ -1235,7 +1239,7 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
         
         try:
             # Extract title from the HTML or use a default
-            title = "Group Discussion Transcript"
+            title = "Group Discussion Notes"
             
             # Generate the Word document
             doc_path = generate_word_document(transcript_html, title)
