@@ -980,9 +980,11 @@ def generate_word_document(transcript_html: str, title: str = "Group Discussion 
                         
                         for i in range(1, len(strategy_parts), 2):
                             if i < len(strategy_parts):
-                                # Strategy title
+                                # Strategy title - remove the number prefix since it's already in numbered list
                                 strategy_title = strategy_parts[i].strip()
-                                para = doc.add_paragraph(strategy_title, style='List Number')
+                                # Remove the number and dot at the beginning (e.g., "1. " -> "")
+                                strategy_title_clean = re.sub(r'^\d+\.\s+', '', strategy_title)
+                                para = doc.add_paragraph(strategy_title_clean, style='List Number')
                                 if para.runs:
                                     para.runs[0].bold = True
                                 
@@ -990,19 +992,27 @@ def generate_word_document(transcript_html: str, title: str = "Group Discussion 
                                 if i + 1 < len(strategy_parts):
                                     content = strategy_parts[i + 1]
                                     
-                                    # Extract examples (text in <em> tags) and Chinese explanations
+                                    # Extract examples (text in <em> tags)
                                     examples = re.findall(r'<em>"([^"]+)"</em>', content)
-                                    chinese_text = re.findall(r'用於[^<。]+。?', content)
                                     
                                     # Add examples as indented bullet points
                                     for example in examples:
                                         example_para = doc.add_paragraph(f'"{example}"', style='List Bullet')
                                         example_para.paragraph_format.left_indent = Inches(0.5)
                                     
-                                    # Add Chinese explanation as indented bullet point
-                                    for chinese in chinese_text:
-                                        chinese_para = doc.add_paragraph(chinese, style='List Bullet')
-                                        chinese_para.paragraph_format.left_indent = Inches(0.5)
+                                    # Extract ALL Chinese text (not just those starting with '用於')
+                                    # Remove HTML tags first
+                                    clean_content = re.sub(r'<[^>]+>', '', content)
+                                    # Find Chinese sentences (characters followed by punctuation)
+                                    chinese_sentences = re.findall(r'[\u4e00-\u9fff]+[^<\n]*[。！？]?', clean_content)
+                                    
+                                    # Add Chinese explanations as indented bullet points
+                                    for chinese in chinese_sentences:
+                                        chinese = chinese.strip()
+                                        # Skip if it's empty or just punctuation
+                                        if chinese and not re.match(r'^[。！？，、；：""''（）]+$', chinese):
+                                            chinese_para = doc.add_paragraph(chinese, style='List Bullet')
+                                            chinese_para.paragraph_format.left_indent = Inches(0.5)
                     
                     # Handle Ideas section
                     elif "Ideas" in heading_text or "討論要點" in heading_text:
