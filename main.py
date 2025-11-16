@@ -1091,7 +1091,7 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
         # Add download button for Word document
         with gr.Row():
             download_word_btn = gr.Button("📄 Download Transcript & Notes as Word Document", variant="secondary")
-            word_doc_output = gr.File(label="Word Document", visible=False)
+            word_doc_output = gr.File(label="Word Document", visible=True)
 
     with gr.Accordion("📜 Archives (Stored in your browser)", open=False): # Keep existing Accordion
         # This HTML component will be populated by JavaScript from head.html
