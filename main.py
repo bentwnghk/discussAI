@@ -973,6 +973,7 @@ def generate_word_document(transcript_html: str, title: str = "Group Discussion 
                         
                         # Process HTML content to preserve formatting and line breaks
                         from bs4 import BeautifulSoup
+                        import re  # Import re here to make it available throughout the function
                         content_soup = BeautifulSoup(html_content, 'html.parser')
                         
                         # First, let's try to process the content more intelligently
@@ -983,7 +984,6 @@ def generate_word_document(transcript_html: str, title: str = "Group Discussion 
                         if "Communication Strategies" in heading_text or "溝通策略" in heading_text:
                             # Special handling for Communication Strategies
                             # Split by numbered strategy patterns
-                            import re
                             strategy_pattern = r'(\d+\.\s+[^:]+:?\s*[^.]*\.?)'
                             strategies = re.split(strategy_pattern, full_text)
                             
