@@ -22,9 +22,14 @@ from pypdf import PdfReader
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential # tenacity is imported here
 from mimetypes import guess_type
 import docx # Added for DOCX support
+from docx.shared import Pt, RGBColor, Inches
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.oxml.shared import OxmlElement, qn
 import pytz
 import requests
 import html
+from bs4 import BeautifulSoup
 
 OPENAI_VOICE_MAPPINGS = {
     "Candidate A": "nova",
@@ -859,6 +864,148 @@ def generate_audio(
     return temp_file_path, html_transcript, json_data_string, temp_file_path # 4th item for hidden gr.File
 
 
+def generate_word_document(transcript_html: str, title: str = "Group Discussion Transcript") -> str:
+    """
+    Generates a Word document from the transcript and study notes HTML.
+    Returns the path to the generated Word document.
+    """
+    try:
+        # Create a new Word document
+        doc = docx.Document()
+        
+        # Add title
+        title_para = doc.add_heading(title, 0)
+        title_para.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        
+        # Add timestamp
+        from datetime import datetime
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        timestamp_para = doc.add_paragraph(f"Generated on: {timestamp}")
+        timestamp_para.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        doc.add_paragraph()  # Add a blank line
+        
+        # Parse the HTML to extract transcript and learning notes
+        from bs4 import BeautifulSoup
+        soup = BeautifulSoup(transcript_html, 'html.parser')
+        
+        # Find transcript container
+        transcript_container = soup.find('div', class_='transcript-container')
+        if transcript_container:
+            # Add transcript heading
+            doc.add_heading("Transcript", level=1)
+            
+            # Process transcript bubbles
+            transcript_bubbles = transcript_container.find_all('div', class_='transcript-bubble')
+            for bubble in transcript_bubbles:
+                # Extract speaker and text
+                bubble_text = bubble.get_text()
+                if ': ' in bubble_text:
+                    speaker, text = bubble_text.split(': ', 1)
+                    
+                    # Add speaker paragraph with formatting
+                    speaker_para = doc.add_paragraph()
+                    speaker_run = speaker_para.add_run(f"{speaker}:")
+                    speaker_run.bold = True
+                    speaker_run.font.size = Pt(11)
+                    
+                    # Get speaker color from TRANSCRIPT_COLORS
+                    speaker_color = TRANSCRIPT_COLORS.get(speaker, "#000000")
+                    # Convert hex to RGB
+                    hex_color = speaker_color.lstrip('#')
+                    rgb = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+                    
+                    # Add a colored background paragraph for the text
+                    text_para = doc.add_paragraph()
+                    text_para.paragraph_format.left_indent = Inches(0.25)
+                    text_run = text_para.add_run(text)
+                    text_run.font.size = Pt(11)
+                    
+                    # Add shading to the paragraph
+                    shading_elm = OxmlElement('w:shd')
+                    shading_elm.set(qn('w:fill'), hex_color)
+                    text_para._p.get_or_add_pPr().append(shading_elm)
+                    
+                    doc.add_paragraph()  # Add spacing between bubbles
+        
+        # Find learning notes container
+        learning_notes_container = soup.find('div', class_='learning-notes-container')
+        if learning_notes_container:
+            doc.add_page_break()  # Add a page break before learning notes
+            
+            # Add learning notes heading
+            doc.add_heading("Study Notes 學習筆記", level=1)
+            
+            # Process each section
+            sections = learning_notes_container.find_all('div', class_='notes-section')
+            
+            for section in sections:
+                # Get section heading
+                section_heading = section.find('h3')
+                if section_heading:
+                    heading_text = section_heading.get_text()
+                    doc.add_heading(heading_text, level=2)
+                
+                # Process section content
+                section_content = section.find('div')
+                if section_content:
+                    # Handle tables (for language section)
+                    tables = section_content.find_all('table')
+                    if tables:
+                        for table in tables:
+                            # Create Word table
+                            rows = table.find_all('tr')
+                            word_table = doc.add_table(rows=len(rows), cols=len(rows[0].find_all(['th', 'td'])))
+                            word_table.style = 'Table Grid'
+                            word_table.alignment = WD_TABLE_ALIGNMENT.CENTER
+                            
+                            for i, row in enumerate(rows):
+                                cells = row.find_all(['th', 'td'])
+                                for j, cell in enumerate(cells):
+                                    word_table.cell(i, j).text = cell.get_text().strip()
+                                    
+                                    # Make header cells bold
+                                    if cell.name == 'th':
+                                        word_table.cell(i, j).paragraphs[0].runs[0].bold = True
+                    else:
+                        # Handle regular text content
+                        content_text = section_content.get_text()
+                        # Split by paragraphs and add them
+                        paragraphs = content_text.split('\n')
+                        for para_text in paragraphs:
+                            if para_text.strip():
+                                # Handle bullet points
+                                if para_text.strip().startswith('•'):
+                                    para = doc.add_paragraph(para_text.strip(), style='List Bullet')
+                                # Handle numbered lists
+                                elif para_text.strip() and para_text.strip()[0].isdigit() and '.' in para_text.strip()[:3]:
+                                    para = doc.add_paragraph(para_text.strip(), style='List Number')
+                                else:
+                                    para = doc.add_paragraph(para_text.strip())
+                                
+                                # Apply formatting for emphasis
+                                for run in para.runs:
+                                    # Check for strong/em tags in original HTML and apply formatting
+                                    if any(tag in section_content.decode_contents() for tag in ['<strong>', '<em>']):
+                                        # This is a simplified approach - in a real implementation,
+                                        # you'd need more sophisticated parsing to preserve formatting
+                                        pass
+        
+        # Save the document
+        temporary_directory = "./gradio_cached_files/tmp/"
+        os.makedirs(temporary_directory, exist_ok=True)
+        
+        doc_filename = f"transcript_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
+        doc_path = os.path.join(temporary_directory, doc_filename)
+        doc.save(doc_path)
+        
+        logger.info(f"Word document generated successfully: {doc_path}")
+        return doc_path
+        
+    except Exception as e:
+        logger.error(f"Error generating Word document: {e}")
+        raise gr.Error(f"Failed to generate Word document: {e}")
+
+
 # --- Gradio UI Definition ---
 
 allowed_extensions = [
@@ -940,6 +1087,11 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
     with gr.Column():
         audio_output = gr.Audio(label="🔊 Audio", type="filepath", elem_id="podcast_audio_player") # Keep existing elem_id
         transcript_output = gr.HTML(label="📃 Transcript", elem_id="podcast_transcript_display") # Keep existing elem_id
+        
+        # Add download button for Word document
+        with gr.Row():
+            download_word_btn = gr.Button("📄 Download Transcript & Notes as Word Document", variant="secondary")
+            word_doc_output = gr.File(label="Word Document", visible=False)
 
     with gr.Accordion("📜 Archives (Stored in your browser)", open=False): # Keep existing Accordion
         # This HTML component will be populated by JavaScript from head.html
@@ -993,6 +1145,32 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
         ],
         outputs=[audio_output, transcript_output, js_trigger_data_textbox, temp_audio_file_output_for_url],
         api_name="generate_audio"
+    )
+    
+    # Function to handle Word document download
+    def handle_word_download(transcript_html):
+        if not transcript_html:
+            raise gr.Error("No transcript available to download. Please generate a discussion first.")
+        
+        try:
+            # Extract title from the HTML or use a default
+            title = "Group Discussion Transcript"
+            
+            # Generate the Word document
+            doc_path = generate_word_document(transcript_html, title)
+            
+            # Return the file path for Gradio's File component
+            return doc_path
+        except Exception as e:
+            logger.error(f"Error in handle_word_download: {e}")
+            raise gr.Error(f"Failed to generate Word document: {str(e)}")
+    
+    # Connect the download button to the function
+    download_word_btn.click(
+        fn=handle_word_download,
+        inputs=[transcript_output],
+        outputs=[word_doc_output],
+        api_name="download_word"
     )
 
     gr.Examples(
