@@ -990,93 +990,129 @@ def generate_word_document(transcript_html: str, title: str = "Group Discussion 
                             # Clean up the strategies list
                             strategies = [s.strip() for s in strategies if s.strip()]
                             
-                            for i, strategy in enumerate(strategies):
-                                if strategy and not strategy.startswith(str(i+1) + '.'):
-                                    # This might be a continuation, add it to the previous strategy
-                                    if i > 0:
-                                        strategies[i-1] += ' ' + strategy
-                                        strategies[i] = ''
-                            
                             # Process each strategy
-                            for strategy in strategies:
+                            for i, strategy in enumerate(strategies):
                                 if strategy:
                                     # Check if it starts with a number
                                     if re.match(r'^\d+\.', strategy):
-                                        # This is a new strategy
-                                        para = doc.add_paragraph(strategy, style='List Number')
+                                        # Extract the strategy name (number and title)
+                                        strategy_title = re.match(r'^\d+\.\s+[^:]+:', strategy)
+                                        if strategy_title:
+                                            title_text = strategy_title.group().strip()
+                                            # Add the numbered strategy title
+                                            para = doc.add_paragraph(title_text, style='List Number')
+                                            run = para.runs[0]
+                                            run.bold = True
+                                            
+                                            # Extract the rest of the content (examples and explanations)
+                                            rest_content = strategy[len(title_text):].strip()
+                                            if rest_content:
+                                                # Split by bullet points or examples
+                                                example_pattern = r'(•\s+[^•]*|"[^"]*"|用於[^。]*。?)'
+                                                examples = re.findall(example_pattern, rest_content)
+                                                
+                                                for example in examples:
+                                                    if example.strip():
+                                                        # Add as indented bullet point
+                                                        example_para = doc.add_paragraph(example.strip(), style='List Bullet')
+                                                        example_para.paragraph_format.left_indent = Inches(0.25)
+                                        else:
+                                            # Fallback for strategy without proper format
+                                            para = doc.add_paragraph(strategy, style='List Number')
                                     else:
-                                        # This is a continuation
-                                        para = doc.add_paragraph(strategy)
+                                        # This might be a continuation, add it as an indented bullet
+                                        continuation_para = doc.add_paragraph(strategy.strip(), style='List Bullet')
+                                        continuation_para.paragraph_format.left_indent = Inches(0.25)
                         
                         else:
                             # Handle other sections (like Ideas)
-                            # First try to process by HTML elements
-                            processed_content = False
-                            
-                            # Look for <br> tags and split content accordingly
-                            br_tags = content_soup.find_all('br')
-                            if br_tags:
-                                # Split content by <br> tags
-                                parts = str(content_soup).split('<br/>')
-                                for part in parts:
-                                    part_soup = BeautifulSoup(part, 'html.parser')
-                                    text = part_soup.get_text().strip()
+                            # Look for <strong> tags which might indicate questions
+                            strong_tags = content_soup.find_all('strong')
+                            if strong_tags:
+                                for strong in strong_tags:
+                                    text = strong.get_text().strip()
                                     if text:
-                                        # Handle bullet points
-                                        if text.startswith('•'):
-                                            para = doc.add_paragraph(text, style='List Bullet')
-                                        # Handle numbered lists
-                                        elif text and text[0].isdigit() and '.' in text[:3]:
-                                            para = doc.add_paragraph(text, style='List Number')
-                                        else:
-                                            para = doc.add_paragraph(text)
-                                processed_content = True
+                                        # Add the question
+                                        para = doc.add_paragraph()
+                                        run = para.add_run(text)
+                                        run.bold = True
+                                        
+                                        # Look for content after this strong tag
+                                        next_sibling = strong.next_sibling
+                                        content_after = ""
+                                        
+                                        # Collect all text content after this strong tag until the next strong tag
+                                        while next_sibling and next_sibling.name != 'strong':
+                                            if hasattr(next_sibling, 'get_text'):
+                                                content_after += next_sibling.get_text() + " "
+                                            elif hasattr(next_sibling, 'string'):
+                                                content_after += next_sibling.string + " "
+                                            next_sibling = next_sibling.next_sibling
+                                        
+                                        if content_after.strip():
+                                            # Process the content after the question
+                                            content_text = content_after.strip()
+                                            
+                                            # Split by bullet points
+                                            bullet_points = re.split(r'(•\s+[^•]*)', content_text)
+                                            
+                                            for i, point in enumerate(bullet_points):
+                                                if point.strip():
+                                                    if point.startswith('•'):
+                                                        # Remove the redundant dot and add as regular paragraph
+                                                        clean_point = point.strip()[1:].strip()
+                                                        main_para = doc.add_paragraph(clean_point)
+                                                        
+                                                        # Look for sub-points (indented content)
+                                                        # Check if there are indented parts in the original HTML
+                                                        next_sibling_check = strong.next_sibling
+                                                        while next_sibling_check and next_sibling_check.name != 'strong':
+                                                            if hasattr(next_sibling_check, 'get_text') and '&nbsp;' in str(next_sibling_check):
+                                                                # This might be an indented sub-point
+                                                                sub_text = next_sibling_check.get_text().strip()
+                                                                if sub_text and sub_text.startswith('-'):
+                                                                    sub_para = doc.add_paragraph(sub_text[1:].strip(), style='List Bullet')
+                                                                    sub_para.paragraph_format.left_indent = Inches(0.5)
+                                                            next_sibling_check = next_sibling_check.next_sibling
+                                                    else:
+                                                        # Regular content
+                                                        content_para = doc.add_paragraph(point.strip())
                             
-                            # If no <br> tags found, try other approaches
-                            if not processed_content:
-                                # Look for <strong> tags which might indicate questions
-                                strong_tags = content_soup.find_all('strong')
-                                if strong_tags:
-                                    for strong in strong_tags:
-                                        text = strong.get_text().strip()
+                            else:
+                                # Fallback: process by <br> tags
+                                br_tags = content_soup.find_all('br')
+                                if br_tags:
+                                    # Split content by <br> tags
+                                    parts = str(content_soup).split('<br/>')
+                                    for part in parts:
+                                        part_soup = BeautifulSoup(part, 'html.parser')
+                                        text = part_soup.get_text().strip()
                                         if text:
-                                            # Add the question
-                                            para = doc.add_paragraph()
-                                            run = para.add_run(text)
-                                            run.bold = True
-                                            
-                                            # Look for content after this strong tag
-                                            next_sibling = strong.next_sibling
-                                            content_after = ""
-                                            
-                                            # Collect all text content after this strong tag until the next strong tag
-                                            while next_sibling and next_sibling.name != 'strong':
-                                                if hasattr(next_sibling, 'get_text'):
-                                                    content_after += next_sibling.get_text() + " "
-                                                elif hasattr(next_sibling, 'string'):
-                                                    content_after += next_sibling.string + " "
-                                                next_sibling = next_sibling.next_sibling
-                                            
-                                            if content_after.strip():
-                                                # Add the content after the question
-                                                content_para = doc.add_paragraph(content_after.strip())
-                                    
-                                    processed_content = True
-                            
-                            # If still not processed, fall back to text processing
-                            if not processed_content:
-                                # Split by double line breaks which might indicate separate points
-                                paragraphs = full_text.split('\n\n')
-                                for para_text in paragraphs:
-                                    if para_text.strip():
-                                        # Handle bullet points
-                                        if para_text.strip().startswith('•'):
-                                            para = doc.add_paragraph(para_text.strip(), style='List Bullet')
-                                        # Handle numbered lists
-                                        elif para_text.strip() and para_text.strip()[0].isdigit() and '.' in para_text.strip()[:3]:
-                                            para = doc.add_paragraph(para_text.strip(), style='List Number')
-                                        else:
-                                            para = doc.add_paragraph(para_text.strip())
+                                            # Handle bullet points (remove redundant dot)
+                                            if text.startswith('•'):
+                                                clean_text = text[1:].strip()  # Remove the bullet
+                                                para = doc.add_paragraph(clean_text)
+                                            # Handle numbered lists
+                                            elif text and text[0].isdigit() and '.' in text[:3]:
+                                                para = doc.add_paragraph(text, style='List Number')
+                                            else:
+                                                para = doc.add_paragraph(text)
+                                
+                                # Final fallback: text processing
+                                else:
+                                    # Split by double line breaks which might indicate separate points
+                                    paragraphs = full_text.split('\n\n')
+                                    for para_text in paragraphs:
+                                        if para_text.strip():
+                                            # Handle bullet points (remove redundant dot)
+                                            if para_text.strip().startswith('•'):
+                                                clean_text = para_text.strip()[1:].strip()
+                                                para = doc.add_paragraph(clean_text)
+                                            # Handle numbered lists
+                                            elif para_text.strip() and para_text.strip()[0].isdigit() and '.' in para_text.strip()[:3]:
+                                                para = doc.add_paragraph(para_text.strip(), style='List Number')
+                                            else:
+                                                para = doc.add_paragraph(para_text.strip())
         
         # Save the document
         temporary_directory = "./gradio_cached_files/tmp/"
