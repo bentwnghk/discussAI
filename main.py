@@ -22,6 +22,10 @@ from pypdf import PdfReader
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential # tenacity is imported here
 from mimetypes import guess_type
 import docx # Added for DOCX support
+from docx.shared import Pt, RGBColor
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.oxml.shared import OxmlElement, qn
 import pytz
 import requests
 import html
@@ -505,7 +509,7 @@ def generate_audio(
     input_text: Optional[str],
     dialogue_mode: str = "Normal",
     openai_api_key: str = None,
-) -> (str, str, str, str): # Added 4th str for the hidden gr.File component
+) -> (str, str, str, str, str): # Added 5th str for the Word document
     """Generates audio from uploaded files or direct text input."""
     start_time = time.time()
     
@@ -856,7 +860,184 @@ def generate_audio(
     
     logger.debug(f"Returning JSON data for JS trigger (no audio_url, JS will fetch from component): {json_data_string[:200]}...")
 
-    return temp_file_path, html_transcript, json_data_string, temp_file_path # 4th item for hidden gr.File
+    # Generate Word document
+    gr.Info("📄 Generating Word document...")
+    try:
+        word_doc_path = generate_word_document(html_transcript, llm_output)
+        logger.info(f"Word document generated at: {word_doc_path}")
+    except Exception as e:
+        logger.error(f"Error generating Word document: {e}")
+        word_doc_path = None  # Set to None if generation fails
+
+    return temp_file_path, html_transcript, json_data_string, temp_file_path, word_doc_path # 5th item for Word document
+
+
+def generate_word_document(transcript_html: str, llm_output: Dialogue) -> str:
+    """
+    Generates a Word document (.docx) from the transcript and study notes.
+    Returns the path to the generated Word document.
+    """
+    # Create a new Word document
+    doc = docx.Document()
+    
+    # Set up document styles
+    style = doc.styles['Normal']
+    font = style.font
+    font.name = 'Calibri'
+    font.size = Pt(11)
+    
+    # Add title
+    title = doc.add_heading('Group Discussion Transcript and Study Notes', 0)
+    title.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    
+    # Add current date
+    date_paragraph = doc.add_paragraph()
+    date_run = date_paragraph.add_run(f"Generated on: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    date_run.italic = True
+    date_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    
+    # Add a separator
+    doc.add_paragraph("=" * 50)
+    
+    # Add transcript section
+    doc.add_heading('Transcript', level=1)
+    
+    # Process the transcript HTML to extract speaker and text
+    import re
+    from html.parser import HTMLParser
+    
+    class TranscriptParser(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.current_data = ""
+            self.current_speaker = None
+            self.in_transcript_bubble = False
+            self.transcript_lines = []
+            
+        def handle_starttag(self, tag, attrs):
+            if tag == "div" and any('transcript-bubble' in attr.get('class', '') for attr in attrs if 'class' in attr):
+                self.in_transcript_bubble = True
+            elif tag == "strong" and self.in_transcript_bubble:
+                # Next text will be the speaker name
+                pass
+                
+        def handle_data(self, data):
+            if self.in_transcript_bubble:
+                self.current_data += data
+                
+        def handle_endtag(self, tag):
+            if tag == "div" and self.in_transcript_bubble:
+                # Parse the collected data to extract speaker and text
+                if ": " in self.current_data:
+                    parts = self.current_data.split(": ", 1)
+                    if len(parts) == 2:
+                        speaker = parts[0].strip()
+                        text = parts[1].strip()
+                        self.transcript_lines.append((speaker, text))
+                
+                self.current_data = ""
+                self.in_transcript_bubble = False
+    
+    # Parse the transcript HTML
+    parser = TranscriptParser()
+    parser.feed(transcript_html)
+    
+    # Add transcript lines to the document
+    for speaker, text in parser.transcript_lines:
+        # Add speaker with formatting
+        speaker_para = doc.add_paragraph()
+        speaker_run = speaker_para.add_run(f"{speaker}:")
+        speaker_run.bold = True
+        speaker_run.font.color.rgb = RGBColor(0, 0, 0)  # Black color
+        
+        # Add text
+        text_para = doc.add_paragraph(text)
+        text_para.paragraph_format.left_indent = Pt(20)  # Indent the text
+        
+        # Add some space between entries
+        doc.add_paragraph()
+    
+    # Add a page break before study notes
+    doc.add_page_break()
+    
+    # Add study notes section
+    doc.add_heading('Study Notes', level=1)
+    
+    # Add Ideas section
+    doc.add_heading('Ideas 討論要點', level=2)
+    
+    # Process the ideas HTML to extract the content
+    ideas_html = llm_output.learning_notes.ideas
+    
+    # Simple HTML to text conversion for ideas
+    ideas_text = re.sub(r'<[^>]+>', '\n', ideas_html)
+    ideas_text = re.sub(r'\n+', '\n', ideas_text).strip()
+    
+    for line in ideas_text.split('\n'):
+        if line.strip():
+            doc.add_paragraph(line.strip())
+    
+    # Add Language section
+    doc.add_heading('Language 語言學習', level=2)
+    
+    # Process the language HTML to extract table data
+    language_html = llm_output.learning_notes.language
+    
+    # Create a table for vocabulary
+    if '<table>' in language_html:
+        # Extract table rows
+        table_rows = re.findall(r'<tr>(.*?)</tr>', language_html, re.DOTALL)
+        
+        if table_rows:
+            # Create table in Word document
+            table = doc.add_table(rows=len(table_rows), cols=3)
+            table.style = 'Table Grid'
+            
+            for i, row_html in enumerate(table_rows):
+                # Extract cells
+                cells = re.findall(r'<t[dh]>(.*?)</t[dh]>', row_html, re.DOTALL)
+                
+                for j, cell_html in enumerate(cells[:3]):  # Limit to 3 columns
+                    cell_text = re.sub(r'<[^>]+>', '', cell_html).strip()
+                    table.cell(i, j).text = cell_text
+                    
+                    # Make header row bold
+                    if i == 0:
+                        table.cell(i, j).paragraphs[0].runs[0].bold = True
+    else:
+        # If no table found, just add the text
+        language_text = re.sub(r'<[^>]+>', '\n', language_html)
+        language_text = re.sub(r'\n+', '\n', language_text).strip()
+        
+        for line in language_text.split('\n'):
+            if line.strip():
+                doc.add_paragraph(line.strip())
+    
+    # Add Communication Strategies section
+    doc.add_heading('Communication Strategies 溝通策略', level=2)
+    
+    # Process the communication strategies HTML
+    strategies_html = llm_output.learning_notes.communication_strategies
+    
+    # Simple HTML to text conversion for strategies
+    strategies_text = re.sub(r'<[^>]+>', '\n', strategies_html)
+    strategies_text = re.sub(r'\n+', '\n', strategies_text).strip()
+    
+    for line in strategies_text.split('\n'):
+        if line.strip():
+            doc.add_paragraph(line.strip())
+    
+    # Save the document to a temporary file
+    temporary_directory = "./gradio_cached_files/tmp/"
+    os.makedirs(temporary_directory, exist_ok=True)
+    
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    docx_filename = f"discussion_transcript_{timestamp}.docx"
+    docx_path = os.path.join(temporary_directory, docx_filename)
+    
+    doc.save(docx_path)
+    
+    return docx_path
 
 
 # --- Gradio UI Definition ---
@@ -940,6 +1121,7 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
     with gr.Column():
         audio_output = gr.Audio(label="🔊 Audio", type="filepath", elem_id="podcast_audio_player") # Keep existing elem_id
         transcript_output = gr.HTML(label="📃 Transcript", elem_id="podcast_transcript_display") # Keep existing elem_id
+        word_doc_output = gr.File(label="📄 Download Word Document", visible=False) # Hidden by default, will be shown when document is ready
 
     with gr.Accordion("📜 Archives (Stored in your browser)", open=False): # Keep existing Accordion
         # This HTML component will be populated by JavaScript from head.html
@@ -991,7 +1173,7 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
             dialogue_mode_radio,
             api_key_input
         ],
-        outputs=[audio_output, transcript_output, js_trigger_data_textbox, temp_audio_file_output_for_url],
+        outputs=[audio_output, transcript_output, js_trigger_data_textbox, temp_audio_file_output_for_url, word_doc_output],
         api_name="generate_audio"
     )
 
@@ -1006,7 +1188,7 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
         ],
         # Examples won't trigger the history save directly unless we adapt the example fn or outputs
         # For now, history save is only for manual generation.
-        outputs=[audio_output, transcript_output, js_trigger_data_textbox, temp_audio_file_output_for_url],
+        outputs=[audio_output, transcript_output, js_trigger_data_textbox, temp_audio_file_output_for_url, word_doc_output],
         fn=generate_audio,
         cache_examples=True,
         run_on_click=True,
