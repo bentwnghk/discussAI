@@ -1234,18 +1234,36 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
     
     # Function to handle Word document download
     def handle_word_download(transcript_html):
-        if not transcript_html:
-            raise gr.Error("No transcript available to download. Please generate a discussion first.")
+        if not transcript_html or not transcript_html.strip():
+            raise gr.Error("No transcript available to download. Please generate a discussion first or load one from Archives.")
         
         try:
             # Extract title from the HTML or use a default
             title = "Group Discussion Notes"
+            
+            # Try to extract title from the HTML if it contains timestamp
+            # Look for patterns like "filename - YYYY-MM-DD HH:MM" in the transcript
+            import re
+            from bs4 import BeautifulSoup
+            
+            # Parse HTML to check if it's valid
+            soup = BeautifulSoup(transcript_html, 'html.parser')
+            
+            # Check if we have actual content (transcript bubbles or learning notes)
+            has_content = bool(soup.find('div', class_='transcript-bubble') or
+                             soup.find('div', class_='learning-notes-container'))
+            
+            if not has_content:
+                raise gr.Error("The transcript appears to be empty or invalid. Please generate a discussion first or load one from Archives.")
             
             # Generate the Word document
             doc_path = generate_word_document(transcript_html, title)
             
             # Return the file path for Gradio's File component
             return doc_path
+        except gr.Error:
+            # Re-raise Gradio errors as-is
+            raise
         except Exception as e:
             logger.error(f"Error in handle_word_download: {e}")
             raise gr.Error(f"Failed to generate Word document: {str(e)}")
