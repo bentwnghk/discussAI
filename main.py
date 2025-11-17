@@ -1111,6 +1111,18 @@ def generate_word_document(transcript_html: str, title: str = "Group Discussion 
         doc_path = os.path.join(temporary_directory, doc_filename)
         doc.save(doc_path)
         
+        # Clean up old Word documents (older than 60 minutes)
+        try:
+            for file in glob.glob(f"{temporary_directory}Discussion_*.docx"):
+                if os.path.isfile(file) and time.time() - os.path.getmtime(file) > 60 * 60:  # 60 minutes
+                    try:
+                        os.remove(file)
+                        logger.debug(f"Removed old Word document: {file}")
+                    except OSError as e_rem:
+                        logger.warning(f"Could not remove old Word document {file}: {e_rem}")
+        except Exception as e:
+            logger.warning(f"Error during old Word document cleanup: {e}")
+        
         logger.info(f"Word document generated successfully: {doc_path}")
         return doc_path
         
