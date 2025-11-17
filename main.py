@@ -1020,13 +1020,33 @@ def generate_word_document(transcript_html: str, title: str = "Group Discussion 
                                 if i + 1 < len(strategy_parts):
                                     content = strategy_parts[i + 1]
                                     
-                                    # Extract examples (text in <em> tags)
-                                    examples = re.findall(r'<em>"([^"]+)"</em>', content)
+                                    # Extract examples - try multiple patterns for robustness
+                                    examples = []
+                                    
+                                    # Pattern 1: Text in <em> tags with quotes
+                                    examples.extend(re.findall(r'<em>"([^"]+)"</em>', content))
+                                    
+                                    # Pattern 2: Text in <em> tags without quotes
+                                    if not examples:
+                                        examples.extend(re.findall(r'<em>([^<]+)</em>', content))
+                                    
+                                    # Pattern 3: Lines starting with bullet point (•) followed by quoted text
+                                    if not examples:
+                                        examples.extend(re.findall(r'•\s*"([^"]+)"', content))
+                                    
+                                    # Pattern 4: Any quoted text in the content
+                                    if not examples:
+                                        examples.extend(re.findall(r'"([^"]+)"', content))
                                     
                                     # Add examples as indented bullet points
                                     for example in examples:
-                                        example_para = doc.add_paragraph(f'"{example}"', style='List Bullet')
-                                        example_para.paragraph_format.left_indent = Inches(0.5)
+                                        example = example.strip()
+                                        if example:  # Only add non-empty examples
+                                            # Add quotes if not already present
+                                            if not example.startswith('"'):
+                                                example = f'"{example}"'
+                                            example_para = doc.add_paragraph(example, style='List Bullet')
+                                            example_para.paragraph_format.left_indent = Inches(0.5)
                                     
                                     # Extract ALL Chinese text (not just those starting with '用於')
                                     # Remove HTML tags first
