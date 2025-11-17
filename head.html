@@ -519,6 +519,22 @@
                         });
                         transcriptDisplayElement.dispatchEvent(event);
                     }, 100);
+                    
+                    // IMPORTANT: Also update the hidden storage textbox for Word document download
+                    const storageElement = document.getElementById('transcript_html_storage');
+                    if (storageElement) {
+                        const storageInput = storageElement.querySelector('textarea') || storageElement.querySelector('input[type="text"]') || storageElement;
+                        if (storageInput) {
+                            storageInput.value = htmlTranscript;
+                            storageInput.dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));
+                            storageInput.dispatchEvent(new Event('change', { bubbles: true, cancelable: true }));
+                            console.log(`[LOAD_HISTORY] Updated transcript_html_storage for Word download`);
+                        } else {
+                            console.warn("[LOAD_HISTORY] Could not find input element in transcript_html_storage");
+                        }
+                    } else {
+                        console.warn("[LOAD_HISTORY] transcript_html_storage element not found");
+                    }
                 } else {
                     console.error("[LOAD_HISTORY] Transcript display element not found");
                 }

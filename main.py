@@ -1173,6 +1173,10 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
         audio_output = gr.Audio(label="🔊 Audio", type="filepath", elem_id="podcast_audio_player") # Keep existing elem_id
         transcript_output = gr.HTML(label="📃 Transcript", elem_id="podcast_transcript_display") # Keep existing elem_id
         
+        # Hidden textbox to store transcript HTML for Word document generation
+        # This will be updated by JavaScript when loading from archives
+        transcript_html_storage = gr.Textbox(label="Transcript HTML Storage", visible=False, elem_id="transcript_html_storage")
+        
         # Add download button for Word document
         with gr.Row():
             download_word_btn = gr.Button("📄 Download Transcript & Notes as Word Document", variant="primary")
@@ -1219,6 +1223,11 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
         ]
     )
 
+    # Function to sync transcript to hidden storage
+    def sync_transcript_to_storage(transcript_html):
+        """Syncs the transcript HTML to the hidden storage for Word download."""
+        return transcript_html
+    
     submit_button.click(
         fn=generate_audio,
         inputs=[ # Order must match generate_audio parameters
@@ -1230,11 +1239,20 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
         ],
         outputs=[audio_output, transcript_output, js_trigger_data_textbox, temp_audio_file_output_for_url],
         api_name="generate_audio"
+    ).then(
+        fn=sync_transcript_to_storage,
+        inputs=[transcript_output],
+        outputs=[transcript_html_storage]
     )
     
     # Function to handle Word document download
-    def handle_word_download(transcript_html):
-        if not transcript_html or not transcript_html.strip():
+    def handle_word_download(transcript_html_from_storage):
+        """
+        Generates a Word document from the transcript HTML.
+        Uses the hidden storage textbox which is updated both when generating new discussions
+        and when loading from archives (via JavaScript).
+        """
+        if not transcript_html_from_storage or not transcript_html_from_storage.strip():
             raise gr.Error("No transcript available to download. Please generate a discussion first or load one from Archives.")
         
         try:
@@ -1247,7 +1265,7 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
             from bs4 import BeautifulSoup
             
             # Parse HTML to check if it's valid
-            soup = BeautifulSoup(transcript_html, 'html.parser')
+            soup = BeautifulSoup(transcript_html_from_storage, 'html.parser')
             
             # Check if we have actual content (transcript bubbles or learning notes)
             has_content = bool(soup.find('div', class_='transcript-bubble') or
@@ -1257,7 +1275,7 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
                 raise gr.Error("The transcript appears to be empty or invalid. Please generate a discussion first or load one from Archives.")
             
             # Generate the Word document
-            doc_path = generate_word_document(transcript_html, title)
+            doc_path = generate_word_document(transcript_html_from_storage, title)
             
             # Return the file path for Gradio's File component
             return doc_path
@@ -1271,7 +1289,7 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
     # Connect the download button to the function
     download_word_btn.click(
         fn=handle_word_download,
-        inputs=[transcript_output],
+        inputs=[transcript_html_storage],
         outputs=[word_doc_output],
         api_name="download_word"
     )
