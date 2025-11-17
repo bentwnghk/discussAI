@@ -1107,7 +1107,7 @@ def generate_word_document(transcript_html: str, title: str = "Group Discussion 
         temporary_directory = "./gradio_cached_files/tmp/"
         os.makedirs(temporary_directory, exist_ok=True)
         
-        doc_filename = f"transcript_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
+        doc_filename = f"Discussion_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
         doc_path = os.path.join(temporary_directory, doc_filename)
         doc.save(doc_path)
         
