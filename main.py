@@ -1324,6 +1324,15 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
         api_name="download_word"
     )
 
+    # Create a wrapper function that also syncs transcript to storage for examples
+    def generate_audio_with_sync(input_method, files, input_text, dialogue_mode, openai_api_key):
+        """Wrapper that generates audio and syncs transcript to storage."""
+        audio_path, transcript_html, json_data, temp_audio = generate_audio(
+            input_method, files, input_text, dialogue_mode, openai_api_key
+        )
+        # Return all outputs including the synced transcript storage
+        return audio_path, transcript_html, json_data, temp_audio, transcript_html
+    
     gr.Examples(
         examples=examples,
         inputs=[ # Ensure order matches generate_audio parameters for examples
@@ -1333,10 +1342,9 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
             dialogue_mode_radio,
             api_key_input
         ],
-        # Examples won't trigger the history save directly unless we adapt the example fn or outputs
-        # For now, history save is only for manual generation.
-        outputs=[audio_output, transcript_output, js_trigger_data_textbox, temp_audio_file_output_for_url],
-        fn=generate_audio,
+        # Now includes transcript_html_storage in outputs so Word download works for examples
+        outputs=[audio_output, transcript_output, js_trigger_data_textbox, temp_audio_file_output_for_url, transcript_html_storage],
+        fn=generate_audio_with_sync,
         cache_examples=True,
         run_on_click=True,
         label="Examples (Click for Demo)"
