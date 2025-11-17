@@ -1264,8 +1264,12 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
             import re
             from bs4 import BeautifulSoup
             
+            # The transcript HTML from storage might have escaped characters from JavaScript
+            # Unescape them before processing
+            transcript_html_unescaped = transcript_html_from_storage.replace('\\n', '\n').replace('\\r', '\r').replace('\\"', '"').replace("\\'", "'").replace('\\\\', '\\')
+            
             # Parse HTML to check if it's valid
-            soup = BeautifulSoup(transcript_html_from_storage, 'html.parser')
+            soup = BeautifulSoup(transcript_html_unescaped, 'html.parser')
             
             # Check if we have actual content (transcript bubbles or learning notes)
             has_content = bool(soup.find('div', class_='transcript-bubble') or
@@ -1275,7 +1279,7 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
                 raise gr.Error("The transcript appears to be empty or invalid. Please generate a discussion first or load one from Archives.")
             
             # Generate the Word document
-            doc_path = generate_word_document(transcript_html_from_storage, title)
+            doc_path = generate_word_document(transcript_html_unescaped, title)
             
             # Return the file path for Gradio's File component
             return doc_path
