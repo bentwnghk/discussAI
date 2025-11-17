@@ -1024,7 +1024,7 @@ def generate_word_document(transcript_html: str, title: str = "Group Discussion 
                                     examples = []
                                     
                                     # Pattern 1: Text in <em> tags with quotes
-                                    examples.extend(re.findall(r'<em>"([^"]+)"</em>', content))
+                                    examples.extend(re.findall(r'<em>[\u0022\u201C\u201D]([^\u0022\u201C\u201D]+)[\u0022\u201C\u201D]</em>', content))
                                     
                                     # Pattern 2: Text in <em> tags without quotes
                                     if not examples:
@@ -1032,18 +1032,19 @@ def generate_word_document(transcript_html: str, title: str = "Group Discussion 
                                     
                                     # Pattern 3: Lines starting with bullet point (•) followed by quoted text
                                     if not examples:
-                                        examples.extend(re.findall(r'•\s*"([^"]+)"', content))
+                                        examples.extend(re.findall(r'•\s*[\u0022\u201C\u201D]([^\u0022\u201C\u201D]+)[\u0022\u201C\u201D]', content))
                                     
                                     # Pattern 4: Any quoted text in the content
                                     if not examples:
-                                        examples.extend(re.findall(r'"([^"]+)"', content))
+                                        examples.extend(re.findall(r'[\u0022\u201C\u201D]([^\u0022\u201C\u201D]+)[\u0022\u201C\u201D]', content))
                                     
                                     # Add examples as indented bullet points
                                     for example in examples:
                                         example = example.strip()
                                         if example:  # Only add non-empty examples
                                             # Add quotes if not already present
-                                            if not example.startswith('"'):
+                                            if not (example.startswith('"') or
+                                            example.startswith('\u201C')):
                                                 example = f'"{example}"'
                                             example_para = doc.add_paragraph(example, style='List Bullet')
                                             example_para.paragraph_format.left_indent = Inches(0.5)
