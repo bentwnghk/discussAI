@@ -881,9 +881,11 @@ def generate_word_document(transcript_html: str, title: str = "Group Discussion 
         title_para = doc.add_heading(title, 0)
         title_para.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
         
-        # Add timestamp
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        timestamp_para = doc.add_paragraph(f"Generated on: {timestamp}")
+        # Add timestamp in Hong Kong time
+        hk_tz = pytz.timezone('Asia/Hong_Kong')
+        hk_now = datetime.now(hk_tz)
+        timestamp = hk_now.strftime("%Y-%m-%d %H:%M:%S")
+        timestamp_para = doc.add_paragraph(f"Generated on (Hong Kong Time): {timestamp}")
         timestamp_para.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
         doc.add_paragraph()  # Add a blank line
         
