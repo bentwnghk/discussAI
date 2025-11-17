@@ -1107,13 +1107,19 @@ def generate_word_document(transcript_html: str, title: str = "Group Discussion 
         temporary_directory = "./gradio_cached_files/tmp/"
         os.makedirs(temporary_directory, exist_ok=True)
         
-        doc_filename = f"Discussion_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
-        doc_path = os.path.join(temporary_directory, doc_filename)
-        doc.save(doc_path)
+        # Use NamedTemporaryFile for consistent naming with audio files
+        with NamedTemporaryFile(
+            dir=temporary_directory,
+            delete=False,
+            suffix=".docx",
+            prefix="GI_notes_"
+        ) as temp_doc_file:
+            doc.save(temp_doc_file.name)
+            doc_path = temp_doc_file.name
         
         # Clean up old Word documents (older than 60 minutes)
         try:
-            for file in glob.glob(f"{temporary_directory}Discussion_*.docx"):
+            for file in glob.glob(f"{temporary_directory}GI_notes_*.docx"):
                 if os.path.isfile(file) and time.time() - os.path.getmtime(file) > 60 * 60:  # 60 minutes
                     try:
                         os.remove(file)
