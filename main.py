@@ -890,19 +890,45 @@ def generate_word_document(transcript_html: str, title: str = "Group Discussion 
         # Parse the HTML to extract transcript and learning notes
         soup = BeautifulSoup(transcript_html, 'html.parser')
         
+        # Debug logging
+        logger.debug(f"Parsing HTML for Word document. HTML length: {len(transcript_html)}")
+        logger.debug(f"Found transcript containers: {len(soup.find_all('div', class_='transcript-container'))}")
+        logger.debug(f"Found transcript bubbles: {len(soup.find_all('div', class_='transcript-bubble'))}")
+        
         # Find transcript container
         transcript_container = soup.find('div', class_='transcript-container')
+        # Get transcript bubbles - either from container or directly from soup
+        transcript_bubbles = []
         if transcript_container:
+            transcript_bubbles = transcript_container.find_all('div', class_='transcript-bubble')
+        else:
+            # Fallback: try to find bubbles directly (in case HTML structure is different)
+            transcript_bubbles = soup.find_all('div', class_='transcript-bubble')
+        
+        if transcript_bubbles:
             # Add transcript heading
             doc.add_heading("Transcript", level=1)
             
+            logger.debug(f"Processing {len(transcript_bubbles)} transcript bubbles")
+            
             # Process transcript bubbles
-            transcript_bubbles = transcript_container.find_all('div', class_='transcript-bubble')
-            for bubble in transcript_bubbles:
+            for idx, bubble in enumerate(transcript_bubbles):
                 # Extract speaker and text
                 bubble_text = bubble.get_text()
+                
+                # Skip if this bubble contains the entire transcript (duplication issue)
+                # This happens when the HTML structure is malformed
+                if len(bubble_text) > 5000 or bubble_text.count('Candidate A:') > 2:
+                    logger.warning(f"Skipping bubble {idx} - appears to contain entire transcript (length: {len(bubble_text)})")
+                    continue
+                
                 if ': ' in bubble_text:
                     speaker, text = bubble_text.split(': ', 1)
+                    
+                    # Validate speaker name
+                    if speaker not in TRANSCRIPT_COLORS:
+                        logger.warning(f"Skipping bubble {idx} - invalid speaker: {speaker}")
+                        continue
                     
                     # Add speaker paragraph with formatting
                     speaker_para = doc.add_paragraph()
