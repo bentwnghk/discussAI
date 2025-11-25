@@ -519,6 +519,22 @@
                         });
                         transcriptDisplayElement.dispatchEvent(event);
                     }, 100);
+                    
+                    // IMPORTANT: Also update the hidden storage textbox for Word document download
+                    const storageElement = document.getElementById('transcript_html_storage');
+                    if (storageElement) {
+                        const storageInput = storageElement.querySelector('textarea') || storageElement.querySelector('input[type="text"]') || storageElement;
+                        if (storageInput) {
+                            storageInput.value = htmlTranscript;
+                            storageInput.dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));
+                            storageInput.dispatchEvent(new Event('change', { bubbles: true, cancelable: true }));
+                            console.log(`[LOAD_HISTORY] Updated transcript_html_storage for Word download`);
+                        } else {
+                            console.warn("[LOAD_HISTORY] Could not find input element in transcript_html_storage");
+                        }
+                    } else {
+                        console.warn("[LOAD_HISTORY] transcript_html_storage element not found");
+                    }
                 } else {
                     console.error("[LOAD_HISTORY] Transcript display element not found");
                 }
@@ -743,8 +759,72 @@
         }, 100);
     };
 
-    renderPodcastHistory(); 
+    renderPodcastHistory();
     initializeJsTriggerObserver();
+    
+    // Monitor transcript_output changes and sync to storage (for examples and archives)
+    function setupTranscriptSync() {
+        const transcriptDisplayId = 'podcast_transcript_display';
+        const storageId = 'transcript_html_storage';
+        let attempts = 0;
+        const maxAttempts = 50;
+        
+        const intervalId = setInterval(() => {
+            attempts++;
+            const transcriptWrapper = document.getElementById(transcriptDisplayId);
+            const storageWrapper = document.getElementById(storageId);
+            
+            if (transcriptWrapper && storageWrapper) {
+                clearInterval(intervalId);
+                console.log('[TRANSCRIPT_SYNC] Setting up automatic sync from transcript to storage');
+                
+                // Find the actual input element in the hidden storage
+                const storageInput = storageWrapper.querySelector('textarea') ||
+                                   storageWrapper.querySelector('input[type="text"]') ||
+                                   storageWrapper;
+                
+                // Monitor changes to transcript display
+                const observer = new MutationObserver((mutations) => {
+                    // Get the current HTML content from transcript display
+                    const transcriptInput = transcriptWrapper.querySelector('input[type="hidden"]') ||
+                                          transcriptWrapper.querySelector('.contain') ||
+                                          transcriptWrapper;
+                    
+                    let htmlContent = '';
+                    if (transcriptInput.tagName === 'INPUT') {
+                        htmlContent = transcriptInput.value;
+                    } else {
+                        htmlContent = transcriptInput.innerHTML;
+                    }
+                    
+                    // Only sync if we have actual content with transcript bubbles or learning notes
+                    if (htmlContent && (htmlContent.includes('transcript-bubble') || htmlContent.includes('learning-notes-container'))) {
+                        if (storageInput.value !== htmlContent) {
+                            storageInput.value = htmlContent;
+                            storageInput.dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));
+                            storageInput.dispatchEvent(new Event('change', { bubbles: true, cancelable: true }));
+                            console.log('[TRANSCRIPT_SYNC] Synced transcript to storage for Word download');
+                        }
+                    }
+                });
+                
+                // Observe the transcript wrapper for changes
+                observer.observe(transcriptWrapper, {
+                    childList: true,
+                    subtree: true,
+                    attributes: true,
+                    characterData: true
+                });
+                
+                console.log('[TRANSCRIPT_SYNC] Automatic sync observer set up successfully');
+            } else if (attempts >= maxAttempts) {
+                clearInterval(intervalId);
+                console.warn('[TRANSCRIPT_SYNC] Could not find transcript or storage elements');
+            }
+        }, 100);
+    }
+    
+    setupTranscriptSync();
   }
 
   function waitForGradioElements() {
