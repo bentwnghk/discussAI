@@ -1236,18 +1236,17 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
 
     submit_button = gr.Button("✨ Generate Discussion with Audio and Study Notes", variant="primary")
 
-    with gr.Column():
-        audio_output = gr.Audio(label="🔊 Audio", type="filepath", elem_id="podcast_audio_player") # Keep existing elem_id
-        transcript_output = gr.HTML(label="📃 Transcript", elem_id="podcast_transcript_display") # Keep existing elem_id
-        
-        # Hidden textbox to store transcript HTML for Word document generation
-        # This will be updated by JavaScript when loading from archives
-        transcript_html_storage = gr.Textbox(label="Transcript HTML Storage", visible=False, elem_id="transcript_html_storage")
-        
-        # Add download button for Word document
-        with gr.Row():
-            download_word_btn = gr.Button("📄 Download Transcript & Study Notes as Word Document", variant="primary")
-            word_doc_output = gr.File(label="📄 Word Document", visible=True)
+    audio_output = gr.Audio(label="🔊 Audio", type="filepath", elem_id="podcast_audio_player") # Keep existing elem_id
+    transcript_output = gr.HTML(label="📃 Transcript", elem_id="podcast_transcript_display") # Keep existing elem_id
+    
+    # Hidden textbox to store transcript HTML for Word document generation
+    # This will be updated by JavaScript when loading from archives
+    transcript_html_storage = gr.Textbox(label="Transcript HTML Storage", visible=False, elem_id="transcript_html_storage")
+    
+    # Add download button for Word document
+    with gr.Row():
+        download_word_btn = gr.Button("📄 Download Transcript & Study Notes as Word Document", variant="primary")
+        word_doc_output = gr.File(label="📄 Word Document", visible=True)
 
     with gr.Accordion("📜 Archives (Stored in your browser)", open=False): # Keep existing Accordion
         # This HTML component will be populated by JavaScript from head.html
