@@ -128,6 +128,23 @@
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  table-layout: fixed;
+}
+
+/* Set specific column widths for the language table */
+.learning-notes-container table th:nth-child(1),
+.learning-notes-container table td:nth-child(1) {
+  width: 20%;
+}
+
+.learning-notes-container table th:nth-child(2),
+.learning-notes-container table td:nth-child(2) {
+  width: 20%;
+}
+
+.learning-notes-container table th:nth-child(3),
+.learning-notes-container table td:nth-child(3) {
+  width: 60%;
 }
 
 .learning-notes-container table th {
