@@ -620,7 +620,7 @@ def generate_audio(
         dialogue_generator = generate_dialogue_normal
 
     try:
-        gr.Info("✨ Generating dialogue and study notes with AI...")
+        gr.Info("✨ Generating dialogue and study notes...")
         llm_start_time = time.time()
         llm_output = dialogue_generator(full_text)
         logger.info(f"Dialogue generation took {time.time() - llm_start_time:.2f} seconds.")
@@ -1245,7 +1245,7 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
     
     # Add download button for Word document
     with gr.Row():
-        download_word_btn = gr.Button("📄 Download Transcript & Study Notes as Word Document", variant="primary")
+        download_word_btn = gr.Button("📄 Download as Word Document →", variant="primary")
         word_doc_output = gr.File(label="📄 Word Document", visible=True)
 
     with gr.Accordion("📜 Archives (Stored in your browser)", open=False): # Keep existing Accordion
