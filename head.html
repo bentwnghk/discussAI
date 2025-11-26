@@ -16,6 +16,40 @@
 <link rel="icon" href="/static/icon.png" type="image/png" />
 
 <style>
+/* Ensure full width for transcript and study notes - target all parent containers */
+#podcast_transcript_display,
+#podcast_transcript_display *,
+#podcast_transcript_display .contain,
+#podcast_transcript_display > div,
+#podcast_transcript_display .wrap,
+#podcast_transcript_display .block {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.transcript-container,
+.learning-notes-container {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+}
+
+/* Target the Gradio HTML component wrapper */
+.gr-html {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Ensure parent containers don't restrict width */
+#podcast_transcript_display.block,
+#podcast_transcript_display .block.gradio-html {
+  width: 100% !important;
+  max-width: none !important;
+}
+
 /* Transcript styling */
 .transcript-bubble {
   color: black !important;
@@ -94,6 +128,23 @@
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  table-layout: fixed;
+}
+
+/* Set specific column widths for the language table */
+.learning-notes-container table th:nth-child(1),
+.learning-notes-container table td:nth-child(1) {
+  width: 20%;
+}
+
+.learning-notes-container table th:nth-child(2),
+.learning-notes-container table td:nth-child(2) {
+  width: 20%;
+}
+
+.learning-notes-container table th:nth-child(3),
+.learning-notes-container table td:nth-child(3) {
+  width: 60%;
 }
 
 .learning-notes-container table th {
