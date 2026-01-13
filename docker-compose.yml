@@ -7,15 +7,12 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       OPENAI_BASE_URL: ${OPENAI_BASE_URL}
       OPENAI_MODEL: ${OPENAI_MODEL}
-      SENTRY_DSN: ${SENTRY_DSN}
-      PROMPTIC_DEBUG: ${PROMPTIC_DEBUG}
-      HEAD: ${HEAD}
     volumes:
       - pdf_to_podcast_gradio:/app/.gradio
-      - pdf_to_podcast_gradio_cache:/app/gradio_cached_examples
+      - pdf_to_podcast_gradio_examples:/app/gradio_cached_examples
       - pdf_to_podcast_gradio_files:/app/gradio_cached_files
 
 volumes:
   pdf_to_podcast_gradio:
-  pdf_to_podcast_gradio_cache:
+  pdf_to_podcast_gradio_examples:
   pdf_to_podcast_gradio_files:
