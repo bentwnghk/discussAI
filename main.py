@@ -219,7 +219,7 @@ def extract_text_from_image_via_vision(image_file, openai_api_key=None):
 
 
 # Normal mode dialogue generation function
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=15), retry=retry_if_exception_type(ValidationError))
+@retry(stop=stop_after_attempt(2), wait=wait_exponential(multiplier=1, min=4, max=15), retry=retry_if_exception_type(ValidationError))
 @llm(
     model=os.getenv("OPENAI_MODEL_NORMAL"),
     api_key=os.getenv("OPENAI_API_KEY"),
@@ -227,7 +227,7 @@ def extract_text_from_image_via_vision(image_file, openai_api_key=None):
     provider="openai",
     temperature=0.5,
     max_tokens=16384,
-    timeout=120.0
+    timeout=150.0
 )
 def generate_dialogue_normal(text: str) -> Dialogue:
     """
@@ -354,7 +354,7 @@ def generate_dialogue_normal(text: str) -> Dialogue:
     """
 
 # Deeper mode dialogue generation function
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=15), retry=retry_if_exception_type(ValidationError))
+@retry(stop=stop_after_attempt(2), wait=wait_exponential(multiplier=1, min=4, max=15), retry=retry_if_exception_type(ValidationError))
 @llm(
     model=os.getenv("OPENAI_MODEL_DEEP"),
     api_key=os.getenv("OPENAI_API_KEY"),
@@ -362,7 +362,7 @@ def generate_dialogue_normal(text: str) -> Dialogue:
     provider="openai",
     temperature=0.5,
     max_tokens=16384,
-    timeout=120.0
+    timeout=150.0
 )
 def generate_dialogue_deeper(text: str) -> Dialogue:
     """
