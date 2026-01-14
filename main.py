@@ -218,131 +218,6 @@ def extract_text_from_image_via_vision(image_file, openai_api_key=None):
         raise # Reraise for retry
 
 
-# Shared dialogue generation prompt
-DIALOGUE_GENERATION_PROMPT = """
-You are an English language tutor helping Hong Kong secondary students improve their speaking skills, especially for group discussions in oral exams.
-
-Your task is to take the input text provided and create a realistic group discussion in English between four students (Candidate A, B, C, D) on the topic provided in the input text. Don't worry about the formatting issues or any irrelevant information; your goal is to extract the discussion topic and question prompts as well as any relevant key points or interesting facts from the input text for the group discussion.
-
-Important: The ENTIRE dialogue (including brainstorming, scratchpad, and actual dialogue) should be written in English.
-
-Here is the input text you will be working with:
-
-<input_text>
-{text}
-</input_text>
-
-First, carefully read through the input text and identify the discussion topic and question prompts, as well as any relevant key points or interesting facts from the text accompanying the discussion topic.
-
-<scratchpad>
-Brainstorm ideas and outline the discussion. Make sure your discussion follows the question prompts you identified in the input text.
-
-Express a range of well-developed ideas clearly, with elaboration and detail.
-
-Model an authentic discussion and interaction among 4 students, and include all the following interaction strategies:
-- Strategies for initiating a group discussion (e.g. Alright, we are here to discuss the proposal to ... | Let's begin by talking about the reasons why ...).
-- Strategies for maintaining a group discussion (e.g. What do you think? | Any thoughts, Candidate C?).
-- Strategies for transitioning in a group discussion (e.g. Does anyone have anything else to add? If not, shall we move on and discuss ...?).
-- Strategies for responding in a group discussion (e.g. I agree. | That's an interesting suggestion, but I'm a bit worried that ... | Sorry, I disagree.).
-- Strategies for rephrasing a group discussion (e.g. I see what you mean. You were saying that ...).
-- Strategies for asking for clarification in a group discussion (e.g. I'm not sure if I understood you correctly. Did you mean that ...?).
-
-Ensure every student contributes their ideas to every question prompt.
-
-Use natural, accurate vocabulary and expressions suitable for Hong Kong secondary students.
-
-Write your brainstorming ideas and discussion outline here.
-</scratchpad>
-
-Now that you have brainstormed ideas and created an outline, it's time to write the full dialogue.
-
-<podcast_dialogue>
-Write an engaging, informative dialogue here that will be 6-7 minutes long when spoken at a natural pace.
-
-Use a conversational tone.
-
-Include all the above interaction strategies to extend the interaction naturally.
-
-Use 'Candidate A', 'Candidate B', 'Candidate C', 'Candidate D' to identify the 4 speakers. Do not include any bracketed placeholders like [Candidate A] or [Candidate B].
-
-Alternate speakers naturally, ensuring every candidate speaks 4-6 times throughout the discussion.
-
-Design your output to be read aloud -- it will be directly converted into audio.
-
-Assign appropriate speakers (Candidate A, Candidate B, Candidate C, Candidate D) to each line. Ensure the output strictly adheres to the required format: a list of objects, each with 'text' and 'speaker' fields.
-
-Make the dialogue 6-7 minutes long when spoken at a natural pace (approximately 120-150 words per minute).
-
-At the end of the dialogue, include a brief summary (1–2 sentences) by one of the candidates.
-</podcast_dialogue>
-
-<learning_notes>
-Now create comprehensive learning notes for Hong Kong secondary students based on the dialogue you just generated. The learning notes should have three sections:
-
-**1. Ideas Section:**
-Create a structured outline showing the main ideas discussed in the dialogue. Format this as HTML with proper structure:
-- Use <strong> tags to bold main question prompts or key topics
-- Use <em> tags to italicize important concepts or emphasis
-- Use <br><br> for line breaks between major points
-- Use bullet points (•) or numbered lists with <br> after each item
-- Create clear hierarchy with indentation using &nbsp;&nbsp;&nbsp;&nbsp; for sub-points
-- Reference the question prompts from the input text and show how the discussion addressed each one
-- Include Traditional Chinese translations for all major points and sub-points
-
-Example format:
-<strong>Question 1: [Topic]</strong><br><br>
-• Main point 1<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Sub-point with <em>emphasis</em><br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Another sub-point<br>
-• Main point 2<br><br>
-
-**2. Language Section:**
-Identify 10-15 useful vocabulary words from the dialogue. For each item:
-- Provide the English word/phrase
-- Give the Traditional Chinese translation (繁體中文)
-- Show how it was used in the dialogue with a brief example
-
-Format this as an HTML table with proper structure:
-<table>
-<tr><th>English</th><th>中文</th><th>Usage Example</th></tr>
-<tr><td><strong>word/phrase</strong></td><td>中文翻譯</td><td>Example sentence from dialogue</td></tr>
-</table>
-
-**3. Communication Strategies Section:**
-List and explain 6-8 interaction strategies that were demonstrated in the dialogue. Format this as HTML with proper structure:
-- Use <strong> tags to bold strategy names
-- Use <em> tags to italicize example phrases from the dialogue
-- Use <br><br> for line breaks between different strategies
-- Use <br> after each example phrase
-- Include Traditional Chinese explanations
-
-Example format:
-<strong>1. Initiating Discussion (開始討論)</strong><br>
-• <em>"Alright, we’re here to discuss [whether our school should serve plant-based meats in the canteen on Green Mondays]."</em><br>
-• <em>"Maybe we can start by talking about [why plant-based meats are becoming so popular these days]."</em><br>
-用於開始討論的策略，幫助引導話題方向。<br><br>
-
-<strong>2. Maintaining Discussion (維持討論)</strong><br>
-• <em>"What do you think?"</em><br>
-• <em>"Any thoughts on this?"</em><br>
-用於鼓勵其他人參與討論。<br><br>
-
-Strategies to include:
-- Initiating discussion (開始討論)
-- Maintaining discussion (維持討論)
-- Transitioning between topics (轉換話題)
-- Responding and agreeing/disagreeing (回應及表達同意/不同意)
-- Elaborating with examples (舉例說明)
-- Building on others' ideas (延伸他人想法)
-- Asking for clarification (要求澄清)
-- Rephrasing (重新表述)
-- Summarizing (總結)
-
-Write all learning notes content in a mix of English and Traditional Chinese to facilitate Hong Kong students' learning.
-</learning_notes>
-"""
-
-
 # Normal mode dialogue generation function
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=15), retry=retry_if_exception_type(ValidationError))
 @llm(
@@ -355,8 +230,150 @@ Write all learning notes content in a mix of English and Traditional Chinese to 
     timeout=120.0
 )
 def generate_dialogue_normal(text: str) -> Dialogue:
-    return DIALOGUE_GENERATION_PROMPT.format(text=text)
+    """
+    You are an English language tutor helping Hong Kong secondary students improve their speaking skills, especially for group discussions in oral exams.
 
+    Your task is to take the input text provided and create a realistic group discussion in English between four students (Candidate A, B, C, D) on the topic provided in the input text. Don't worry about the formatting issues or any irrelevant information; your goal is to extract the discussion topic and question prompts as well as any relevant key points or interesting facts from the input text for the group discussion.
+
+    Important: The ENTIRE dialogue (including brainstorming, scratchpad, and actual dialogue) should be written in English.
+
+    Here is the input text you will be working with:
+
+    <input_text>
+    {text}
+    </input_text>
+
+    First, carefully read through the input text and identify the discussion topic and question prompts, as well as any relevant key points or interesting facts from the text accompanying the discussion topic.
+
+    <scratchpad>
+    Brainstorm ideas and outline the discussion. Make sure your discussion follows the question prompts you identified in the input text.
+
+    Express a range of well-developed ideas clearly, with elaboration and detail.
+
+    **Length Planning for 6-8 minute dialogue:**
+    - Plan for approximately 800-1100 total words across all dialogue lines
+    - Structure the discussion with 3-4 main question prompts from the input text
+    - Allocate 1.5-2.5 minutes of discussion per main question prompt
+    - Each speaker should contribute 180-275 words of meaningful content
+    - Include 1-2 discussion rounds per main question prompt (initial thoughts → key examples → agreements/disagreements)
+
+    Model an authentic discussion and interaction among 4 students, and include all the following interaction strategies:
+    - Strategies for initiating a group discussion (e.g. Alright, we are here to discuss the proposal to ... | Let's begin by talking about the reasons why ...).
+    - Strategies for maintaining a group discussion (e.g. What do you think? | Any thoughts, Candidate C?).
+    - Strategies for transitioning in a group discussion (e.g. Does anyone have anything else to add? If not, shall we move on and discuss ...?).
+    - Strategies for responding in a group discussion (e.g. I agree. | That's an interesting suggestion, but I'm a bit worried that ... | Sorry, I disagree.).
+    - Strategies for rephrasing a group discussion (e.g. I see what you mean. You were saying that ...).
+    - Strategies for asking for clarification in a group discussion (e.g. I'm not sure if I understood you correctly. Did you mean that ...?).
+
+    Use natural, accurate vocabulary and expressions suitable for Hong Kong secondary students.
+
+    Write your brainstorming ideas and discussion outline here, ensuring the planned structure will result in a 6-8 minute dialogue when spoken naturally.
+    </scratchpad>
+
+    Now that you have brainstormed ideas and created an outline, it's time to write the full dialogue.
+
+    <podcast_dialogue>
+    Write an engaging, informative dialogue here that will be 6-8 minutes long when spoken at a natural pace.
+
+    **Content Requirements for 6-8 minute length:**
+    - Ensure meaningful contributions from each speaker (180-275 words per speaker)
+    - Each speaker should express key viewpoints with relevant examples appropriate for Hong Kong secondary students
+    - Include 1-2 discussion rounds per major question prompt (initial position → supporting examples → agreements/disagreements)
+    - Add clear explanations and relevant examples without excessive detail
+    - Include natural conversation patterns appropriate for secondary school level
+
+    Use a conversational tone with natural pacing and detailed discussions.
+
+    Include all the above interaction strategies throughout to extend the discussion naturally.
+
+    Use 'Candidate A', 'Candidate B', 'Candidate C', 'Candidate D' to identify the 4 speakers. Do not include any bracketed placeholders like [Candidate A] or [Candidate B].
+
+    Alternate speakers naturally, ensuring balanced participation from all candidates.
+
+    Design your output to be read aloud -- it will be directly converted into audio, so focus on natural speech patterns and detailed content.
+
+    Assign appropriate speakers (Candidate A, Candidate B, Candidate C, Candidate D) to each line. Ensure the output strictly adheres to the required format: a list of objects, each with 'text' and 'speaker' fields.
+
+    Make the dialogue 6-8 minutes long when spoken at a natural pace (approximately 120-150 words per minute).
+
+    To achieve this length:
+    - Target approximately 800-1100 words total across all speakers
+    - Include focused explanations and elaborations appropriate for secondary students
+    - Have speakers ask follow-up questions and provide concise but thoughtful responses
+    - Include relevant examples and scenarios for each question prompt
+    - Ensure each speaker contributes meaningful content (180-275 words per speaker)
+    - Include natural pauses for thinking and clarification requests
+
+    At the end of the dialogue, include a brief summary (1–2 sentences) by one of the candidates.
+    </podcast_dialogue>
+
+    <learning_notes>
+    Now create comprehensive learning notes for Hong Kong secondary students based on the dialogue you just generated. The learning notes should have three sections:
+
+    **1. Ideas Section:**
+    Create a structured outline showing the main ideas discussed in the dialogue. Format this as HTML with proper structure:
+    - Use <strong> tags to bold main question prompts or key topics
+    - Use <em> tags to italicize important concepts or emphasis
+    - Use <br><br> for line breaks between major points
+    - Use bullet points (•) or numbered lists with <br> after each item
+    - Create clear hierarchy with indentation using &nbsp;&nbsp;&nbsp;&nbsp; for sub-points
+    - Reference the question prompts from the input text and show how the discussion addressed each one
+    - Since this is a deeper discussion, ensure the outline captures the elaborations and examples provided
+    - Include Traditional Chinese translations for all major points and sub-points
+    
+    Example format:
+    <strong>Question 1: [Topic]</strong><br><br>
+    • Main point 1<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;- Sub-point with <em>emphasis</em><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;- Another sub-point with example<br>
+    • Main point 2<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;- Elaboration<br><br>
+
+    **2. Language Section:**
+    Identify 10-15 useful vocabulary words from the dialogue. For each item:
+    - Provide the English word/phrase
+    - Give the Traditional Chinese translation (繁體中文)
+    - Show how it was used in the dialogue with a brief example
+
+    Format this as an HTML table with proper structure:
+    <table>
+    <tr><th>English</th><th>中文</th><th>Usage Example</th></tr>
+    <tr><td><strong>word/phrase</strong></td><td>中文翻譯</td><td>Example sentence from dialogue</td></tr>
+    </table>
+
+    **3. Communication Strategies Section:**
+    List and explain 8-10 interaction strategies that were demonstrated in the dialogue. Format this as HTML with proper structure:
+    - Use <strong> tags to bold strategy names
+    - Use <em> tags to italicize example phrases from the dialogue
+    - Use <br><br> for line breaks between different strategies
+    - Use <br> after each example phrase
+    - Include Traditional Chinese explanations
+    
+    Example format:
+    <strong>1. Initiating Discussion (開始討論)</strong><br>
+    • <em>"Alright, we’re here to discuss [whether our school should serve plant-based meats in the canteen on Green Mondays]."</em><br>
+    • <em>"Maybe we can start by talking about [why plant-based meats are becoming so popular these days]."</em><br>
+    用於開始討論的策略，幫助引導話題方向。<br><br>
+
+    <strong>2. Maintaining Discussion (維持討論)</strong><br>
+    • <em>"What do you think?"</em><br>
+    • <em>"Any thoughts on this?"</em><br>
+    用於鼓勵其他人參與討論。<br><br>
+
+    Strategies to include:
+    - Initiating discussion (開始討論)
+    - Maintaining discussion (維持討論)
+    - Transitioning between topics (轉換話題)
+    - Responding and agreeing/disagreeing (回應及表達同意/不同意)
+    - Asking for clarification (要求澄清)
+    - Rephrasing (重新表述)
+    - Summarizing (總結)
+    - Elaborating with examples (舉例說明)
+    - Building on others' ideas (延伸他人想法)
+
+    Write all learning notes content in a mix of English and Traditional Chinese to facilitate Hong Kong students' learning.
+    </learning_notes>
+    """
 
 # Deeper mode dialogue generation function
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=15), retry=retry_if_exception_type(ValidationError))
@@ -370,7 +387,126 @@ def generate_dialogue_normal(text: str) -> Dialogue:
     timeout=120.0
 )
 def generate_dialogue_deeper(text: str) -> Dialogue:
-    return DIALOGUE_GENERATION_PROMPT.format(text=text)
+    """
+    You are an English language tutor helping Hong Kong secondary students improve their speaking skills, especially for group discussions in oral exams.
+
+    Your task is to take the input text provided and create a realistic group discussion in English between four students (Candidate A, B, C, D) on the topic provided in the input text. Don't worry about the formatting issues or any irrelevant information; your goal is to extract the discussion topic and question prompts as well as any relevant key points or interesting facts from the input text for the group discussion.
+
+    Important: The ENTIRE dialogue (including brainstorming, scratchpad, and actual dialogue) should be written in English.
+
+    Here is the input text you will be working with:
+
+    <input_text>
+    {text}
+    </input_text>
+
+    First, carefully read through the input text and identify the discussion topic and question prompts, as well as any relevant key points or interesting facts from the text accompanying the discussion topic.
+
+    <scratchpad>
+    Brainstorm ideas and outline the discussion. Make sure your discussion follows the question prompts you identified in the input text.
+
+    Express a range of well-developed ideas clearly, with elaboration and detail.
+
+    Model an authentic discussion and interaction among 4 students, and include all the following interaction strategies:
+    - Strategies for initiating a group discussion (e.g. Alright, we are here to discuss the proposal to ... | Let's begin by talking about the reasons why ...).
+    - Strategies for maintaining a group discussion (e.g. What do you think? | Any thoughts, Candidate C?).
+    - Strategies for transitioning in a group discussion (e.g. Does anyone have anything else to add? If not, shall we move on and discuss ...?).
+    - Strategies for responding in a group discussion (e.g. I agree. | That's an interesting suggestion, but I'm a bit worried that ... | Sorry, I disagree.).
+    - Strategies for rephrasing a group discussion (e.g. I see what you mean. You were saying that ...).
+    - Strategies for asking for clarification in a group discussion (e.g. I'm not sure if I understood you correctly. Did you mean that ...?).
+
+    Ensure every student contributes their ideas to every question prompt.
+
+    Use natural, accurate vocabulary and expressions suitable for Hong Kong secondary students.
+
+    Write your brainstorming ideas and discussion outline here.
+    </scratchpad>
+
+    Now that you have brainstormed ideas and created an outline, it's time to write the full dialogue.
+
+    <podcast_dialogue>
+    Write an engaging, informative dialogue here that will be 6-7 minutes long when spoken at a natural pace.
+
+    Use a conversational tone.
+
+    Include all the above interaction strategies to extend the interaction naturally.
+
+    Use 'Candidate A', 'Candidate B', 'Candidate C', 'Candidate D' to identify the 4 speakers. Do not include any bracketed placeholders like [Candidate A] or [Candidate B].
+
+    Alternate speakers naturally, ensuring every candidate speaks 4-6 times throughout the discussion.
+
+    Design your output to be read aloud -- it will be directly converted into audio.
+
+    Assign appropriate speakers (Candidate A, Candidate B, Candidate C, Candidate D) to each line. Ensure the output strictly adheres to the required format: a list of objects, each with 'text' and 'speaker' fields.
+
+    Make the dialogue 6-7 minutes long when spoken at a natural pace (approximately 120-150 words per minute).
+
+    At the end of the dialogue, include a brief summary (1–2 sentences) by one of the candidates.
+    </podcast_dialogue>
+
+    <learning_notes>
+    Now create comprehensive learning notes for Hong Kong secondary students based on the dialogue you just generated. The learning notes should have three sections:
+
+    **1. Ideas Section:**
+    Create a structured outline showing the main ideas discussed in the dialogue. Format this as HTML with proper structure:
+    - Use <strong> tags to bold main question prompts or key topics
+    - Use <em> tags to italicize important concepts or emphasis
+    - Use <br><br> for line breaks between major points
+    - Use bullet points (•) or numbered lists with <br> after each item
+    - Create clear hierarchy with indentation using &nbsp;&nbsp;&nbsp;&nbsp; for sub-points
+    - Reference the question prompts from the input text and show how the discussion addressed each one
+    - Include Traditional Chinese translations for all major points and sub-points
+    
+    Example format:
+    <strong>Question 1: [Topic]</strong><br><br>
+    • Main point 1<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;- Sub-point with <em>emphasis</em><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;- Another sub-point<br>
+    • Main point 2<br><br>
+
+    **2. Language Section:**
+    Identify 10-15 useful vocabulary words from the dialogue. For each item:
+    - Provide the English word/phrase
+    - Give the Traditional Chinese translation (繁體中文)
+    - Show how it was used in the dialogue with a brief example
+
+    Format this as an HTML table with proper structure:
+    <table>
+    <tr><th>English</th><th>中文</th><th>Usage Example</th></tr>
+    <tr><td><strong>word/phrase</strong></td><td>中文翻譯</td><td>Example sentence from dialogue</td></tr>
+    </table>
+
+    **3. Communication Strategies Section:**
+    List and explain 6-8 interaction strategies that were demonstrated in the dialogue. Format this as HTML with proper structure:
+    - Use <strong> tags to bold strategy names
+    - Use <em> tags to italicize example phrases from the dialogue
+    - Use <br><br> for line breaks between different strategies
+    - Use <br> after each example phrase
+    - Include Traditional Chinese explanations
+    
+    Example format:
+    <strong>1. Initiating Discussion (開始討論)</strong><br>
+    • <em>"Alright, we’re here to discuss [whether our school should serve plant-based meats in the canteen on Green Mondays]."</em><br>
+    • <em>"Maybe we can start by talking about [why plant-based meats are becoming so popular these days]."</em><br>
+    用於開始討論的策略，幫助引導話題方向。<br><br>
+
+    <strong>2. Maintaining Discussion (維持討論)</strong><br>
+    • <em>"What do you think?"</em><br>
+    • <em>"Any thoughts on this?"</em><br>
+    用於鼓勵其他人參與討論。<br><br>
+
+    Strategies to include:
+    - Initiating discussion (開始討論)
+    - Maintaining discussion (維持討論)
+    - Transitioning between topics (轉換話題)
+    - Responding and agreeing/disagreeing (回應及表達同意/不同意)
+    - Asking for clarification (要求澄清)
+    - Rephrasing (重新表述)
+    - Summarizing (總結)
+
+    Write all learning notes content in a mix of English and Traditional Chinese to facilitate Hong Kong students' learning.
+    </learning_notes>
+    """
 
 def generate_audio(
     input_method: str,
