@@ -356,6 +356,7 @@ Write all learning notes content in a mix of English and Traditional Chinese to 
 )
 def generate_dialogue_normal(text: str) -> Dialogue:
     return DIALOGUE_GENERATION_PROMPT.format(text=text)
+generate_dialogue_normal.__doc__ = DIALOGUE_GENERATION_PROMPT
 
 
 # Deeper mode dialogue generation function
@@ -371,6 +372,7 @@ def generate_dialogue_normal(text: str) -> Dialogue:
 )
 def generate_dialogue_deeper(text: str) -> Dialogue:
     return DIALOGUE_GENERATION_PROMPT.format(text=text)
+generate_dialogue_deeper.__doc__ = DIALOGUE_GENERATION_PROMPT
 
 def generate_audio(
     input_method: str,
