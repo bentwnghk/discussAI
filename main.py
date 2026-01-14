@@ -224,6 +224,7 @@ def extract_text_from_image_via_vision(image_file, openai_api_key=None):
     model=os.getenv("OPENAI_MODEL_NORMAL"),
     api_key=os.getenv("OPENAI_API_KEY"),
     base_url=os.getenv("OPENAI_BASE_URL"),
+    provider="openai",
     temperature=0.5,
     max_tokens=16384,
     timeout=120.0
@@ -356,6 +357,7 @@ def generate_dialogue_normal(text: str) -> Dialogue:
     model=os.getenv("OPENAI_MODEL_DEEP"),
     api_key=os.getenv("OPENAI_API_KEY"),
     base_url=os.getenv("OPENAI_BASE_URL"),
+    provider="openai",
     temperature=0.5,
     max_tokens=16384,
     timeout=120.0
