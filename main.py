@@ -75,7 +75,7 @@ class Dialogue(BaseModel):
 
 
 # Add retry mechanism to TTS calls for resilience
-@retry(stop=stop_after_attempt(2), wait=wait_exponential(multiplier=1, min=2, max=10), retry=retry_if_exception_type(Exception))
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10), retry=retry_if_exception_type(Exception))
 def get_mp3(text: str, voice: str, api_key: str = None) -> bytes:
     """
     Generates MP3 audio for the given text by making a direct request to the
@@ -221,7 +221,7 @@ def extract_text_from_image_via_vision(image_file, openai_api_key=None):
 # Normal mode dialogue generation function
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=15), retry=retry_if_exception_type(ValidationError))
 @llm(
-    model=os.getenv("OPENAI_MODEL"),
+    model=os.getenv("OPENAI_MODEL_NORMAL"),
     api_key=os.getenv("OPENAI_API_KEY"),
     base_url=os.getenv("OPENAI_BASE_URL"),
     temperature=0.5,
@@ -353,7 +353,7 @@ def generate_dialogue_normal(text: str) -> Dialogue:
 # Deeper mode dialogue generation function
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=15), retry=retry_if_exception_type(ValidationError))
 @llm(
-    model=os.getenv("OPENAI_MODEL"),
+    model=os.getenv("OPENAI_MODEL_DEEP"),
     api_key=os.getenv("OPENAI_API_KEY"),
     base_url=os.getenv("OPENAI_BASE_URL"),
     temperature=0.5,
