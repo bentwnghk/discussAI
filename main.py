@@ -308,7 +308,7 @@ def generate_dialogue_normal(text: str) -> Dialogue:
     • Main point 2<br><br>
 
     **2. Language Section:**
-    Identify 10-15 useful vocabulary words from the dialogue. For each item:
+    Identify 12-15 useful vocabulary words from the dialogue. For each item:
     - Provide the English word/phrase
     - Give the Traditional Chinese translation (繁體中文)
     - Show how it was used in the dialogue with a brief example
@@ -604,7 +604,7 @@ def generate_audio(
         dialogue_generator = generate_dialogue_normal
 
     try:
-        gr.Info("✨ Generating dialogue and study notes...")
+        gr.Info("✨ Generating dialogue and study notes... (This may take 1-2 minutes.)")
         llm_start_time = time.time()
         llm_output = dialogue_generator(full_text)
         logger.info(f"Dialogue generation took {time.time() - llm_start_time:.2f} seconds.")
