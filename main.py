@@ -1203,7 +1203,7 @@ with gr.Blocks(theme="ocean", title="Mr.🆖 DiscussAI 👥🎙️", css="footer
             ["Normal", "Deeper"],
             label="🎯 Depth of Discussion",
             value="Normal",
-            info="Select 'Deeper' if you prefer a more detailed discussion with further elaborations"
+            info="Select 'Deeper' if you prefer a more detailed discussion with further ideas and elaborations"
         )
 
     API_KEY_URL = "https://api.mr5ai.com"

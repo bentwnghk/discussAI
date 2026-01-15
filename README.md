@@ -13,25 +13,26 @@
 - **🎓 Educational Focus:** Designed specifically for Hong Kong secondary students to practice group discussion skills for HKDSE oral exams
 - **👥 4-Student Dialogues:** Generates realistic conversations between Candidates A, B, C, and D with authentic interaction patterns
 - **🗣️ Communication Strategies:** Incorporates essential discussion skills - initiating, maintaining, transitioning, responding, rephrasing, and clarifying ideas
-- **📁 Multiple Input Methods:** Upload documents (PDF, DOCX, TXT), images with OCR (JPG, JPEG, PNG), or paste discussion topics directly
+- **📁 Multiple Input Methods:** Upload documents (PDF, DOCX), images with OCR (JPG, JPEG, PNG), or paste discussion topics directly
 - **🤖 AI-Powered Generation:** Uses OpenAI's top-tier LLMs to create engaging, topic-relevant dialogues with proper brainstorming and structure
 - **🎵 Audio Narration:** High-quality text-to-speech with natural voices through Mr.🆖 AI Hub for immersive practice sessions
 - **🌈 Color-Coded Transcripts:** Each candidate's dialogue is displayed in a distinct color bubble for easy reading and review
+- **📄 Word Document Export:** Download complete study materials as formatted Word documents with color-coded transcripts and structured notes
 - **📚 Comprehensive Study Notes:** Every session generates structured learning materials including:
   - Ideas outline with Traditional Chinese translations
   - Vocabulary table with English terms, Chinese meanings, and usage examples
   - Communication strategies with HKDSE-relevant patterns and examples
-- **⏱️ Exam-Length Practice:** Generates 6-10 minute discussions matching typical HKDSE oral exam duration
+- **⏱️ Exam-Length Practice:** Generates 6-9 minute discussions matching typical HKDSE oral exam duration
 - **🎚️ Two Dialogue Modes:**
   - **Normal Mode:** Clear, exam-style conversations (6-7 minutes) for quick practice
-  - **Deeper Mode:** More detailed discussions with elaborations and richer vocabulary (6-8 minutes, 800-1100 words)
+  - **Deeper Mode:** More detailed discussions with further ideas and elaborations (7-9 minutes)
 - **💰 Cost Transparency:** Real-time TTS cost calculation and tracking
 - **💾 Practice History:** Save and review previous discussion sessions with full transcripts and audio in your browser
 
 ## How It Works
 
 1. **Choose Input Method:**
-   - Upload HKDSE exam papers or study materials (PDF, DOCX, TXT, images)
+   - Upload HKDSE exam papers or study materials (PDF, DOCX, images)
    - Or enter your own discussion topic directly
 
 2. **Select Dialogue Depth:**
@@ -48,7 +49,12 @@
    - View color-coded transcript with speaker bubbles
    - Review comprehensive study notes below the transcript
 
-5. **Review History:**
+5. **Download as Word Document:**
+   - Click "Download as Word Document" to get a formatted .docx file
+   - Includes color-coded transcript and all study notes
+   - Perfect for offline study and printing
+
+6. **Review History:**
    - All sessions are saved in your browser
    - Access previous discussions anytime from the Archives section
 
@@ -59,7 +65,7 @@ Every generation includes:
 ### 🎙️ Audio Discussion
 - Authentic HKDSE-style group discussion
 - 4 distinct AI voices
-- 6-10 minutes duration matching real exam length
+- 6-9 minutes duration matching real exam length
 - Natural conversation flow with proper pacing
 
 ### 📃 Color-Coded Transcript
@@ -69,6 +75,13 @@ Every generation includes:
   - Candidate C: Light Green
   - Candidate D: Light Pink
 - Easy to follow and review
+
+### 📄 Word Document (Downloadable)
+- Formatted .docx file with:
+  - Color-coded transcript with background shading
+  - Structured study notes (Ideas, Language, Communication Strategies)
+  - Tables for vocabulary
+  - Numbered lists for communication strategies
 
 ### 📚 Study Notes (English + Traditional Chinese)
 
@@ -112,12 +125,11 @@ These examples demonstrate how to transform exam topics into interactive group d
 
 | Feature | Normal Mode | Deeper Mode |
 |---------|-------------|-------------|
-| Duration | 6-7 minutes | 6-8 minutes |
-| Word Count | ~700-900 words | ~800-1100 words |
+| Duration | 6-7 minutes | 7-9 minutes |
 | Detail Level | Clear, focused | More elaboration |
 | Examples | Key examples | Multiple examples per point |
 | Best For | Quick practice, time efficiency | Comprehensive review, vocabulary building |
-| Learning Notes | 6-8 strategies | 8-10 strategies |
+| Learning Notes | 6 strategies | 6-8 strategies |
 
 ## Installation
 
@@ -149,7 +161,8 @@ These examples demonstrate how to transform exam topics into interactive group d
    ```bash
    export OPENAI_API_KEY="your-api-key-here"
    export OPENAI_BASE_URL="https://api.mr5ai.com/v1"  # Mr.🆖 AI Hub endpoint
-   export OPENAI_MODEL="gpt-5"  # Optional, defaults to gpt-5
+   export OPENAI_MODEL_NORMAL="gpt-5-mini"  # Model for Normal mode (optional)
+   export OPENAI_MODEL_DEEP="gpt-5.1"    # Model for Deeper mode (optional)
    ```
 
    - Optional: Configure Sentry for error monitoring:
@@ -182,7 +195,8 @@ The application will start on `http://0.0.0.0:8000`
 4. Enter your Mr.🆖 AI Hub API key (if not set in environment)
 5. Click "Generate Discussion with Audio and Study Notes"
 6. Listen to the audio, read the color-coded transcript, and review study notes
-7. Access previous sessions in the Archives section
+7. Click "Download as Word Document" to get a formatted .docx file
+8. Access previous sessions in the Archives section
 
 ## Technical Features
 
@@ -192,19 +206,20 @@ The application will start on `http://0.0.0.0:8000`
   - PDF: Text extraction with PyPDF
   - DOCX: Document parsing with python-docx
   - Images: OCR with OpenAI Vision API (GPT-4.1-mini)
-  - TXT: Direct text input
+- **Word Document Export:** Generates formatted .docx files with color-coded transcripts and structured notes
 - **Cost Tracking:** Real-time TTS cost calculation in HKD
 - **Browser-Based Storage:** Practice history saved in localStorage
-- **Automatic Cleanup:** Old temporary audio files removed after 24 hours
+- **Automatic Cleanup:** Old temporary audio files removed after 24 hours, Word documents after 60 minutes
 - **Timezone Support:** Timestamps in Hong Kong timezone (Asia/Hong_Kong)
 - **Error Handling:** Comprehensive error handling with detailed logging via Loguru
+- **Sentry Integration:** Optional error monitoring via SENTRY_DSN environment variable
 
 ## API Integration
 
 This application uses Mr.🆖 AI Hub's OpenAI-compatible API:
 
-- **Dialogue Generation:** GPT-5 with structured output (Pydantic models)
-- **Text-to-Speech:** OpenAI TTS-1 with 4 distinct voices
+- **Dialogue Generation:** Configurable models (default: GPT-5) with structured output (Pydantic models)
+- **Text-to-Speech:** OpenAI TTS-1 with 4 distinct voices (nova, alloy, fable, echo)
 - **Vision OCR:** GPT-4.1-mini vision model for image text extraction
 
 ## File Structure
@@ -213,13 +228,18 @@ This application uses Mr.🆖 AI Hub's OpenAI-compatible API:
 discussAI/
 ├── main.py                 # Main application file
 ├── description.md          # App description for UI
-├── footer.md              # Footer content for UI
-├── head.html              # Custom HTML/JS for browser storage
-├── examples/              # Sample HKDSE exam papers
+├── footer.md               # Footer content for UI
+├── head.html               # Custom HTML/JS for browser storage
+├── examples/               # Sample HKDSE exam papers
 │   ├── DSE 2023 Paper 4 Set 1.2.png
 │   └── DSE 2024 Paper 4 Set 5.2.png
-├── gradio_cached_files/   # Temporary audio files
-└── pyproject.toml         # Dependencies
+├── static/                 # Static assets (logo, icon)
+│   ├── logo.png
+│   └── icon.png
+├── gradio_cached_files/    # Temporary audio and document files
+│   └── tmp/
+├── pyproject.toml          # Dependencies
+└── README.md               # This file
 ```
 
 ## Dependencies
@@ -230,18 +250,20 @@ Key dependencies:
 - `promptic` - LLM decorator for structured outputs
 - `pydantic` - Data validation and structured models
 - `pypdf` - PDF text extraction
-- `python-docx` - DOCX document parsing
+- `python-docx` - DOCX document parsing and Word document generation
 - `tenacity` - Retry mechanisms
 - `fastapi` - Web framework
 - `loguru` - Logging
 - `pytz` - Timezone support
+- `requests` - HTTP requests for TTS
+- `beautifulsoup4` - HTML parsing for Word document conversion
 
 ## Troubleshooting
 
 ### Common Issues for Students & Teachers
 
 - **API Key Issues:** Ensure your Mr.🆖 AI Hub key is valid and has sufficient credits for TTS generation
-- **Study Material Upload:** Check that HKDSE papers and study materials are in supported formats (PDF, DOCX, TXT, JPG, JPEG, PNG)
+- **Study Material Upload:** Check that HKDSE papers and study materials are in supported formats (PDF, DOCX, JPG, JPEG, PNG)
 - **Content Extraction:** Some scanned documents might need better quality images for accurate text extraction
 - **Generation Timeouts:** Complex topics might take longer - the app has retry mechanisms built-in
 - **Audio Quality:** Ensure stable internet connection for consistent TTS generation
