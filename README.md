@@ -116,7 +116,7 @@ Every generation includes:
 
 The project includes sample HKDSE exam materials:
 
-- **DSE 2023 Paper 4 Set 1.2.png** - Sample group discussion exam paper for practice
+- **DSE 2019 Paper 4 Set 3.2.png** - Sample group discussion exam paper for practice
 - **DSE 2024 Paper 4 Set 5.2.png** - Additional HKDSE oral exam materials
 
 These examples demonstrate how to transform exam topics into interactive group discussions for oral practice.
@@ -231,7 +231,7 @@ discussAI/
 ├── footer.md               # Footer content for UI
 ├── head.html               # Custom HTML/JS for browser storage
 ├── examples/               # Sample HKDSE exam papers
-│   ├── DSE 2023 Paper 4 Set 1.2.png
+│   ├── DSE 2019 Paper 4 Set 3.2.png
 │   └── DSE 2024 Paper 4 Set 5.2.png
 ├── static/                 # Static assets (logo, icon)
 │   ├── logo.png

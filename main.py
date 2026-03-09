@@ -1151,7 +1151,7 @@ allowed_extensions = [
 examples_dir = Path("examples")
 examples = [
     [ # Input method, dialogue mode, files, text, api_key
-        "Upload Files", [str(examples_dir / "DSE 2023 Paper 4 Set 1.2.png")], "", "Deeper", None
+        "Upload Files", [str(examples_dir / "DSE 2019 Paper 4 Set 3.2.png")], "", "Deeper", None
     ],
     [
         "Upload Files", [str(examples_dir / "DSE 2024 Paper 4 Set 5.2.png")], "", "Normal",  None
@@ -1389,7 +1389,7 @@ app = gr.mount_gradio_app(app, demo, path="/")
 if __name__ == "__main__":
     examples_dir.mkdir(exist_ok=True)
     example_files = [
-        "DSE 2023 Paper 4 Set 1.2.png",
+        "DSE 2019 Paper 4 Set 3.2.png",
         "DSE 2024 Paper 4 Set 5.2.png"
     ]
     for fname in example_files:
