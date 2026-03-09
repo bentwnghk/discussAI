@@ -562,6 +562,17 @@
                         contentDiv.innerHTML = htmlTranscript;
                     }
                     
+                    // Ensure transcript-container has correct styling (max-height and overflow)
+                    // This makes Archives behave consistently with Examples
+                    setTimeout(() => {
+                        const transcriptContainer = document.querySelector('#podcast_transcript_display .transcript-container');
+                        if (transcriptContainer) {
+                            transcriptContainer.style.maxHeight = '400px';
+                            transcriptContainer.style.overflowY = 'auto';
+                            console.log('[LOAD_HISTORY] Ensured transcript-container has correct max-height and overflow styling');
+                        }
+                    }, 150);
+                    
                     // Force a re-render by triggering Gradio's update mechanism
                     setTimeout(() => {
                         const event = new CustomEvent('gradio:update', {
