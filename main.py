@@ -1287,8 +1287,10 @@ def generate_word_document(
 
                         if has_strong_tags:
                             # Split by <strong> tags to find questions
+                            # Use .*? (non-greedy) instead of [^<]+ to allow HTML tags inside <strong>
+                            # re.DOTALL ensures it matches across newlines
                             question_parts = re.split(
-                                r"<strong>([^<]+)</strong>", html_str
+                                r"<strong>(.*?)</strong>", html_str, flags=re.DOTALL
                             )
                             logger.debug(
                                 f"Ideas section split into {len(question_parts)} parts"
