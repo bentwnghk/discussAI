@@ -1174,8 +1174,9 @@ def generate_word_document(
                         html_str = str(section_content)
 
                         # Split by <strong> tags to find strategy titles
+                        # Use .*? to match any characters (including HTML) until </strong>
                         strategy_parts = re.split(
-                            r"<strong>(\d+\.\s+[^<]+)</strong>", html_str
+                            r"<strong>(\d+\.\s+.*?)</strong>", html_str, flags=re.DOTALL
                         )
 
                         for i in range(1, len(strategy_parts), 2):
