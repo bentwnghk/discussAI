@@ -1303,10 +1303,38 @@ def generate_word_document(
                                         doc.add_paragraph()  # Add blank line for spacing
 
                                     # Question title
-                                    question_title = question_parts[i].strip()
-                                    para = doc.add_paragraph()
-                                    run = para.add_run(question_title)
-                                    run.bold = True
+                                    question_title_raw = question_parts[i].strip()
+
+                                    # Clean HTML tags from question title
+                                    # First, convert <br> to newlines
+                                    question_title_clean = re.sub(
+                                        r"<br\s*/?>", "\n", question_title_raw
+                                    )
+                                    # Remove other HTML tags
+                                    question_title_clean = re.sub(
+                                        r"<[^>]+>", "", question_title_clean
+                                    )
+                                    # Handle HTML entities
+                                    question_title_clean = question_title_clean.replace(
+                                        "&nbsp;", " "
+                                    )
+                                    question_title_clean = question_title_clean.strip()
+
+                                    # Add question title (handle multi-line titles)
+                                    if "\n" in question_title_clean:
+                                        # Split by newlines and add each line
+                                        title_lines = question_title_clean.split("\n")
+                                        for idx, title_line in enumerate(title_lines):
+                                            title_line = title_line.strip()
+                                            if title_line:
+                                                para = doc.add_paragraph()
+                                                run = para.add_run(title_line)
+                                                run.bold = True
+                                    else:
+                                        # Single line title
+                                        para = doc.add_paragraph()
+                                        run = para.add_run(question_title_clean)
+                                        run.bold = True
 
                                     # Question content (main points and sub-points)
                                     if i + 1 < len(question_parts):
