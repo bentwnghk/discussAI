@@ -1,4 +1,4 @@
-import { generateObject } from "ai";
+import { generateText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { dialogueSchema } from "./schemas";
 import { buildDialoguePrompt } from "./prompts";
@@ -26,14 +26,15 @@ export async function generateDialogue(
 
   const { system, user } = buildDialoguePrompt(text);
 
-  const { object } = await generateObject({
+  const { text: raw } = await generateText({
     model: openai.chat(modelId),
-    schema: dialogueSchema,
     system,
-    prompt: user,
+    prompt: user + "\n\nReturn ONLY valid JSON matching the schema. No markdown fences.",
     ...(isReasoning ? {} : { temperature: 0.5 }),
     maxRetries: 2,
   });
 
-  return object as Dialogue;
+  const cleaned = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
+  const parsed = JSON.parse(cleaned);
+  return dialogueSchema.parse(parsed) as Dialogue;
 }
