@@ -27,7 +27,7 @@ export async function generateDialogue(
   const { system, user } = buildDialoguePrompt(text);
 
   const { object } = await generateObject({
-    model: openai(modelId),
+    model: openai.chat(modelId),
     schema: dialogueSchema,
     system,
     prompt: user,
