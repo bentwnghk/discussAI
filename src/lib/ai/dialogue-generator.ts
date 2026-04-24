@@ -22,6 +22,8 @@ export async function generateDialogue(
       ? process.env.OPENAI_MODEL_DEEP || "gpt-4.1"
       : process.env.OPENAI_MODEL_NORMAL || "gpt-4.1-mini";
 
+  const isReasoning = /o[1-4]|gpt-5/i.test(modelId);
+
   const { system, user } = buildDialoguePrompt(text);
 
   const { object } = await generateObject({
@@ -29,7 +31,7 @@ export async function generateDialogue(
     schema: dialogueSchema,
     system,
     prompt: user,
-    temperature: 0.5,
+    ...(isReasoning ? {} : { temperature: 0.5 }),
     maxRetries: 2,
   });
 

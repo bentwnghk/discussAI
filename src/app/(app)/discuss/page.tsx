@@ -157,39 +157,47 @@ export default function DiscussPage() {
       }
 
       const blob = new Blob([combined], { type: "audio/mpeg" });
-      const url = URL.createObjectURL(blob);
-      setAudioUrl(url);
+      const objectUrl = URL.createObjectURL(blob);
+      setAudioUrl(objectUrl);
 
       setProgressLabel("Saving session...");
       setProgress(95);
 
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const base64Audio = (reader.result as string).split(",")[1];
-        try {
-          await fetch("/api/history", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              title: data.title,
-              dialogueMode: data.dialogue
-                ? dialogueMode
-                : "Normal",
-              inputMethod,
-              inputText:
-                inputMethod === "Enter Topic" ? topicText : null,
-              transcript: data.dialogue,
-              learningNotes: data.learningNotes,
-              audioUrl: base64Audio,
-              charactersCount: data.charactersCount,
-              ttsCostHKD: data.ttsCostHKD,
-            }),
-          });
-        } catch {
-          toast.warning("Session saved locally but could not sync to server.");
+      let savedAudioUrl: string | null = null;
+      try {
+        const uploadForm = new FormData();
+        uploadForm.append("audio", blob, "discussion.mp3");
+        const uploadRes = await fetch("/api/upload-audio", {
+          method: "POST",
+          body: uploadForm,
+        });
+        if (uploadRes.ok) {
+          const { audioUrl: serverUrl } = await uploadRes.json();
+          savedAudioUrl = serverUrl;
         }
-      };
-      reader.readAsDataURL(blob);
+      } catch {
+        console.warn("Audio upload failed, session will be saved without audio.");
+      }
+
+      try {
+        await fetch("/api/history", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: data.title,
+            dialogueMode,
+            inputMethod,
+            inputText: inputMethod === "Enter Topic" ? topicText : null,
+            transcript: data.dialogue,
+            learningNotes: data.learningNotes,
+            audioUrl: savedAudioUrl,
+            charactersCount: data.charactersCount,
+            ttsCostHKD: data.ttsCostHKD,
+          }),
+        });
+      } catch {
+        toast.warning("Session saved locally but could not sync to server.");
+      }
 
       setProgress(100);
       setProgressLabel("Done!");

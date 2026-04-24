@@ -7,11 +7,9 @@ export async function extractTextFromPDF(filePath: string): Promise<string> {
   if (typeof g.Path2D === "undefined") g.Path2D = class {};
 
   const mod = await import("pdf-parse");
-  const pdfParse = (mod as unknown as { default?: Function; (buf: Buffer): Promise<{ text: string }> }).default
-    || (mod as unknown as (buf: Buffer) => Promise<{ text: string }>);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const pdfParse = (mod as any).default || mod;
   const dataBuffer = await fs.readFile(filePath);
-  const data = await (pdfParse as (data: Buffer) => Promise<{ text: string }>)(
-    dataBuffer
-  );
+  const data: { text: string } = await pdfParse(dataBuffer);
   return data.text.trim();
 }

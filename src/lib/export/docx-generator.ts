@@ -22,7 +22,24 @@ const SPEAKER_COLORS_HEX: Record<Speaker, string> = {
 };
 
 function stripHtml(html: string): string {
-  return html.replace(/<[^>]+>/g, "").trim();
+  return html
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .trim();
+}
+
+function textParagraph(text: string, indent = 0): Paragraph {
+  return new Paragraph({
+    children: [new TextRun({ text, size: 22 })],
+    indent: indent > 0 ? { left: indent * 360 } : undefined,
+    spacing: { after: 120 },
+  });
 }
 
 function buildTranscriptParagraphs(items: DialogueItem[]): Paragraph[] {
@@ -36,16 +53,15 @@ function buildTranscriptParagraphs(items: DialogueItem[]): Paragraph[] {
 
   for (const item of items) {
     const color = SPEAKER_COLORS_HEX[item.speaker as Speaker] || "FFFFFF";
-
     paragraphs.push(
       new Paragraph({
         children: [
           new TextRun({ text: `${item.speaker}: `, bold: true, size: 22 }),
         ],
         shading: { type: ShadingType.CLEAR, fill: color },
+        spacing: { after: 40 },
       })
     );
-
     paragraphs.push(
       new Paragraph({
         children: [new TextRun({ text: item.text, size: 22 })],
@@ -58,83 +74,28 @@ function buildTranscriptParagraphs(items: DialogueItem[]): Paragraph[] {
   return paragraphs;
 }
 
-function buildLearningNotesSections(notes: LearningNotes): Paragraph[] {
-  const sections: Paragraph[] = [
-    new Paragraph({ text: "", pageBreakBefore: true }),
-    new Paragraph({
-      text: "Study Notes",
-      heading: HeadingLevel.HEADING_1,
-    }),
-    new Paragraph({ text: "" }),
-  ];
-
-  sections.push(
-    new Paragraph({
-      text: "Ideas",
-      heading: HeadingLevel.HEADING_2,
-    })
-  );
-  sections.push(...parseHtmlToParagraphs(notes.ideas));
-
-  sections.push(
-    new Paragraph({
-      text: "Language",
-      heading: HeadingLevel.HEADING_2,
-    })
-  );
-  sections.push(...parseLanguageTable(notes.language));
-
-  sections.push(
-    new Paragraph({
-      text: "Communication Strategies",
-      heading: HeadingLevel.HEADING_2,
-    })
-  );
-  sections.push(...parseHtmlToParagraphs(notes.communication_strategies));
-
-  return sections;
-}
-
-function parseHtmlToParagraphs(html: string): Paragraph[] {
+function buildSectionContent(html: string): Paragraph[] {
   const paragraphs: Paragraph[] = [];
   const $ = cheerio.load(html);
-  const body = $("body").length > 0 ? $("body") : $("*").first();
-  const children = body.children();
 
-  children.each((_, node) => {
+  const elements = $("body").length > 0 ? $("body").contents() : $.root().contents();
+
+  elements.each((_, node) => {
+    if (node.type === "text") {
+      const text = (node.data || "").trim();
+      if (text) paragraphs.push(textParagraph(text));
+      return;
+    }
+
+    if (node.type !== "tag") return;
     const el = $(node);
-    const text = el.text().trim();
-    if (!text) return;
+    const tag = node.tagName?.toLowerCase();
 
-    paragraphs.push(
-      new Paragraph({
-        children: [new TextRun({ text: stripHtml(el.html() || text), size: 22 })],
-        spacing: { after: 120 },
-      })
-    );
-  });
+    if (tag === "table") {
+      const rows = el.find("tr");
+      if (rows.length === 0) return;
 
-  if (paragraphs.length === 0 && html.trim()) {
-    paragraphs.push(
-      new Paragraph({
-        children: [new TextRun({ text: stripHtml(html), size: 22 })],
-      })
-    );
-  }
-
-  return paragraphs;
-}
-
-function parseLanguageTable(html: string): Paragraph[] {
-  const paragraphs: Paragraph[] = [];
-  const $ = cheerio.load(html);
-
-  const tables = $("table");
-  if (tables.length > 0) {
-    tables.each((_, table) => {
-      const rows = $(table).find("tr");
       const docRows: TableRow[] = [];
-
       rows.each((_, row) => {
         const cells = $(row).find("th, td");
         const isHeader = $(row).find("th").length > 0;
@@ -147,11 +108,7 @@ function parseLanguageTable(html: string): Paragraph[] {
               children: [
                 new Paragraph({
                   children: [
-                    new TextRun({
-                      text: cellText,
-                      bold: isHeader,
-                      size: 20,
-                    }),
+                    new TextRun({ text: cellText, bold: isHeader, size: 20 }),
                   ],
                 }),
               ],
@@ -163,7 +120,9 @@ function parseLanguageTable(html: string): Paragraph[] {
           );
         });
 
-        docRows.push(new TableRow({ children: docCells }));
+        if (docCells.length > 0) {
+          docRows.push(new TableRow({ children: docCells }));
+        }
       });
 
       if (docRows.length > 0) {
@@ -178,9 +137,60 @@ function parseLanguageTable(html: string): Paragraph[] {
           })
         );
       }
-    });
-  } else {
-    paragraphs.push(...parseHtmlToParagraphs(html));
+      return;
+    }
+
+    if (tag === "strong" || tag === "b") {
+      const text = stripHtml($.html(el) || el.text());
+      if (text) {
+        paragraphs.push(
+          new Paragraph({
+            children: [new TextRun({ text, bold: true, size: 22 })],
+            spacing: { after: 120 },
+          })
+        );
+      }
+      return;
+    }
+
+    if (tag === "em" || tag === "i") {
+      const text = el.text().trim();
+      if (text) {
+        paragraphs.push(
+          new Paragraph({
+            children: [new TextRun({ text, italics: true, size: 22 })],
+            spacing: { after: 120 },
+          })
+        );
+      }
+      return;
+    }
+
+    const text = stripHtml($.html(el) || el.text());
+    if (text) {
+      const lines = text.split("\n");
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed) {
+          const isBullet = trimmed.startsWith("•") || trimmed.startsWith("- ");
+          const bulletText = isBullet
+            ? trimmed.replace(/^[•-]\s*/, "")
+            : trimmed;
+          paragraphs.push(textParagraph(bulletText, isBullet ? 1 : 0));
+        }
+      }
+    }
+  });
+
+  if (paragraphs.length === 0) {
+    const fallbackText = stripHtml(html);
+    if (fallbackText) {
+      const lines = fallbackText.split("\n");
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed) paragraphs.push(textParagraph(trimmed));
+      }
+    }
   }
 
   return paragraphs;
@@ -203,7 +213,7 @@ export async function generateDocx(
           new Paragraph({
             children: [
               new TextRun({
-                text: `Generated by Mr. DiscussAI`,
+                text: "Generated by Mr. DiscussAI",
                 size: 20,
                 color: "666666",
               }),
@@ -212,7 +222,29 @@ export async function generateDocx(
           }),
           new Paragraph({ text: "" }),
           ...buildTranscriptParagraphs(items),
-          ...buildLearningNotesSections(notes),
+          new Paragraph({ text: "", pageBreakBefore: true }),
+          new Paragraph({
+            text: "Study Notes",
+            heading: HeadingLevel.HEADING_1,
+          }),
+          new Paragraph({ text: "" }),
+          new Paragraph({
+            text: "Ideas",
+            heading: HeadingLevel.HEADING_2,
+          }),
+          ...buildSectionContent(notes.ideas),
+          new Paragraph({ text: "" }),
+          new Paragraph({
+            text: "Language",
+            heading: HeadingLevel.HEADING_2,
+          }),
+          ...buildSectionContent(notes.language),
+          new Paragraph({ text: "" }),
+          new Paragraph({
+            text: "Communication Strategies",
+            heading: HeadingLevel.HEADING_2,
+          }),
+          ...buildSectionContent(notes.communication_strategies),
         ],
       },
     ],

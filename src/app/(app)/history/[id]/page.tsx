@@ -38,18 +38,7 @@ export default function SessionDetailPage() {
         setSession(data);
 
         if (data.audioUrl) {
-          try {
-            const binaryStr = atob(data.audioUrl);
-            const bytes = new Uint8Array(binaryStr.length);
-            for (let i = 0; i < binaryStr.length; i++) {
-              bytes[i] = binaryStr.charCodeAt(i);
-            }
-            const blob = new Blob([bytes], { type: "audio/mpeg" });
-            setAudioSrc(URL.createObjectURL(blob));
-          } catch {
-            // audioUrl might be a regular URL
-            setAudioSrc(data.audioUrl);
-          }
+          setAudioSrc(data.audioUrl);
         }
       } catch {
         // session not found
