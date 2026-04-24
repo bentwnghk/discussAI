@@ -1,0 +1,155 @@
+"use client";
+
+import { useEffect, useState, useCallback } from "react";
+import { useParams } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { TranscriptDisplay } from "@/components/discuss/transcript-display";
+import { LearningNotes } from "@/components/discuss/learning-notes";
+import type { DialogueItem, LearningNotes as LearningNotesType } from "@/types";
+
+interface SessionData {
+  id: string;
+  title: string;
+  dialogueMode: string;
+  inputMethod: string;
+  transcript: DialogueItem[];
+  learningNotes: LearningNotesType;
+  audioUrl: string | null;
+  charactersCount: number;
+  ttsCostHKD: number;
+  createdAt: string;
+}
+
+export default function SessionDetailPage() {
+  const params = useParams();
+  const [session, setSession] = useState<SessionData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [audioSrc, setAudioSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const res = await fetch(`/api/history/${params.id}`);
+        if (!res.ok) throw new Error("Not found");
+        const data = await res.json();
+        setSession(data);
+
+        if (data.audioUrl) {
+          try {
+            const binaryStr = atob(data.audioUrl);
+            const bytes = new Uint8Array(binaryStr.length);
+            for (let i = 0; i < binaryStr.length; i++) {
+              bytes[i] = binaryStr.charCodeAt(i);
+            }
+            const blob = new Blob([bytes], { type: "audio/mpeg" });
+            setAudioSrc(URL.createObjectURL(blob));
+          } catch {
+            // audioUrl might be a regular URL
+            setAudioSrc(data.audioUrl);
+          }
+        }
+      } catch {
+        // session not found
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, [params.id]);
+
+  const handleExportDocx = useCallback(async () => {
+    if (!session) return;
+    try {
+      const res = await fetch("/api/export/docx", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          transcript: session.transcript,
+          learningNotes: session.learningNotes,
+          title: session.title,
+        }),
+      });
+      if (!res.ok) throw new Error("Export failed.");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "discussion-notes.docx";
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      // silently fail
+    }
+  }, [session]);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-5xl">
+        <p className="text-center text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-5xl">
+        <Card>
+          <CardContent className="py-12 text-center">
+            <p className="text-muted-foreground">Session not found.</p>
+            <Link href="/history">
+              <Button className="mt-4">Back to History</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8 max-w-5xl">
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">{session.title}</h1>
+            <p className="text-sm text-muted-foreground">
+              {new Date(session.createdAt).toLocaleString("en-HK", {
+                timeZone: "Asia/Hong_Kong",
+              })}{" "}
+              | HK${session.ttsCostHKD.toFixed(2)}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleExportDocx}>
+              Export DOCX
+            </Button>
+            <Link href="/history">
+              <Button variant="outline">Back</Button>
+            </Link>
+          </div>
+        </div>
+
+        <Separator />
+
+        {audioSrc && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Audio</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <audio controls className="w-full" src={audioSrc}>
+                Your browser does not support the audio element.
+              </audio>
+            </CardContent>
+          </Card>
+        )}
+
+        <TranscriptDisplay items={session.transcript} />
+
+        <LearningNotes notes={session.learningNotes} />
+      </div>
+    </div>
+  );
+}
