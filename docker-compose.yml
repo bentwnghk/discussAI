@@ -1,19 +1,17 @@
-services:
-  web:
-    build: .
-    ports:
-      - "${PORT:-8000}:8000"
-    environment:
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-      OPENAI_BASE_URL: ${OPENAI_BASE_URL}
-      OPENAI_MODEL_NORMAL: ${OPENAI_MODEL_NORMAL}
-      OPENAI_MODEL_DEEP: ${OPENAI_MODEL_DEEP}
-    volumes:
-      - pdf_to_podcast_gradio:/app/.gradio
-      - pdf_to_podcast_gradio_examples:/app/gradio_cached_examples
-      - pdf_to_podcast_gradio_files:/app/gradio_cached_files
+version: '3.8'
 
-volumes:
-  pdf_to_podcast_gradio:
-  pdf_to_podcast_gradio_examples:
-  pdf_to_podcast_gradio_files:
+services:
+  discussai:
+    image: bentwng/discussai:latest
+    container_name: discussai
+    restart: always
+    ports:
+      - "8220:8000"
+    volumes:
+      - /home/ncadmin/discussai:/app/.gradio
+      - /home/ncadmin/discussai_files:/app/gradio_cached_files
+    environment:
+      OPENAI_BASE_URL: https://api.mr5ai.com/v1
+      OPENAI_API_KEY: sk-xxx
+      OPENAI_MODEL_NORMAL: gemini-3-flash
+      OPENAI_MODEL_DEEP: gpt-5.1
