@@ -17,6 +17,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
+RUN apk add --no-cache su-exec
 
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
@@ -24,11 +25,11 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/pdf-parse ./node_modules/pdf-parse
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/pdfjs-dist ./node_modules/pdfjs-dist
 
-RUN mkdir -p /app/tmp/uploads /app/tmp/audio && chown -R nextjs:nodejs /app/tmp
+COPY --chown=root:root entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
-USER nextjs
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-ENTRYPOINT ["sh", "-c", "mkdir -p /app/tmp/audio && exec node server.js"]
+ENTRYPOINT ["/app/entrypoint.sh"]
