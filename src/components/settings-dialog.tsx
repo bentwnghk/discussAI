@@ -40,7 +40,13 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
             Configure your application settings.
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-3">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSave();
+          }}
+          className="space-y-3"
+        >
           <p className="text-sm text-muted-foreground">
             Get your API key{" "}
             <a
@@ -58,7 +64,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
           />
-        </div>
+        </form>
         <DialogFooter>
           <Button onClick={handleSave}>Save</Button>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
