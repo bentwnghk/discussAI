@@ -3,6 +3,10 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { discussionSessions } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
+import { unlink } from "fs/promises";
+import path from "path";
+
+const AUDIO_DIR = path.join(process.cwd(), "tmp", "audio");
 
 export async function GET(
   _req: NextRequest,
@@ -50,6 +54,24 @@ export async function DELETE(
     }
 
     const { id } = await params;
+
+    const [existing] = await db
+      .select({ audioUrl: discussionSessions.audioUrl })
+      .from(discussionSessions)
+      .where(
+        and(
+          eq(discussionSessions.id, id),
+          eq(discussionSessions.userId, session.user.id)
+        )
+      );
+
+    if (existing?.audioUrl) {
+      const filename = existing.audioUrl.split("/").pop();
+      if (filename && !filename.includes("..")) {
+        await unlink(path.join(AUDIO_DIR, filename)).catch(() => {});
+      }
+    }
+
     await db
       .delete(discussionSessions)
       .where(
