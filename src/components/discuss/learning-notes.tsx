@@ -13,14 +13,14 @@ export function LearningNotes({ notes }: LearningNotesProps) {
       <Card className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10">
         <CardHeader>
           <CardTitle className="text-center text-2xl">
-            Study Notes
+            📚 Study Notes 學習筆記
           </CardTitle>
         </CardHeader>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-indigo-600">Ideas</CardTitle>
+          <CardTitle className="text-indigo-600">💡 Ideas 討論要點</CardTitle>
         </CardHeader>
         <CardContent>
           <div
@@ -32,7 +32,7 @@ export function LearningNotes({ notes }: LearningNotesProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-purple-600">Language</CardTitle>
+          <CardTitle className="text-purple-600">📖 Language 語言學習</CardTitle>
         </CardHeader>
         <CardContent>
           <div
@@ -45,7 +45,7 @@ export function LearningNotes({ notes }: LearningNotesProps) {
       <Card>
         <CardHeader>
           <CardTitle className="text-pink-600">
-            Communication Strategies
+            💬 Communication Strategies 溝通策略
           </CardTitle>
         </CardHeader>
         <CardContent>

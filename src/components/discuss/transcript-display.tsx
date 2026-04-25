@@ -13,7 +13,7 @@ export function TranscriptDisplay({ items }: TranscriptDisplayProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Transcript</CardTitle>
+        <CardTitle>Transcript 文字稿</CardTitle>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[400px] rounded-md">
