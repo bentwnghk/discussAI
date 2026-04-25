@@ -257,7 +257,7 @@ function buildSectionContent(html: string): (Paragraph | Table)[] {
                 children: [
                   new Paragraph({
                     children: [
-                      new TextRun({ text: cellText, bold: isHeader, size: 20 }),
+                      new TextRun({ text: cellText, bold: isHeader, size: 22 }),
                     ],
                   }),
                 ],
