@@ -6,7 +6,6 @@ import {
   useState,
   useCallback,
   useEffect,
-  useRef,
   type ReactNode,
 } from "react";
 
@@ -19,7 +18,6 @@ const ApiKeyContext = createContext<ApiKeyContextType | null>(null);
 
 export function ApiKeyProvider({ children }: { children: ReactNode }) {
   const [apiKey, setApiKeyState] = useState("");
-  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     fetch("/api/user/api-key")
@@ -32,15 +30,11 @@ export function ApiKeyProvider({ children }: { children: ReactNode }) {
 
   const setApiKey = useCallback((value: string) => {
     setApiKeyState(value);
-
-    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
-    saveTimeoutRef.current = setTimeout(() => {
-      fetch("/api/user/api-key", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ apiKey: value }),
-      }).catch(() => {});
-    }, 500);
+    fetch("/api/user/api-key", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ apiKey: value }),
+    }).catch(() => {});
   }, []);
 
   return (
