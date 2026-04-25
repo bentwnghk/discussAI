@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mr. DiscussAI - AI Speaking Tutor for Hong Kong Students",
+  title: "Mr.🆖 DiscussAI - AI Speaking Tutor for Hong Kong Students",
   description:
     "AI language tutor helping Hong Kong secondary students improve speaking skills through interactive group discussions for HKDSE oral exam preparation.",
   icons: { icon: "/icon.png" },
