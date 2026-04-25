@@ -39,8 +39,7 @@ export async function extractTextFromImage(
         ],
       },
     ],
-    maxOutputTokens: 32768,
-    temperature: 0,
+    maxOutputTokens: 6000,
     maxRetries: 2,
   });
 
