@@ -29,7 +29,7 @@ async function ocrPdfPages(
 ): Promise<string> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const pdfjsLib = (await import("pdfjs-dist/legacy/build/pdf.mjs")) as any;
-  const { createCanvas } = await import("canvas");
+  const { createCanvas } = await import("@napi-rs/canvas");
   const fileData = new Uint8Array(await fs.readFile(filePath));
   const pdf = await pdfjsLib.getDocument({ data: fileData }).promise;
   const pageTexts: string[] = [];
