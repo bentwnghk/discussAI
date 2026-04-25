@@ -8,13 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { FileUpload } from "@/components/discuss/file-upload";
@@ -31,20 +24,12 @@ import type {
 } from "@/types";
 import { getVoiceForSpeaker } from "@/lib/tts/generate";
 
-const API_KEY_STORAGE_KEY = "discussai_api_key";
-
 export default function DiscussPage() {
   const router = useRouter();
   const [inputMethod, setInputMethod] = useState<InputMethod>("Upload Files");
   const [dialogueMode, setDialogueMode] = useState<DialogueMode>("Normal");
   const [files, setFiles] = useState<File[]>([]);
   const [topicText, setTopicText] = useState("");
-  const [apiKey, setApiKey] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem(API_KEY_STORAGE_KEY) || "";
-    }
-    return "";
-  });
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
   const [progressLabel, setProgressLabel] = useState("");
@@ -57,11 +42,6 @@ export default function DiscussPage() {
   const [sessionTitle, setSessionTitle] = useState<string>("");
   const [charactersCount, setCharactersCount] = useState(0);
   const [ttsCostHKD, setTtsCostHKD] = useState(0);
-
-  const handleApiKeyChange = useCallback((value: string) => {
-    setApiKey(value);
-    localStorage.setItem(API_KEY_STORAGE_KEY, value);
-  }, []);
 
   const handleGenerate = useCallback(async () => {
     if (
@@ -84,7 +64,6 @@ export default function DiscussPage() {
       const formData = new FormData();
       formData.append("inputMethod", inputMethod);
       formData.append("dialogueMode", dialogueMode);
-      if (apiKey) formData.append("apiKey", apiKey);
       if (inputMethod === "Enter Topic") {
         formData.append("text", topicText);
       }
@@ -130,7 +109,6 @@ export default function DiscussPage() {
             body: JSON.stringify({
               text: item.text,
               voice,
-              apiKey: apiKey || undefined,
             }),
           });
           if (!ttsRes.ok) throw new Error("TTS failed for a line.");
@@ -211,7 +189,7 @@ export default function DiscussPage() {
     } finally {
       setIsGenerating(false);
     }
-  }, [inputMethod, dialogueMode, files, topicText, apiKey]);
+  }, [inputMethod, dialogueMode, files, topicText]);
 
   const handleExportDocx = useCallback(async () => {
     if (!dialogueItems.length || !learningNotes) return;
@@ -300,35 +278,6 @@ export default function DiscussPage() {
                 </div>
               </RadioGroup>
             </div>
-
-            <Accordion>
-              <AccordionItem value="advanced">
-                <AccordionTrigger className="text-sm">
-                  Advanced Settings
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="space-y-3 pt-2">
-                    <p className="text-sm text-muted-foreground">
-                      Get your API key{" "}
-                      <a
-                        href="https://api.mr5ai.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline"
-                      >
-                        here
-                      </a>
-                    </p>
-                    <Input
-                      type="password"
-                      placeholder="API Key (optional if set server-side)"
-                      value={apiKey}
-                      onChange={(e) => handleApiKeyChange(e.target.value)}
-                    />
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
 
             {isGenerating && (
               <div className="space-y-2">

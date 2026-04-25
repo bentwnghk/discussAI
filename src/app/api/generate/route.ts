@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { generateDialogue } from "@/lib/ai/dialogue-generator";
 import { extractTextFromFile } from "@/lib/file-processing";
 import { auth } from "@/lib/auth";
+import { getUserApiKey } from "@/lib/db/user-api-key";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
@@ -13,10 +14,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const apiKey = await getUserApiKey(session.user.id);
+
     const formData = await req.formData();
     const inputMethod = formData.get("inputMethod") as string;
     const dialogueMode = (formData.get("dialogueMode") as string) || "Normal";
-    const apiKey = (formData.get("apiKey") as string) || undefined;
     const textInput = (formData.get("text") as string) || "";
 
     let fullText = "";

@@ -1,13 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateTTSAudio } from "@/lib/tts/generate";
+import { auth } from "@/lib/auth";
+import { getUserApiKey } from "@/lib/db/user-api-key";
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const apiKey = await getUserApiKey(session.user.id);
+
     const body = await req.json();
-    const { text, voice, apiKey } = body as {
+    const { text, voice } = body as {
       text: string;
       voice: string;
-      apiKey?: string;
     };
 
     if (!text || !voice) {

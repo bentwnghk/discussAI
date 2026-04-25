@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS "user" (
   "email" TEXT NOT NULL UNIQUE,
   "emailVerified" TIMESTAMP,
   "image" TEXT,
+  "apiKey" TEXT,
   "createdAt" TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
