@@ -190,13 +190,13 @@ export default function HistoryPage() {
             placeholder="Enter new title"
           />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRenameId(null)}>
-              <X className="mr-2 h-4 w-4" />
-              Cancel
-            </Button>
             <Button onClick={handleRename}>
               <Check className="mr-2 h-4 w-4" />
               Rename
+            </Button>
+            <Button variant="outline" onClick={() => setRenameId(null)}>
+              <X className="mr-2 h-4 w-4" />
+              Cancel
             </Button>
           </DialogFooter>
         </DialogContent>
