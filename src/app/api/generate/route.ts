@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      topicLabel = files.map((f) => f.name).join(", ");
+      topicLabel = files.map((f) => f.name.replace(/\.[^/.]+$/, "")).join(", ");
       const texts: string[] = [];
       const tmpDir = path.join(process.cwd(), "tmp", "uploads");
       await mkdir(tmpDir, { recursive: true });
