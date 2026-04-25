@@ -111,10 +111,10 @@ export default function HistoryPage() {
         <div className="space-y-3">
           {items.map((item) => (
             <Card key={item.id}>
-              <CardContent className="flex items-center justify-between py-4">
+              <CardContent className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-4 gap-2">
                 <div className="space-y-1">
                   <p className="font-medium">{item.title}</p>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                     <span>
                       {new Date(item.createdAt).toLocaleString("en-HK", {
                         timeZone: "Asia/Hong_Kong",
@@ -124,7 +124,7 @@ export default function HistoryPage() {
                     <span>HK${item.ttsCostHKD.toFixed(2)}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <Link href={`/history/${item.id}`}>
                     <Button variant="outline" size="sm">
                       <Eye className="mr-2 h-4 w-4" />

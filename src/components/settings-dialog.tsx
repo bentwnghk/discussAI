@@ -67,13 +67,13 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
           />
         </form>
         <DialogFooter>
-          <Button onClick={handleSave}>
-            <Save className="mr-2 h-4 w-4" />
-            Save
-          </Button>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             <X className="mr-2 h-4 w-4" />
             Cancel
+          </Button>
+          <Button onClick={handleSave}>
+            <Save className="mr-2 h-4 w-4" />
+            Save
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -68,12 +68,14 @@ export function Header() {
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="md:hidden">
-                  <Link href="/discuss" className="w-full">
+                  <Link href="/discuss" className="flex items-center w-full">
+                    <MessageSquareText className="mr-2 h-4 w-4" />
                     Discuss
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem className="md:hidden">
-                  <Link href="/history" className="w-full">
+                  <Link href="/history" className="flex items-center w-full">
+                    <History className="mr-2 h-4 w-4" />
                     History
                   </Link>
                 </DropdownMenuItem>
