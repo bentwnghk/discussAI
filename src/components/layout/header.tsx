@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SettingsDialog } from "@/components/settings-dialog";
+import { Settings, LogOut, MessageSquareText, History } from "lucide-react";
 
 export function Header() {
   const { data: session } = useSession();
@@ -33,11 +34,13 @@ export function Header() {
             <nav className="hidden md:flex items-center gap-4">
               <Link href="/discuss">
                 <Button variant="ghost" size="sm">
+                  <MessageSquareText className="mr-2 h-4 w-4" />
                   Discuss
                 </Button>
               </Link>
               <Link href="/history">
                 <Button variant="ghost" size="sm">
+                  <History className="mr-2 h-4 w-4" />
                   History
                 </Button>
               </Link>
@@ -76,12 +79,14 @@ export function Header() {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="md:hidden" />
                 <DropdownMenuItem onClick={() => setSettingsOpen(true)}>
+                  <Settings className="mr-2 h-4 w-4" />
                   Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => signOut({ callbackUrl: "/" })}
                 >
+                  <LogOut className="mr-2 h-4 w-4" />
                   Sign out
                 </DropdownMenuItem>
               </DropdownMenuContent>

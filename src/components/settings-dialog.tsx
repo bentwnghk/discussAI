@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useApiKey } from "@/hooks/use-api-key";
+import { Save, X } from "lucide-react";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -66,8 +67,12 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
           />
         </form>
         <DialogFooter>
-          <Button onClick={handleSave}>Save</Button>
+          <Button onClick={handleSave}>
+            <Save className="mr-2 h-4 w-4" />
+            Save
+          </Button>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
+            <X className="mr-2 h-4 w-4" />
             Cancel
           </Button>
         </DialogFooter>
