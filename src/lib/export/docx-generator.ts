@@ -114,12 +114,17 @@ function flushLineBuffer(buffer: InlineRun[]): Paragraph | null {
       // ── First text run: extract &nbsp; prefix and bullet char ──
       const raw = (item as { kind: "text"; raw: string }).raw;
 
+      // Strip leading regular whitespace (newlines, tabs, regular spaces — but NOT
+      // &nbsp;/\u00a0) so that HTML source line-breaks inserted after <br> tags by
+      // the AI don't prevent the &nbsp; indentation prefix from being detected.
+      const rawNormalized = raw.replace(/^[\n\r\t ]+/, "");
+
       // Count leading non-breaking spaces (\u00a0, i.e. &nbsp;) for indentation
-      const nbspMatch = raw.match(/^(\u00a0*)/);
+      const nbspMatch = rawNormalized.match(/^(\u00a0*)/);
       const nbspCount = nbspMatch ? nbspMatch[1].length : 0;
       indentLevel = Math.floor(nbspCount / 4); // 4 &nbsp; = 1 indent level
 
-      const afterNbsp = raw.slice(nbspCount);
+      const afterNbsp = rawNormalized.slice(nbspCount);
       const isDashBullet =
         afterNbsp.startsWith("- ") ||  // hyphen-minus
         afterNbsp.startsWith("– ") ||  // en-dash (U+2013)
@@ -221,17 +226,21 @@ function buildSectionContent(html: string): (Paragraph | Table)[] {
       continue;
     }
 
-    // Any non-<br> node resets the consecutive-<br> counter
-    consecutiveBrs = 0;
-
     // ── Text node ─────────────────────────────────────────────────────────────
     if (node.type === "text") {
       const raw = (node as DomText).data || "";
-      // Skip nodes that are only regular whitespace (no &nbsp;)
+      // Skip pure-whitespace text nodes (no &nbsp;) WITHOUT resetting
+      // consecutiveBrs — a bare "\n" between two <br> tags in the HTML source
+      // must not break the consecutive-<br> blank-line detection.
       if (!raw.trim() && !raw.includes("\u00a0")) continue;
+      // Only non-whitespace text resets the counter
+      consecutiveBrs = 0;
       lineBuffer.push({ kind: "text", raw });
       continue;
     }
+
+    // Any non-<br> non-text node resets the consecutive-<br> counter
+    consecutiveBrs = 0;
 
     if (node.type !== "tag") continue;
 
