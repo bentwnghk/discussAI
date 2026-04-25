@@ -21,7 +21,7 @@ export async function extractTextFromFile(
 
   switch (ext) {
     case ".pdf":
-      return extractTextFromPDF(filePath);
+      return extractTextFromPDF(filePath, apiKey);
     case ".docx":
       return extractTextFromDOCX(filePath);
     case ".jpg":
