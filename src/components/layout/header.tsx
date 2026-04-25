@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SettingsDialog } from "@/components/settings-dialog";
-import { Settings, LogOut, MessageSquareText, History } from "lucide-react";
+import { Settings, LogOut, MessageSquareText, History, LogIn } from "lucide-react";
 
 export function Header() {
   const { data: session } = useSession();
@@ -98,7 +98,10 @@ export function Header() {
           </div>
         ) : (
           <Link href="/login">
-            <Button size="sm">Sign in</Button>
+            <Button size="sm">
+              <LogIn className="mr-2 h-4 w-4" />
+              Sign in
+            </Button>
           </Link>
         )}
       </div>

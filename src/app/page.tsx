@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Rocket } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
@@ -39,7 +40,10 @@ export default async function HomePage() {
 
         <div className="mt-10 flex justify-center gap-4">
           <Link href="/login">
-            <Button size="lg">Get Started</Button>
+            <Button size="lg">
+              <Rocket className="mr-2 h-5 w-5" />
+              Get Started
+            </Button>
           </Link>
         </div>
       </div>
