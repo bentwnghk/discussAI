@@ -10,6 +10,7 @@ import {
   WidthType,
   AlignmentType,
   ShadingType,
+  LevelFormat,
 } from "docx";
 import * as cheerio from "cheerio";
 import type { DialogueItem, LearningNotes, Speaker } from "@/types";
@@ -20,6 +21,8 @@ const SPEAKER_COLORS_HEX: Record<Speaker, string> = {
   "Candidate C": "E8F5E8",
   "Candidate D": "FDECEA",
 };
+
+const ORDERED_NUMBERING_REF = "ordered-list";
 
 function stripHtml(html: string): string {
   return html
@@ -53,29 +56,41 @@ function buildTranscriptParagraphs(items: DialogueItem[]): Paragraph[] {
 
   for (const item of items) {
     const color = SPEAKER_COLORS_HEX[item.speaker as Speaker] || "FFFFFF";
+
+    // Speaker name: bold, no background shading (matches reference style)
     paragraphs.push(
       new Paragraph({
         children: [
-          new TextRun({ text: `${item.speaker}: `, bold: true, size: 22 }),
+          new TextRun({ text: `${item.speaker}:`, bold: true, size: 22 }),
         ],
-        shading: { type: ShadingType.CLEAR, fill: color },
         spacing: { after: 40 },
       })
     );
+
+    // Speech text: indented + speaker color shading (matches reference style)
     paragraphs.push(
       new Paragraph({
         children: [new TextRun({ text: item.text, size: 22 })],
+        shading: { type: ShadingType.CLEAR, fill: color },
         indent: { left: 360 },
-        spacing: { after: 200 },
+        spacing: { after: 120 },
       })
     );
+
+    // Empty paragraph separator between exchanges
+    paragraphs.push(new Paragraph({ text: "" }));
   }
 
   return paragraphs;
 }
 
-function buildSectionContent(html: string): Paragraph[] {
-  const paragraphs: Paragraph[] = [];
+/**
+ * Parse HTML content into DOCX block elements.
+ * Returns (Paragraph | Table)[] — Tables MUST be top-level block children,
+ * never nested inside a Paragraph (invalid OOXML).
+ */
+function buildSectionContent(html: string): (Paragraph | Table)[] {
+  const result: (Paragraph | Table)[] = [];
   const $ = cheerio.load(html);
 
   const elements = $("body").length > 0 ? $("body").contents() : $.root().contents();
@@ -83,7 +98,7 @@ function buildSectionContent(html: string): Paragraph[] {
   elements.each((_, node) => {
     if (node.type === "text") {
       const text = (node.data || "").trim();
-      if (text) paragraphs.push(textParagraph(text));
+      if (text) result.push(textParagraph(text));
       return;
     }
 
@@ -91,6 +106,9 @@ function buildSectionContent(html: string): Paragraph[] {
     const el = $(node);
     const tag = node.tagName?.toLowerCase();
 
+    // ----------------------------------------------------------------
+    // TABLE — must be a direct block child, NOT inside a Paragraph
+    // ----------------------------------------------------------------
     if (tag === "table") {
       const rows = el.find("tr");
       if (rows.length === 0) return;
@@ -113,9 +131,6 @@ function buildSectionContent(html: string): Paragraph[] {
                 }),
               ],
               width: { size: 33, type: WidthType.PERCENTAGE },
-              shading: isHeader
-                ? { type: ShadingType.CLEAR, fill: "667eea" }
-                : undefined,
             })
           );
         });
@@ -126,24 +141,118 @@ function buildSectionContent(html: string): Paragraph[] {
       });
 
       if (docRows.length > 0) {
-        paragraphs.push(
-          new Paragraph({
-            children: [
-              new Table({
-                rows: docRows,
-                width: { size: 100, type: WidthType.PERCENTAGE },
-              }),
-            ],
+        // Push Table directly — this is the fix for the corruption bug
+        result.push(
+          new Table({
+            rows: docRows,
+            width: { size: 100, type: WidthType.PERCENTAGE },
           })
         );
+        // Add spacing paragraph after table
+        result.push(new Paragraph({ text: "" }));
       }
       return;
     }
 
+    // ----------------------------------------------------------------
+    // UNORDERED LIST
+    // ----------------------------------------------------------------
+    if (tag === "ul") {
+      el.find("li").each((_, li) => {
+        const text = $(li).text().trim();
+        if (text) {
+          result.push(
+            new Paragraph({
+              children: [new TextRun({ text, size: 22 })],
+              bullet: { level: 0 },
+            })
+          );
+        }
+      });
+      return;
+    }
+
+    // ----------------------------------------------------------------
+    // ORDERED LIST
+    // ----------------------------------------------------------------
+    if (tag === "ol") {
+      el.find("li").each((_, li) => {
+        const text = $(li).text().trim();
+        if (text) {
+          result.push(
+            new Paragraph({
+              children: [new TextRun({ text, size: 22 })],
+              numbering: { reference: ORDERED_NUMBERING_REF, level: 0 },
+            })
+          );
+        }
+      });
+      return;
+    }
+
+    // ----------------------------------------------------------------
+    // HEADINGS
+    // ----------------------------------------------------------------
+    if (tag === "h1") {
+      const text = el.text().trim();
+      if (text) result.push(new Paragraph({ text, heading: HeadingLevel.HEADING_1 }));
+      return;
+    }
+    if (tag === "h2") {
+      const text = el.text().trim();
+      if (text) result.push(new Paragraph({ text, heading: HeadingLevel.HEADING_2 }));
+      return;
+    }
+    if (tag === "h3") {
+      const text = el.text().trim();
+      if (text) result.push(new Paragraph({ text, heading: HeadingLevel.HEADING_3 }));
+      return;
+    }
+    if (tag === "h4") {
+      const text = el.text().trim();
+      if (text) result.push(new Paragraph({ text, heading: HeadingLevel.HEADING_4 }));
+      return;
+    }
+
+    // ----------------------------------------------------------------
+    // PARAGRAPH — recurse into inline elements for mixed formatting
+    // ----------------------------------------------------------------
+    if (tag === "p") {
+      const children: TextRun[] = [];
+      el.contents().each((_, child) => {
+        if (child.type === "text") {
+          const text = (child.data || "").trim();
+          if (text) children.push(new TextRun({ text, size: 22 }));
+        } else if (child.type === "tag") {
+          const childEl = $(child);
+          const childTag = child.tagName?.toLowerCase();
+          const text = childEl.text().trim();
+          if (!text) return;
+          if (childTag === "strong" || childTag === "b") {
+            children.push(new TextRun({ text, bold: true, size: 22 }));
+          } else if (childTag === "em" || childTag === "i") {
+            children.push(new TextRun({ text, italics: true, size: 22 }));
+          } else {
+            children.push(new TextRun({ text, size: 22 }));
+          }
+        }
+      });
+      if (children.length > 0) {
+        result.push(new Paragraph({ children, spacing: { after: 120 } }));
+      } else {
+        const text = el.text().trim();
+        if (text) result.push(textParagraph(text));
+      }
+      return;
+    }
+
+    // ----------------------------------------------------------------
+    // INLINE BOLD / ITALIC at block level
+    // ----------------------------------------------------------------
     if (tag === "strong" || tag === "b") {
-      const text = stripHtml($.html(el) || el.text());
+      const text = el.text().trim();
       if (text) {
-        paragraphs.push(
+        result.push(
           new Paragraph({
             children: [new TextRun({ text, bold: true, size: 22 })],
             spacing: { after: 120 },
@@ -156,7 +265,7 @@ function buildSectionContent(html: string): Paragraph[] {
     if (tag === "em" || tag === "i") {
       const text = el.text().trim();
       if (text) {
-        paragraphs.push(
+        result.push(
           new Paragraph({
             children: [new TextRun({ text, italics: true, size: 22 })],
             spacing: { after: 120 },
@@ -166,6 +275,9 @@ function buildSectionContent(html: string): Paragraph[] {
       return;
     }
 
+    // ----------------------------------------------------------------
+    // GENERIC FALLBACK — strip tags, handle text bullets
+    // ----------------------------------------------------------------
     const text = stripHtml($.html(el) || el.text());
     if (text) {
       const lines = text.split("\n");
@@ -176,24 +288,25 @@ function buildSectionContent(html: string): Paragraph[] {
           const bulletText = isBullet
             ? trimmed.replace(/^[•-]\s*/, "")
             : trimmed;
-          paragraphs.push(textParagraph(bulletText, isBullet ? 1 : 0));
+          result.push(textParagraph(bulletText, isBullet ? 1 : 0));
         }
       }
     }
   });
 
-  if (paragraphs.length === 0) {
+  // Absolute fallback: if nothing parsed, render plain text
+  if (result.length === 0) {
     const fallbackText = stripHtml(html);
     if (fallbackText) {
       const lines = fallbackText.split("\n");
       for (const line of lines) {
         const trimmed = line.trim();
-        if (trimmed) paragraphs.push(textParagraph(trimmed));
+        if (trimmed) result.push(textParagraph(trimmed));
       }
     }
   }
 
-  return paragraphs;
+  return result;
 }
 
 export async function generateDocx(
@@ -202,6 +315,27 @@ export async function generateDocx(
   title: string = "Group Discussion Notes"
 ): Promise<Buffer> {
   const doc = new Document({
+    numbering: {
+      config: [
+        {
+          reference: ORDERED_NUMBERING_REF,
+          levels: [
+            {
+              level: 0,
+              format: LevelFormat.DECIMAL,
+              text: "%1.",
+              alignment: AlignmentType.LEFT,
+              style: {
+                paragraph: {
+                  indent: { left: 720, hanging: 360 },
+                },
+                run: { size: 22 },
+              },
+            },
+          ],
+        },
+      ],
+    },
     sections: [
       {
         children: [
