@@ -120,11 +120,21 @@ function flushLineBuffer(buffer: InlineRun[]): Paragraph | null {
       indentLevel = Math.floor(nbspCount / 4); // 4 &nbsp; = 1 indent level
 
       const afterNbsp = raw.slice(nbspCount);
-      isBullet =
-        afterNbsp.startsWith("•") || afterNbsp.startsWith("- ");
+      const isDashBullet =
+        afterNbsp.startsWith("- ") ||  // hyphen-minus
+        afterNbsp.startsWith("– ") ||  // en-dash (U+2013)
+        afterNbsp.startsWith("— ");    // em-dash (U+2014)
+      isBullet = afterNbsp.startsWith("•") || isDashBullet;
+
+      // Dash/hyphen-style bullets signal a sub-level item.
+      // When the AI omits &nbsp; prefixes (indentLevel stays 0), fall back to
+      // level 1 so these items are always indented below •-level bullets.
+      if (isDashBullet && indentLevel === 0) {
+        indentLevel = 1;
+      }
 
       const afterBullet = isBullet
-        ? afterNbsp.replace(/^[•-]\s*/, "")
+        ? afterNbsp.replace(/^[•\-–—]\s*/, "")
         : afterNbsp;
 
       // Normalize remaining &nbsp; → regular space, then trim leading space
