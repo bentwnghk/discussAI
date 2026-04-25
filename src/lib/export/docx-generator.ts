@@ -283,32 +283,122 @@ function buildSectionContent(html: string): (Paragraph | Table)[] {
       }
 
       // ── UNORDERED LIST ──────────────────────────────────────────────────────
-      case "ul":
-        el.find("li").each((_, li) => {
-          const text = $(li).text().trim();
-          if (text)
-            result.push(
-              new Paragraph({
-                children: [new TextRun({ text, size: 22 })],
-                bullet: { level: 0 },
-              })
-            );
-        });
+      case "ul": {
+        const processUl = (
+          ulEl: ReturnType<typeof $>,
+          level: number
+        ) => {
+          ulEl.children("li").each((_, li) => {
+            const liEl = $(li);
+            // Collect only the direct text of this <li>, excluding nested list text
+            let directText = "";
+            liEl.contents().each((_, child) => {
+              if (child.type === "text") {
+                directText += (child as DomText).data ?? "";
+              } else if (child.type === "tag") {
+                const childTag = (child as DomElement).tagName?.toLowerCase();
+                if (childTag !== "ul" && childTag !== "ol") {
+                  directText += $(child).text();
+                }
+              }
+            });
+            directText = directText.trim();
+            if (directText) {
+              result.push(
+                new Paragraph({
+                  children: [new TextRun({ text: directText, size: 22 })],
+                  bullet: { level: Math.min(level, 8) },
+                })
+              );
+            }
+            // Recurse into nested unordered lists
+            liEl.children("ul").each((_, nestedUl) => {
+              processUl($(nestedUl), level + 1);
+            });
+          });
+        };
+        processUl(el, 0);
         break;
+      }
 
       // ── ORDERED LIST ────────────────────────────────────────────────────────
-      case "ol":
-        el.find("li").each((_, li) => {
-          const text = $(li).text().trim();
-          if (text)
-            result.push(
-              new Paragraph({
-                children: [new TextRun({ text, size: 22 })],
-                numbering: { reference: ORDERED_NUMBERING_REF, level: 0 },
-              })
-            );
-        });
+      case "ol": {
+        const processOl = (
+          olEl: ReturnType<typeof $>,
+          level: number
+        ) => {
+          olEl.children("li").each((_, li) => {
+            const liEl = $(li);
+            let directText = "";
+            liEl.contents().each((_, child) => {
+              if (child.type === "text") {
+                directText += (child as DomText).data ?? "";
+              } else if (child.type === "tag") {
+                const childTag = (child as DomElement).tagName?.toLowerCase();
+                if (childTag !== "ul" && childTag !== "ol") {
+                  directText += $(child).text();
+                }
+              }
+            });
+            directText = directText.trim();
+            if (directText) {
+              result.push(
+                new Paragraph({
+                  children: [new TextRun({ text: directText, size: 22 })],
+                  numbering: {
+                    reference: ORDERED_NUMBERING_REF,
+                    level: Math.min(level, 8),
+                  },
+                })
+              );
+            }
+            // Recurse into nested ordered lists
+            liEl.children("ol").each((_, nestedOl) => {
+              processOl($(nestedOl), level + 1);
+            });
+            // Also handle ul nested inside ol
+            liEl.children("ul").each((_, nestedUl) => {
+              const nestedEl = $(nestedUl);
+              const recurseUl = (
+                ulEl: ReturnType<typeof $>,
+                ulLevel: number
+              ) => {
+                ulEl.children("li").each((_, nestedLi) => {
+                  const nestedLiEl = $(nestedLi);
+                  let nestedText = "";
+                  nestedLiEl.contents().each((_, child) => {
+                    if (child.type === "text") {
+                      nestedText += (child as DomText).data ?? "";
+                    } else if (child.type === "tag") {
+                      const childTag = (
+                        child as DomElement
+                      ).tagName?.toLowerCase();
+                      if (childTag !== "ul" && childTag !== "ol") {
+                        nestedText += $(child).text();
+                      }
+                    }
+                  });
+                  nestedText = nestedText.trim();
+                  if (nestedText) {
+                    result.push(
+                      new Paragraph({
+                        children: [new TextRun({ text: nestedText, size: 22 })],
+                        bullet: { level: Math.min(ulLevel, 8) },
+                      })
+                    );
+                  }
+                  nestedLiEl
+                    .children("ul")
+                    .each((_, deepUl) => recurseUl($(deepUl), ulLevel + 1));
+                });
+              };
+              recurseUl(nestedEl, level + 1);
+            });
+          });
+        };
+        processOl(el, 0);
         break;
+      }
 
       // ── HEADINGS ────────────────────────────────────────────────────────────
       case "h1":
@@ -415,6 +505,30 @@ export async function generateDocx(
               style: {
                 paragraph: {
                   indent: { left: 720, hanging: 360 },
+                },
+                run: { size: 22 },
+              },
+            },
+            {
+              level: 1,
+              format: LevelFormat.LOWER_LETTER,
+              text: "%2.",
+              alignment: AlignmentType.LEFT,
+              style: {
+                paragraph: {
+                  indent: { left: 1440, hanging: 360 },
+                },
+                run: { size: 22 },
+              },
+            },
+            {
+              level: 2,
+              format: LevelFormat.LOWER_ROMAN,
+              text: "%3.",
+              alignment: AlignmentType.LEFT,
+              style: {
+                paragraph: {
+                  indent: { left: 2160, hanging: 360 },
                 },
                 run: { size: 22 },
               },
