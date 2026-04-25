@@ -32,6 +32,7 @@ export async function generateDialogue(
     system,
     prompt: user,
     ...(isReasoning ? {} : { temperature: 0.5 }),
+    maxTokens: isReasoning ? 16000 : 8000,
     maxRetries: 2,
   });
 
