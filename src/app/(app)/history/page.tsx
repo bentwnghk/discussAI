@@ -13,6 +13,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Plus, Play, Eye, Pencil, Trash2, X, Check } from "lucide-react";
 
 interface HistoryItem {
   id: string;
@@ -88,6 +89,7 @@ export default function HistoryPage() {
         <h1 className="text-2xl font-bold">Practice History</h1>
         <Link href="/discuss">
           <Button variant="outline" size="sm">
+            <Plus className="mr-2 h-4 w-4" />
             New Discussion
           </Button>
         </Link>
@@ -98,7 +100,10 @@ export default function HistoryPage() {
           <CardContent className="py-12 text-center">
             <p className="text-muted-foreground">No discussions yet.</p>
             <Link href="/discuss">
-              <Button className="mt-4">Start Practicing</Button>
+              <Button className="mt-4">
+                <Play className="mr-2 h-4 w-4" />
+                Start Practicing
+              </Button>
             </Link>
           </CardContent>
         </Card>
@@ -122,6 +127,7 @@ export default function HistoryPage() {
                 <div className="flex items-center gap-2">
                   <Link href={`/history/${item.id}`}>
                     <Button variant="outline" size="sm">
+                      <Eye className="mr-2 h-4 w-4" />
                       Load
                     </Button>
                   </Link>
@@ -133,6 +139,7 @@ export default function HistoryPage() {
                       setRenameTitle(item.title);
                     }}
                   >
+                    <Pencil className="mr-2 h-4 w-4" />
                     Rename
                   </Button>
                   <Button
@@ -140,6 +147,7 @@ export default function HistoryPage() {
                     size="sm"
                     onClick={() => setDeleteId(item.id)}
                   >
+                    <Trash2 className="mr-2 h-4 w-4" />
                     Delete
                   </Button>
                 </div>
@@ -160,9 +168,11 @@ export default function HistoryPage() {
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteId(null)}>
+              <X className="mr-2 h-4 w-4" />
               Cancel
             </Button>
             <Button variant="destructive" onClick={handleDelete}>
+              <Trash2 className="mr-2 h-4 w-4" />
               Delete
             </Button>
           </DialogFooter>
@@ -181,9 +191,13 @@ export default function HistoryPage() {
           />
           <DialogFooter>
             <Button variant="outline" onClick={() => setRenameId(null)}>
+              <X className="mr-2 h-4 w-4" />
               Cancel
             </Button>
-            <Button onClick={handleRename}>Rename</Button>
+            <Button onClick={handleRename}>
+              <Check className="mr-2 h-4 w-4" />
+              Rename
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

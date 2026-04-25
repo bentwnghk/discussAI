@@ -22,6 +22,7 @@ import type {
   GenerateResponse,
   Speaker,
 } from "@/types";
+import { Sparkles, FileText, History } from "lucide-react";
 import { getVoiceForSpeaker } from "@/lib/tts/generate";
 
 export default function DiscussPage() {
@@ -296,9 +297,14 @@ export default function DiscussPage() {
               size="lg"
               className="w-full"
             >
-              {isGenerating
-                ? "Generating..."
-                : "Generate Discussion with Audio and Study Notes"}
+              {isGenerating ? (
+                "Generating..."
+              ) : (
+                <>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Generate Discussion with Audio and Study Notes
+                </>
+              )}
             </Button>
           </CardContent>
         </Card>
@@ -333,7 +339,8 @@ export default function DiscussPage() {
                 Cost: HK${ttsCostHKD.toFixed(2)} | {charactersCount} characters
               </p>
               <Button onClick={handleExportDocx} variant="outline">
-                Download as Word Document
+                <FileText className="mr-2 h-4 w-4" />
+                Export to Word
               </Button>
             </div>
           </>
@@ -346,6 +353,7 @@ export default function DiscussPage() {
             variant="ghost"
             onClick={() => router.push("/history")}
           >
+            <History className="mr-2 h-4 w-4" />
             View Practice History
           </Button>
         </div>

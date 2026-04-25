@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { TranscriptDisplay } from "@/components/discuss/transcript-display";
 import { LearningNotes } from "@/components/discuss/learning-notes";
 import type { DialogueItem, LearningNotes as LearningNotesType } from "@/types";
+import { FileText, ArrowLeft } from "lucide-react";
 
 interface SessionData {
   id: string;
@@ -90,7 +91,10 @@ export default function SessionDetailPage() {
           <CardContent className="py-12 text-center">
             <p className="text-muted-foreground">Session not found.</p>
             <Link href="/history">
-              <Button className="mt-4">Back to History</Button>
+              <Button className="mt-4">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to History
+              </Button>
             </Link>
           </CardContent>
         </Card>
@@ -113,10 +117,14 @@ export default function SessionDetailPage() {
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={handleExportDocx}>
-              Export DOCX
+              <FileText className="mr-2 h-4 w-4" />
+              Export to Word
             </Button>
             <Link href="/history">
-              <Button variant="outline">Back</Button>
+              <Button variant="outline">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back
+              </Button>
             </Link>
           </div>
         </div>
