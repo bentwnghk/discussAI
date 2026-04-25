@@ -26,11 +26,14 @@ export async function POST(req: NextRequest) {
 
     const buffer = await generateDocx(transcript, learningNotes, title);
 
+    const timestamp = new Date().toLocaleString("en-HK", { timeZone: "Asia/Hong_Kong" }).replace(/[/:, ]/g, "-");
+    const filename = `Mr.NG-DiscussAI-notes-${timestamp}.docx`;
+
     return new NextResponse(new Uint8Array(buffer), {
       headers: {
         "Content-Type":
           "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "Content-Disposition": `attachment; filename="discussion-notes.docx"`,
+        "Content-Disposition": `attachment; filename="${filename}"`,
         "Content-Length": buffer.length.toString(),
       },
     });
