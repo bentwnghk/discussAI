@@ -84,224 +84,309 @@ function buildTranscriptParagraphs(items: DialogueItem[]): Paragraph[] {
   return paragraphs;
 }
 
+// ─── Inline run types for the line-buffer approach ───────────────────────────
+
+type InlineRun =
+  | { kind: "text"; raw: string }
+  | { kind: "bold"; text: string }
+  | { kind: "italic"; text: string };
+
+/**
+ * Converts a buffered "line" (inline runs collected between <br> tags) into a
+ * single Paragraph, preserving bullet characters, &nbsp; indentation levels,
+ * and mixed bold/italic inline formatting exactly as the UI renders them.
+ */
+function flushLineBuffer(buffer: InlineRun[]): Paragraph | null {
+  if (buffer.length === 0) return null;
+
+  let indentLevel = 0;
+  let isBullet = false;
+
+  // Find the index of the first text run — it carries indent/bullet info
+  const firstTextIdx = buffer.findIndex((item) => item.kind === "text");
+
+  const runs: TextRun[] = [];
+
+  buffer.forEach((item, idx) => {
+    if (idx === firstTextIdx) {
+      // ── First text run: extract &nbsp; prefix and bullet char ──
+      const raw = (item as { kind: "text"; raw: string }).raw;
+
+      // Count leading non-breaking spaces (\u00a0, i.e. &nbsp;) for indentation
+      const nbspMatch = raw.match(/^(\u00a0*)/);
+      const nbspCount = nbspMatch ? nbspMatch[1].length : 0;
+      indentLevel = Math.floor(nbspCount / 4); // 4 &nbsp; = 1 indent level
+
+      const afterNbsp = raw.slice(nbspCount);
+      isBullet =
+        afterNbsp.startsWith("•") || afterNbsp.startsWith("- ");
+
+      const afterBullet = isBullet
+        ? afterNbsp.replace(/^[•-]\s*/, "")
+        : afterNbsp;
+
+      // Normalize remaining &nbsp; → regular space, then trim leading space
+      const finalText = afterBullet.replace(/\u00a0/g, " ").trimStart();
+      if (finalText) runs.push(new TextRun({ text: finalText, size: 22 }));
+    } else if (item.kind === "text") {
+      // Subsequent text runs: normalize &nbsp; but keep all spacing
+      const text = item.raw.replace(/\u00a0/g, " ");
+      if (text) runs.push(new TextRun({ text, size: 22 }));
+    } else if (item.kind === "bold") {
+      if (item.text) runs.push(new TextRun({ text: item.text, bold: true, size: 22 }));
+    } else if (item.kind === "italic") {
+      if (item.text)
+        runs.push(new TextRun({ text: item.text, italics: true, size: 22 }));
+    }
+  });
+
+  if (runs.length === 0) return null;
+
+  if (isBullet) {
+    return new Paragraph({
+      children: runs,
+      bullet: { level: Math.min(indentLevel, 8) },
+    });
+  } else if (indentLevel > 0) {
+    return new Paragraph({
+      children: runs,
+      indent: { left: indentLevel * 720 },
+      spacing: { after: 120 },
+    });
+  } else {
+    return new Paragraph({
+      children: runs,
+      spacing: { after: 120 },
+    });
+  }
+}
+
 /**
  * Parse HTML content into DOCX block elements.
- * Returns (Paragraph | Table)[] — Tables MUST be top-level block children,
- * never nested inside a Paragraph (invalid OOXML).
+ *
+ * Strategy for flat <br>-separated HTML (used in Ideas & Communication
+ * Strategies sections):
+ *   • Inline nodes (text, <strong>, <em>, <b>, <i>) are buffered until a <br>
+ *     is encountered, then flushed as ONE paragraph preserving mixed formatting.
+ *   • Two or more consecutive <br> tags emit an empty paragraph (blank line).
+ *   • Block elements (table, ul, ol, p, hN) flush the buffer first, then are
+ *     emitted as standalone block nodes.
+ *
+ * Tables MUST be direct section children — never nested inside a Paragraph
+ * (invalid OOXML that corrupts the file).
  */
 function buildSectionContent(html: string): (Paragraph | Table)[] {
   const result: (Paragraph | Table)[] = [];
   const $ = cheerio.load(html);
+  const nodes = (
+    $("body").length > 0 ? $("body").contents() : $.root().contents()
+  ).toArray();
 
-  const elements = $("body").length > 0 ? $("body").contents() : $.root().contents();
+  let lineBuffer: InlineRun[] = [];
+  let consecutiveBrs = 0;
 
-  elements.each((_, node) => {
-    if (node.type === "text") {
-      const text = (node.data || "").trim();
-      if (text) result.push(textParagraph(text));
-      return;
-    }
+  const flush = () => {
+    const para = flushLineBuffer(lineBuffer);
+    if (para) result.push(para);
+    lineBuffer = [];
+  };
 
-    if (node.type !== "tag") return;
-    const el = $(node);
-    const tag = node.tagName?.toLowerCase();
-
-    // ----------------------------------------------------------------
-    // TABLE — must be a direct block child, NOT inside a Paragraph
-    // ----------------------------------------------------------------
-    if (tag === "table") {
-      const rows = el.find("tr");
-      if (rows.length === 0) return;
-
-      const docRows: TableRow[] = [];
-      rows.each((_, row) => {
-        const cells = $(row).find("th, td");
-        const isHeader = $(row).find("th").length > 0;
-        const docCells: TableCell[] = [];
-
-        cells.each((_, cell) => {
-          const cellText = $(cell).text().trim();
-          docCells.push(
-            new TableCell({
-              children: [
-                new Paragraph({
-                  children: [
-                    new TextRun({ text: cellText, bold: isHeader, size: 20 }),
-                  ],
-                }),
-              ],
-              width: { size: 33, type: WidthType.PERCENTAGE },
-            })
-          );
-        });
-
-        if (docCells.length > 0) {
-          docRows.push(new TableRow({ children: docCells }));
-        }
-      });
-
-      if (docRows.length > 0) {
-        // Push Table directly — this is the fix for the corruption bug
-        result.push(
-          new Table({
-            rows: docRows,
-            width: { size: 100, type: WidthType.PERCENTAGE },
-          })
-        );
-        // Add spacing paragraph after table
+  for (const node of nodes) {
+    // ── <br> tag ──────────────────────────────────────────────────────────────
+    if (
+      node.type === "tag" &&
+      (node as cheerio.TagElement).tagName?.toLowerCase() === "br"
+    ) {
+      if (consecutiveBrs === 0) {
+        // First <br> ends the current line
+        flush();
+      }
+      consecutiveBrs++;
+      if (consecutiveBrs >= 2) {
+        // Two or more consecutive <br> = blank-line separator
         result.push(new Paragraph({ text: "" }));
       }
-      return;
+      continue;
     }
 
-    // ----------------------------------------------------------------
-    // UNORDERED LIST
-    // ----------------------------------------------------------------
-    if (tag === "ul") {
-      el.find("li").each((_, li) => {
-        const text = $(li).text().trim();
-        if (text) {
+    // Any non-<br> node resets the consecutive-<br> counter
+    consecutiveBrs = 0;
+
+    // ── Text node ─────────────────────────────────────────────────────────────
+    if (node.type === "text") {
+      const raw = (node as cheerio.TextElement).data || "";
+      // Skip nodes that are only regular whitespace (no &nbsp;)
+      if (!raw.trim() && !raw.includes("\u00a0")) continue;
+      lineBuffer.push({ kind: "text", raw });
+      continue;
+    }
+
+    if (node.type !== "tag") continue;
+
+    const el = $(node as cheerio.TagElement);
+    const tag = (node as cheerio.TagElement).tagName?.toLowerCase();
+
+    // ── Block elements: flush the inline buffer first ─────────────────────────
+    const BLOCK_TAGS = new Set([
+      "table", "ul", "ol", "p",
+      "h1", "h2", "h3", "h4", "h5", "h6",
+      "div", "blockquote",
+    ]);
+
+    if (BLOCK_TAGS.has(tag)) {
+      flush();
+    }
+
+    switch (tag) {
+      // ── TABLE ───────────────────────────────────────────────────────────────
+      case "table": {
+        const rows = el.find("tr");
+        if (rows.length === 0) break;
+
+        const docRows: TableRow[] = [];
+        rows.each((_, row) => {
+          const cells = $(row).find("th, td");
+          const isHeader = $(row).find("th").length > 0;
+          const docCells: TableCell[] = [];
+          cells.each((_, cell) => {
+            const cellText = $(cell).text().trim();
+            docCells.push(
+              new TableCell({
+                children: [
+                  new Paragraph({
+                    children: [
+                      new TextRun({ text: cellText, bold: isHeader, size: 20 }),
+                    ],
+                  }),
+                ],
+                width: { size: 33, type: WidthType.PERCENTAGE },
+              })
+            );
+          });
+          if (docCells.length > 0)
+            docRows.push(new TableRow({ children: docCells }));
+        });
+
+        if (docRows.length > 0) {
+          // Table MUST be a direct block child — never inside a Paragraph
           result.push(
-            new Paragraph({
-              children: [new TextRun({ text, size: 22 })],
-              bullet: { level: 0 },
+            new Table({
+              rows: docRows,
+              width: { size: 100, type: WidthType.PERCENTAGE },
             })
           );
+          result.push(new Paragraph({ text: "" }));
         }
-      });
-      return;
-    }
+        break;
+      }
 
-    // ----------------------------------------------------------------
-    // ORDERED LIST
-    // ----------------------------------------------------------------
-    if (tag === "ol") {
-      el.find("li").each((_, li) => {
-        const text = $(li).text().trim();
-        if (text) {
-          result.push(
-            new Paragraph({
-              children: [new TextRun({ text, size: 22 })],
-              numbering: { reference: ORDERED_NUMBERING_REF, level: 0 },
-            })
-          );
-        }
-      });
-      return;
-    }
+      // ── UNORDERED LIST ──────────────────────────────────────────────────────
+      case "ul":
+        el.find("li").each((_, li) => {
+          const text = $(li).text().trim();
+          if (text)
+            result.push(
+              new Paragraph({
+                children: [new TextRun({ text, size: 22 })],
+                bullet: { level: 0 },
+              })
+            );
+        });
+        break;
 
-    // ----------------------------------------------------------------
-    // HEADINGS
-    // ----------------------------------------------------------------
-    if (tag === "h1") {
-      const text = el.text().trim();
-      if (text) result.push(new Paragraph({ text, heading: HeadingLevel.HEADING_1 }));
-      return;
-    }
-    if (tag === "h2") {
-      const text = el.text().trim();
-      if (text) result.push(new Paragraph({ text, heading: HeadingLevel.HEADING_2 }));
-      return;
-    }
-    if (tag === "h3") {
-      const text = el.text().trim();
-      if (text) result.push(new Paragraph({ text, heading: HeadingLevel.HEADING_3 }));
-      return;
-    }
-    if (tag === "h4") {
-      const text = el.text().trim();
-      if (text) result.push(new Paragraph({ text, heading: HeadingLevel.HEADING_4 }));
-      return;
-    }
+      // ── ORDERED LIST ────────────────────────────────────────────────────────
+      case "ol":
+        el.find("li").each((_, li) => {
+          const text = $(li).text().trim();
+          if (text)
+            result.push(
+              new Paragraph({
+                children: [new TextRun({ text, size: 22 })],
+                numbering: { reference: ORDERED_NUMBERING_REF, level: 0 },
+              })
+            );
+        });
+        break;
 
-    // ----------------------------------------------------------------
-    // PARAGRAPH — recurse into inline elements for mixed formatting
-    // ----------------------------------------------------------------
-    if (tag === "p") {
-      const children: TextRun[] = [];
-      el.contents().each((_, child) => {
-        if (child.type === "text") {
-          const text = (child.data || "").trim();
-          if (text) children.push(new TextRun({ text, size: 22 }));
-        } else if (child.type === "tag") {
-          const childEl = $(child);
-          const childTag = child.tagName?.toLowerCase();
-          const text = childEl.text().trim();
-          if (!text) return;
-          if (childTag === "strong" || childTag === "b") {
-            children.push(new TextRun({ text, bold: true, size: 22 }));
-          } else if (childTag === "em" || childTag === "i") {
-            children.push(new TextRun({ text, italics: true, size: 22 }));
-          } else {
-            children.push(new TextRun({ text, size: 22 }));
-          }
-        }
-      });
-      if (children.length > 0) {
-        result.push(new Paragraph({ children, spacing: { after: 120 } }));
-      } else {
+      // ── HEADINGS ────────────────────────────────────────────────────────────
+      case "h1":
+      case "h2":
+      case "h3":
+      case "h4":
+      case "h5":
+      case "h6": {
+        const levelMap: Record<string, (typeof HeadingLevel)[keyof typeof HeadingLevel]> = {
+          h1: HeadingLevel.HEADING_1,
+          h2: HeadingLevel.HEADING_2,
+          h3: HeadingLevel.HEADING_3,
+          h4: HeadingLevel.HEADING_4,
+          h5: HeadingLevel.HEADING_5,
+          h6: HeadingLevel.HEADING_6,
+        };
         const text = el.text().trim();
-        if (text) result.push(textParagraph(text));
+        if (text) result.push(new Paragraph({ text, heading: levelMap[tag] }));
+        break;
       }
-      return;
-    }
 
-    // ----------------------------------------------------------------
-    // INLINE BOLD / ITALIC at block level
-    // ----------------------------------------------------------------
-    if (tag === "strong" || tag === "b") {
-      const text = el.text().trim();
-      if (text) {
-        result.push(
-          new Paragraph({
-            children: [new TextRun({ text, bold: true, size: 22 })],
-            spacing: { after: 120 },
-          })
-        );
-      }
-      return;
-    }
-
-    if (tag === "em" || tag === "i") {
-      const text = el.text().trim();
-      if (text) {
-        result.push(
-          new Paragraph({
-            children: [new TextRun({ text, italics: true, size: 22 })],
-            spacing: { after: 120 },
-          })
-        );
-      }
-      return;
-    }
-
-    // ----------------------------------------------------------------
-    // GENERIC FALLBACK — strip tags, handle text bullets
-    // ----------------------------------------------------------------
-    const text = stripHtml($.html(el) || el.text());
-    if (text) {
-      const lines = text.split("\n");
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (trimmed) {
-          const isBullet = trimmed.startsWith("•") || trimmed.startsWith("- ");
-          const bulletText = isBullet
-            ? trimmed.replace(/^[•-]\s*/, "")
-            : trimmed;
-          result.push(textParagraph(bulletText, isBullet ? 1 : 0));
+      // ── BLOCK PARAGRAPH ─────────────────────────────────────────────────────
+      case "p": {
+        const children: TextRun[] = [];
+        el.contents().each((_, child) => {
+          if (child.type === "text") {
+            const text = (child as cheerio.TextElement).data?.trim() || "";
+            if (text) children.push(new TextRun({ text, size: 22 }));
+          } else if (child.type === "tag") {
+            const childTag = (
+              child as cheerio.TagElement
+            ).tagName?.toLowerCase();
+            const text = $(child).text().trim();
+            if (!text) return;
+            if (childTag === "strong" || childTag === "b")
+              children.push(new TextRun({ text, bold: true, size: 22 }));
+            else if (childTag === "em" || childTag === "i")
+              children.push(new TextRun({ text, italics: true, size: 22 }));
+            else children.push(new TextRun({ text, size: 22 }));
+          }
+        });
+        if (children.length > 0)
+          result.push(new Paragraph({ children, spacing: { after: 120 } }));
+        else {
+          const text = el.text().trim();
+          if (text) result.push(textParagraph(text));
         }
+        break;
+      }
+
+      // ── INLINE ELEMENTS — add to current line buffer ─────────────────────────
+      case "strong":
+      case "b":
+        lineBuffer.push({ kind: "bold", text: el.text() });
+        break;
+
+      case "em":
+      case "i":
+        lineBuffer.push({ kind: "italic", text: el.text() });
+        break;
+
+      // ── GENERIC FALLBACK ────────────────────────────────────────────────────
+      default: {
+        const text = el.text().trim();
+        if (text) lineBuffer.push({ kind: "text", raw: text });
+        break;
       }
     }
-  });
+  }
 
-  // Absolute fallback: if nothing parsed, render plain text
+  // Flush any remaining buffered inline content after the last node
+  flush();
+
+  // Absolute fallback: if nothing was parsed, render as plain text
   if (result.length === 0) {
     const fallbackText = stripHtml(html);
     if (fallbackText) {
-      const lines = fallbackText.split("\n");
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (trimmed) result.push(textParagraph(trimmed));
+      for (const line of fallbackText.split("\n")) {
+        const t = line.trim();
+        if (t) result.push(textParagraph(t));
       }
     }
   }
