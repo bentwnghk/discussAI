@@ -42,6 +42,7 @@ export default function DiscussPage() {
   const [sessionTitle, setSessionTitle] = useState<string>("");
   const [charactersCount, setCharactersCount] = useState(0);
   const [ttsCostHKD, setTtsCostHKD] = useState(0);
+  const [extractedText, setExtractedText] = useState<string | null>(null);
 
   const handleGenerate = useCallback(async () => {
     if (
@@ -90,6 +91,7 @@ export default function DiscussPage() {
       setSessionTitle(data.title);
       setCharactersCount(data.charactersCount);
       setTtsCostHKD(data.ttsCostHKD);
+      setExtractedText(data.extractedText);
 
       setProgressLabel("Generating audio...");
       setProgress(40);
@@ -165,7 +167,7 @@ export default function DiscussPage() {
             title: data.title,
             dialogueMode,
             inputMethod,
-            inputText: inputMethod === "Enter Topic" ? topicText : null,
+            inputText: data.extractedText,
             transcript: data.dialogue,
             learningNotes: data.learningNotes,
             audioUrl: savedAudioUrl,
@@ -304,6 +306,21 @@ export default function DiscussPage() {
         {dialogueItems.length > 0 && (
           <>
             <Separator />
+
+            {extractedText && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Extracted Text</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="max-h-64 overflow-y-auto rounded-md bg-muted p-4">
+                    <pre className="whitespace-pre-wrap text-sm leading-relaxed font-sans">
+                      {extractedText}
+                    </pre>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             <AudioPlayer src={audioUrl} />
 

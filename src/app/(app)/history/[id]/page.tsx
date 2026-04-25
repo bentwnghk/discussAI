@@ -15,6 +15,7 @@ interface SessionData {
   title: string;
   dialogueMode: string;
   inputMethod: string;
+  inputText: string | null;
   transcript: DialogueItem[];
   learningNotes: LearningNotesType;
   audioUrl: string | null;
@@ -121,6 +122,21 @@ export default function SessionDetailPage() {
         </div>
 
         <Separator />
+
+        {session.inputText && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Extracted Text</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="max-h-64 overflow-y-auto rounded-md bg-muted p-4">
+                <pre className="whitespace-pre-wrap text-sm leading-relaxed font-sans">
+                  {session.inputText}
+                </pre>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {audioSrc && (
           <Card>

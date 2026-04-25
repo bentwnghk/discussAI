@@ -98,6 +98,7 @@ export async function POST(req: NextRequest) {
       charactersCount,
       ttsCostHKD,
       title,
+      extractedText: fullText,
     });
   } catch (error: unknown) {
     const message =

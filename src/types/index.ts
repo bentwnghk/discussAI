@@ -70,6 +70,7 @@ export interface GenerateResponse {
   charactersCount: number;
   ttsCostHKD: number;
   title: string;
+  extractedText: string;
 }
 
 export interface TTSRequest {
