@@ -43,6 +43,49 @@ export async function GET(
   }
 }
 
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id } = await params;
+    const body = await req.json();
+    const { title } = body;
+
+    if (!title || typeof title !== "string" || !title.trim()) {
+      return NextResponse.json({ error: "Title is required." }, { status: 400 });
+    }
+
+    const [updated] = await db
+      .update(discussionSessions)
+      .set({ title: title.trim() })
+      .where(
+        and(
+          eq(discussionSessions.id, id),
+          eq(discussionSessions.userId, session.user.id)
+        )
+      )
+      .returning();
+
+    if (!updated) {
+      return NextResponse.json({ error: "Not found." }, { status: 404 });
+    }
+
+    return NextResponse.json(updated);
+  } catch (error) {
+    console.error("History PATCH error:", error);
+    return NextResponse.json(
+      { error: "Failed to rename session." },
+      { status: 500 }
+    );
+  }
+}
+
 export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }

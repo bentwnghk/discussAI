@@ -64,13 +64,22 @@ export default function HistoryPage() {
 
   const handleRename = useCallback(async () => {
     if (!renameId || !renameTitle.trim()) return;
-    // We'd need a PATCH endpoint for rename. For now, delete and recreate isn't ideal.
-    // Let's just update the title locally for now and note this as a TODO.
-    setItems((prev) =>
-      prev.map((i) =>
-        i.id === renameId ? { ...i, title: renameTitle.trim() } : i
-      )
-    );
+    try {
+      const res = await fetch(`/api/history/${renameId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: renameTitle.trim() }),
+      });
+      if (res.ok) {
+        setItems((prev) =>
+          prev.map((i) =>
+            i.id === renameId ? { ...i, title: renameTitle.trim() } : i
+          )
+        );
+      }
+    } catch {
+      // silently fail
+    }
     setRenameId(null);
     setRenameTitle("");
   }, [renameId, renameTitle]);
