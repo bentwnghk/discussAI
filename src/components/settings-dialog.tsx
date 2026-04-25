@@ -54,16 +54,16 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
           </p>
           <Input
             type="password"
-            placeholder="API Key (optional if set server-side)"
+            placeholder="API Key (sk-...)"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
           />
         </div>
         <DialogFooter>
+          <Button onClick={handleSave}>Save</Button>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSave}>Save</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
