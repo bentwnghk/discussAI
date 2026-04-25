@@ -7,6 +7,7 @@ import {
   Table,
   TableRow,
   TableCell,
+  TableLayoutType,
   WidthType,
   AlignmentType,
   ShadingType,
@@ -260,7 +261,6 @@ function buildSectionContent(html: string): (Paragraph | Table)[] {
                     ],
                   }),
                 ],
-                width: { size: 33, type: WidthType.PERCENTAGE },
               })
             );
           });
@@ -274,6 +274,7 @@ function buildSectionContent(html: string): (Paragraph | Table)[] {
             new Table({
               rows: docRows,
               width: { size: 100, type: WidthType.PERCENTAGE },
+              layout: TableLayoutType.AUTOFIT,
             })
           );
           result.push(new Paragraph({ text: "" }));
