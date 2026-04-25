@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
     const textInput = (formData.get("text") as string) || "";
 
     let fullText = "";
+    let topicLabel = "";
 
     if (inputMethod === "Upload Files") {
       const files: File[] = [];
@@ -36,6 +37,7 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      topicLabel = files.map((f) => f.name).join(", ");
       const texts: string[] = [];
       const tmpDir = path.join(process.cwd(), "tmp", "uploads");
       await mkdir(tmpDir, { recursive: true });
@@ -62,6 +64,8 @@ export async function POST(req: NextRequest) {
         );
       }
       fullText = textInput;
+      topicLabel = textInput.trim().slice(0, 80);
+      if (textInput.trim().length > 80) topicLabel += "…";
     } else {
       return NextResponse.json(
         { error: "Invalid input method." },
@@ -85,7 +89,7 @@ export async function POST(req: NextRequest) {
     );
     const ttsCostHKD = (charactersCount / 1_000_000) * 15 * 7.8;
 
-    const title = `Group Discussion - ${new Date().toLocaleString("en-HK", { timeZone: "Asia/Hong_Kong" })}`;
+    const title = `Group Discussion - ${topicLabel}`;
 
     return NextResponse.json({
       dialogue: dialogue.dialogue,
