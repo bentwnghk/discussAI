@@ -2,28 +2,10 @@ import fs from "fs/promises";
 import { createOpenAI } from "@ai-sdk/openai";
 import { generateText } from "ai";
 
-function installPolyfills() {
-  const g = globalThis as Record<string, unknown>;
-  if (typeof g.DOMMatrix === "undefined") g.DOMMatrix = class {};
-  if (typeof g.ImageData === "undefined") g.ImageData = class {};
-  if (typeof g.Path2D === "undefined") g.Path2D = class {};
-}
-
-async function installRenderingPolyfills() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const canvas = (await import("@napi-rs/canvas")) as any;
-  const g = globalThis as Record<string, unknown>;
-  g.DOMMatrix = canvas.DOMMatrix;
-  g.ImageData = canvas.ImageData;
-  g.Path2D = canvas.Path2D;
-}
-
 export async function extractTextFromPDF(
   filePath: string,
   apiKey?: string
 ): Promise<string> {
-  installPolyfills();
-
   const mod = await import("pdf-parse");
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const pdfParse = (mod as any).default || mod;
@@ -40,7 +22,6 @@ async function ocrPdfPages(
   filePath: string,
   apiKey?: string
 ): Promise<string> {
-  await installRenderingPolyfills();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const pdfjsLib = (await import("pdfjs-dist/legacy/build/pdf.mjs")) as any;
   const { createCanvas } = await import("@napi-rs/canvas");
