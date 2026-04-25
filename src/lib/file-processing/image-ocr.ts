@@ -23,7 +23,7 @@ export async function extractTextFromImage(
         : "image/png";
 
   const { text } = await generateText({
-    model: openai("gpt-4.1-mini"),
+    model: openai("gpt-5-nano"),
     messages: [
       {
         role: "user",
