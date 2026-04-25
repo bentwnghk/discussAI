@@ -86,9 +86,9 @@ export default function DiscussPage() {
           for (const pdfFile of pdfFiles) {
             try {
               const result = await processPdf(pdfFile);
+              formData.append("fileName", result.fileName);
               if (result.text) {
                 formData.append("preExtractedText", result.text);
-                formData.append("fileName", result.fileName);
               } else {
                 result.images.forEach((img) =>
                   formData.append("files", img)

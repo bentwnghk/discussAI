@@ -40,9 +40,13 @@ export async function POST(req: NextRequest) {
       }
 
       const allFileNames = [
-        ...files.map((f) => f.name.replace(/\.[^/.]+$/, "")),
         ...fileNames.map((n) => n.replace(/\.[^/.]+$/, "")),
       ];
+      if (allFileNames.length === 0) {
+        allFileNames.push(
+          ...files.map((f) => f.name.replace(/\.[^/.]+$/, ""))
+        );
+      }
       topicLabel = allFileNames.join(", ");
       const texts: string[] = [];
       const tmpDir = path.join(process.cwd(), "tmp", "uploads");
