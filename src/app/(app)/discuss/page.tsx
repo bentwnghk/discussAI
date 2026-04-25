@@ -24,6 +24,7 @@ import type {
 } from "@/types";
 import { Sparkles, FileText, History } from "lucide-react";
 import { getVoiceForSpeaker } from "@/lib/tts/generate";
+import { processPdf } from "@/lib/pdf-client";
 
 export default function DiscussPage() {
   const router = useRouter();
@@ -59,8 +60,8 @@ export default function DiscussPage() {
     }
 
     setIsGenerating(true);
-    setProgress(10);
-    setProgressLabel("Analyzing input...");
+    setProgress(5);
+    setProgressLabel("Preparing files...");
 
     try {
       const formData = new FormData();
@@ -70,7 +71,34 @@ export default function DiscussPage() {
         formData.append("text", topicText);
       }
       if (inputMethod === "Upload Files") {
-        files.forEach((f) => formData.append("files", f));
+        const pdfFiles = files.filter(
+          (f) =>
+            f.type === "application/pdf" ||
+            f.name.toLowerCase().endsWith(".pdf")
+        );
+        const nonPdfFiles = files.filter((f) => !pdfFiles.includes(f));
+
+        nonPdfFiles.forEach((f) => formData.append("files", f));
+
+        if (pdfFiles.length > 0) {
+          setProgressLabel("Processing PDF pages...");
+          setProgress(8);
+          for (const pdfFile of pdfFiles) {
+            try {
+              const result = await processPdf(pdfFile);
+              if (result.text) {
+                formData.append("preExtractedText", result.text);
+                formData.append("fileName", result.fileName);
+              } else {
+                result.images.forEach((img) =>
+                  formData.append("files", img)
+                );
+              }
+            } catch {
+              formData.append("files", pdfFile);
+            }
+          }
+        }
       }
 
       setProgressLabel("Generating dialogue and study notes...");

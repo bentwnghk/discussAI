@@ -29,18 +29,28 @@ export async function POST(req: NextRequest) {
       formData.getAll("files").forEach((f) => {
         if (f instanceof File) files.push(f);
       });
+      const preExtractedTexts = formData.getAll("preExtractedText") as string[];
+      const fileNames = formData.getAll("fileName") as string[];
 
-      if (files.length === 0) {
+      if (files.length === 0 && preExtractedTexts.length === 0) {
         return NextResponse.json(
           { error: "Please upload at least one file." },
           { status: 400 }
         );
       }
 
-      topicLabel = files.map((f) => f.name.replace(/\.[^/.]+$/, "")).join(", ");
+      const allFileNames = [
+        ...files.map((f) => f.name.replace(/\.[^/.]+$/, "")),
+        ...fileNames.map((n) => n.replace(/\.[^/.]+$/, "")),
+      ];
+      topicLabel = allFileNames.join(", ");
       const texts: string[] = [];
       const tmpDir = path.join(process.cwd(), "tmp", "uploads");
       await mkdir(tmpDir, { recursive: true });
+
+      for (const text of preExtractedTexts) {
+        if (text.trim()) texts.push(text.trim());
+      }
 
       for (const file of files) {
         const bytes = await file.arrayBuffer();
