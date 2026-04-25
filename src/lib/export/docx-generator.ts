@@ -12,16 +12,24 @@ import {
   AlignmentType,
   ShadingType,
   LevelFormat,
+  BorderStyle,
 } from "docx";
 import * as cheerio from "cheerio";
 import type { Element as DomElement, Text as DomText } from "domhandler";
 import type { DialogueItem, LearningNotes, Speaker } from "@/types";
 
-const SPEAKER_COLORS_HEX: Record<Speaker, string> = {
-  "Candidate A": "E3F2FD",
-  "Candidate B": "FFFDE7",
-  "Candidate C": "E8F5E8",
-  "Candidate D": "FDECEA",
+const SPEAKER_BG_COLORS: Record<Speaker, string> = {
+  "Candidate A": "EFF6FF",
+  "Candidate B": "FEFCE8",
+  "Candidate C": "F0FDF4",
+  "Candidate D": "FDF2F8",
+};
+
+const SPEAKER_BORDER_COLORS: Record<Speaker, string> = {
+  "Candidate A": "60A5FA",
+  "Candidate B": "FACC15",
+  "Candidate C": "4ADE80",
+  "Candidate D": "F472B6",
 };
 
 const ORDERED_NUMBERING_REF = "ordered-list";
@@ -47,8 +55,8 @@ function textParagraph(text: string, indent = 0): Paragraph {
   });
 }
 
-function buildTranscriptParagraphs(items: DialogueItem[]): Paragraph[] {
-  const paragraphs: Paragraph[] = [
+function buildTranscriptParagraphs(items: DialogueItem[]): (Paragraph | Table)[] {
+  const elements: (Paragraph | Table)[] = [
     new Paragraph({
       text: "Transcript 文字稿",
       heading: HeadingLevel.HEADING_1,
@@ -57,33 +65,64 @@ function buildTranscriptParagraphs(items: DialogueItem[]): Paragraph[] {
   ];
 
   for (const item of items) {
-    const color = SPEAKER_COLORS_HEX[item.speaker as Speaker] || "FFFFFF";
+    const bgColor =
+      SPEAKER_BG_COLORS[item.speaker as Speaker] || "FFFFFF";
+    const borderColor =
+      SPEAKER_BORDER_COLORS[item.speaker as Speaker] || "000000";
 
-    // Speaker name: bold, no background shading (matches reference style)
-    paragraphs.push(
-      new Paragraph({
-        children: [
-          new TextRun({ text: `${item.speaker}:`, bold: true, size: 22 }),
+    elements.push(
+      new Table({
+        rows: [
+          new TableRow({
+            children: [
+              new TableCell({
+                children: [
+                  new Paragraph({
+                    children: [
+                      new TextRun({
+                        text: `${item.speaker}:`,
+                        bold: true,
+                        size: 22,
+                      }),
+                    ],
+                    spacing: { after: 60 },
+                  }),
+                  new Paragraph({
+                    children: [new TextRun({ text: item.text, size: 22 })],
+                    spacing: { after: 0 },
+                  }),
+                ],
+                shading: { type: ShadingType.CLEAR, fill: bgColor },
+                borders: {
+                  left: {
+                    style: BorderStyle.SINGLE,
+                    size: 24,
+                    color: borderColor,
+                  },
+                  top: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+                  bottom: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+                  right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+                },
+                margins: {
+                  top: 120,
+                  bottom: 120,
+                  left: 140,
+                  right: 140,
+                },
+              }),
+            ],
+          }),
         ],
-        spacing: { after: 40 },
+        width: { size: 100, type: WidthType.PERCENTAGE },
       })
     );
 
-    // Speech text: indented + speaker color shading (matches reference style)
-    paragraphs.push(
-      new Paragraph({
-        children: [new TextRun({ text: item.text, size: 22 })],
-        shading: { type: ShadingType.CLEAR, fill: color },
-        indent: { left: 360 },
-        spacing: { after: 120 },
-      })
+    elements.push(
+      new Paragraph({ text: "", spacing: { after: 100 } })
     );
-
-    // Empty paragraph separator between exchanges
-    paragraphs.push(new Paragraph({ text: "" }));
   }
 
-  return paragraphs;
+  return elements;
 }
 
 // ─── Inline run types for the line-buffer approach ───────────────────────────
