@@ -13,6 +13,7 @@ import {
   LevelFormat,
 } from "docx";
 import * as cheerio from "cheerio";
+import type { Element as DomElement, Text as DomText } from "domhandler";
 import type { DialogueItem, LearningNotes, Speaker } from "@/types";
 
 const SPEAKER_COLORS_HEX: Record<Speaker, string> = {
@@ -195,7 +196,7 @@ function buildSectionContent(html: string): (Paragraph | Table)[] {
     // ── <br> tag ──────────────────────────────────────────────────────────────
     if (
       node.type === "tag" &&
-      (node as cheerio.TagElement).tagName?.toLowerCase() === "br"
+      (node as DomElement).tagName?.toLowerCase() === "br"
     ) {
       if (consecutiveBrs === 0) {
         // First <br> ends the current line
@@ -214,7 +215,7 @@ function buildSectionContent(html: string): (Paragraph | Table)[] {
 
     // ── Text node ─────────────────────────────────────────────────────────────
     if (node.type === "text") {
-      const raw = (node as cheerio.TextElement).data || "";
+      const raw = (node as DomText).data || "";
       // Skip nodes that are only regular whitespace (no &nbsp;)
       if (!raw.trim() && !raw.includes("\u00a0")) continue;
       lineBuffer.push({ kind: "text", raw });
@@ -223,8 +224,8 @@ function buildSectionContent(html: string): (Paragraph | Table)[] {
 
     if (node.type !== "tag") continue;
 
-    const el = $(node as cheerio.TagElement);
-    const tag = (node as cheerio.TagElement).tagName?.toLowerCase();
+    const el = $(node as DomElement);
+    const tag = (node as DomElement).tagName?.toLowerCase();
 
     // ── Block elements: flush the inline buffer first ─────────────────────────
     const BLOCK_TAGS = new Set([
@@ -333,11 +334,11 @@ function buildSectionContent(html: string): (Paragraph | Table)[] {
         const children: TextRun[] = [];
         el.contents().each((_, child) => {
           if (child.type === "text") {
-            const text = (child as cheerio.TextElement).data?.trim() || "";
+            const text = (child as DomText).data?.trim() || "";
             if (text) children.push(new TextRun({ text, size: 22 }));
           } else if (child.type === "tag") {
             const childTag = (
-              child as cheerio.TagElement
+              child as DomElement
             ).tagName?.toLowerCase();
             const text = $(child).text().trim();
             if (!text) return;
