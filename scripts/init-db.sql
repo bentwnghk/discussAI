@@ -60,6 +60,7 @@ CREATE TABLE IF NOT EXISTS "discussion_sessions" (
   "audioUrl" TEXT,
   "charactersCount" INTEGER NOT NULL DEFAULT 0,
   "ttsCostHKD" REAL NOT NULL DEFAULT 0,
+  "usedOwnApiKey" BOOLEAN NOT NULL DEFAULT false,
   "createdAt" TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
