@@ -249,6 +249,12 @@ export default function DiscussPage() {
       const message =
         error instanceof Error ? error.message : "An error occurred.";
       toast.error(message);
+      // Always refresh the balance after any failure so the displayed value
+      // reflects the true DB state (whether the server refund worked or not).
+      // Without this, the client shows a stale pre-generation balance; the
+      // next page reload then appears to "deduct" credits when it's just
+      // catching up to the real balance.
+      refreshBalance();
     } finally {
       setIsGenerating(false);
     }
