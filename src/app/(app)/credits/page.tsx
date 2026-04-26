@@ -13,8 +13,8 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Coins, CheckCircle, XCircle, Loader2, Star, ShoppingCart, MessageSquareText, Zap, Package } from "lucide-react";
-import Link from "next/link";
+import { Coins, CheckCircle, XCircle, Loader2, Star, ShoppingCart, KeyRound, Zap, Package } from "lucide-react";
+import { SettingsDialog } from "@/components/settings-dialog";
 
 interface PlanConfig {
   key: string;
@@ -41,6 +41,7 @@ export default function CreditsPage() {
   const [generationCost, setGenerationCost] = useState(10);
   const [loading, setLoading] = useState<string | null>(null);
   const [purchases, setPurchases] = useState<PurchaseRecord[]>([]);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const isSuccess = searchParams.get("success") === "true";
   const isCanceled = searchParams.get("canceled") === "true";
@@ -270,13 +271,13 @@ export default function CreditsPage() {
       )}
 
       <div className="text-center mt-8">
-        <Link href="/discuss">
-          <Button variant="ghost">
-            <MessageSquareText className="mr-2 h-4 w-4" />
-            Back to Discuss
-          </Button>
-        </Link>
+        <Button variant="ghost" onClick={() => setSettingsOpen(true)}>
+          <KeyRound className="mr-2 h-4 w-4" />
+          Already have your own API key?
+        </Button>
       </div>
+
+      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
     </div>
   );
 }
