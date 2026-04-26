@@ -23,12 +23,15 @@ export default async function HomePage() {
           Mr.🆖 DiscussAI
         </h1>
         <p className="mt-4 text-lg text-muted-foreground">
-          AI Group Discussion Tutor for Hong Kong Students
+          The ultimate HKDSE Speaking simulator
         </p>
         <p className="mt-6 text-base leading-relaxed text-muted-foreground">
-          Enhance speaking skills through AI-generated group discussions.
-          Transform any Paper 4 questions into realistic audio discussions with authentic
-          conversation strategies for HKDSE speaking exam preparation.
+          Speak like a 5**—anytime, anywhere!
+          <br />
+          Don't just practice; Simulate. Transform any discussion topic into
+          a high-stakes HKDSE discussion featuring natural voices and
+          exam-specific vocabulary. Master the art of authentic interaction
+          and turn-taking with strategies modeled after real exam success.
         </p>
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2 max-w-2xl mx-auto text-left">

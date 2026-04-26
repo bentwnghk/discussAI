@@ -16,9 +16,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mr.🆖 DiscussAI - AI Group Discussion Tutor for Hong Kong Students",
+  title: "Mr.🆖 DiscussAI - The ultimate HKDSE Speaking simulator",
   description:
-    "AI language tutor helping Hong Kong secondary students improve speaking skills through interactive group discussions for HKDSE speaking exam preparation.",
+    "Conquer HKDSE English Language Paper 4 exam with AI-powered realism.",
   icons: { icon: "/icon.png" },
 };
 
