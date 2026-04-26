@@ -5,6 +5,7 @@ import { discussionSessions } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { unlink } from "fs/promises";
 import path from "path";
+import { getGenerationCost } from "@/lib/db/credits";
 
 const AUDIO_DIR = path.join(process.cwd(), "tmp", "audio");
 
@@ -33,7 +34,7 @@ export async function GET(
       return NextResponse.json({ error: "Not found." }, { status: 404 });
     }
 
-    return NextResponse.json(result);
+    return NextResponse.json({ ...result, generationCost: getGenerationCost() });
   } catch (error) {
     console.error("History GET [id] error:", error);
     return NextResponse.json(

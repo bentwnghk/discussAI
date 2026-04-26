@@ -41,6 +41,7 @@ interface HistoryItem {
   inputMethod: string;
   charactersCount: number;
   ttsCostHKD: number;
+  usedOwnApiKey: boolean;
   createdAt: string;
 }
 
@@ -166,11 +167,15 @@ export default function HistoryPage() {
                       })}
                     </span>
                     <Badge variant="secondary">{item.dialogueMode}</Badge>
-                    <Badge variant="outline" className="gap-1">
-                      <Coins className="h-3 w-3" />
-                      {generationCost}
-                    </Badge>
-                    <span>HK${item.ttsCostHKD.toFixed(2)}</span>
+                    {!item.usedOwnApiKey && (
+                      <Badge variant="outline" className="gap-1">
+                        <Coins className="h-3 w-3" />
+                        {generationCost}
+                      </Badge>
+                    )}
+                    {item.usedOwnApiKey && (
+                      <span>HK${item.ttsCostHKD.toFixed(2)}</span>
+                    )}
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">

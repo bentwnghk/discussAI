@@ -53,6 +53,7 @@ export interface DiscussionSession {
   audioUrl: string | null;
   charactersCount: number;
   ttsCostHKD: number;
+  usedOwnApiKey: boolean;
   createdAt: Date;
 }
 
@@ -71,7 +72,9 @@ export interface GenerateResponse {
   ttsCostHKD: number;
   title: string;
   extractedText: string;
-  generationId: string;
+  generationId: string | null;
+  usedOwnApiKey: boolean;
+  creditsConsumed: number;
 }
 
 export interface TTSRequest {

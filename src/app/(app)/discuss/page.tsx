@@ -47,6 +47,8 @@ export default function DiscussPage() {
   const [charactersCount, setCharactersCount] = useState(0);
   const [ttsCostHKD, setTtsCostHKD] = useState(0);
   const [extractedText, setExtractedText] = useState<string | null>(null);
+  const [usedOwnApiKey, setUsedOwnApiKey] = useState(false);
+  const [creditsConsumed, setCreditsConsumed] = useState(0);
 
   const handleGenerate = useCallback(async () => {
     if (
@@ -129,8 +131,12 @@ export default function DiscussPage() {
       setCharactersCount(data.charactersCount);
       setTtsCostHKD(data.ttsCostHKD);
       setExtractedText(data.extractedText);
+      setUsedOwnApiKey(data.usedOwnApiKey);
+      setCreditsConsumed(data.creditsConsumed);
 
-      refreshBalance();
+      if (!data.usedOwnApiKey) {
+        refreshBalance();
+      }
 
       setProgressLabel("Generating audio...");
       setProgress(40);
@@ -170,11 +176,13 @@ export default function DiscussPage() {
       }
 
       if (audioFailed) {
-        await fetch("/api/credits/refund", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ generationId }),
-        }).catch(() => {});
+        if (generationId) {
+          await fetch("/api/credits/refund", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ generationId }),
+          }).catch(() => {});
+        }
         refreshBalance();
         throw new Error("Audio generation failed. Your credits have been refunded.");
       }
@@ -227,14 +235,17 @@ export default function DiscussPage() {
             audioUrl: savedAudioUrl,
             charactersCount: data.charactersCount,
             ttsCostHKD: data.ttsCostHKD,
+            usedOwnApiKey: data.usedOwnApiKey,
           }),
         });
       } catch {
-        await fetch("/api/credits/refund", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ generationId }),
-        }).catch(() => {});
+        if (generationId) {
+          await fetch("/api/credits/refund", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ generationId }),
+          }).catch(() => {});
+        }
         refreshBalance();
         toast.warning("Failed to save session. Your credits have been refunded.");
         return;
@@ -242,18 +253,19 @@ export default function DiscussPage() {
 
       setProgress(100);
       setProgressLabel("Done!");
-      toast.success(
-        `Discussion generated! Total cost: HK$${data.ttsCostHKD.toFixed(2)}`
-      );
+      if (data.usedOwnApiKey) {
+        toast.success(
+          `Discussion generated! Total cost: HK$${data.ttsCostHKD.toFixed(2)}`
+        );
+      } else {
+        toast.success(
+          `Discussion generated! Credits consumed: ${data.creditsConsumed}`
+        );
+      }
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : "An error occurred.";
       toast.error(message);
-      // Always refresh the balance after any failure so the displayed value
-      // reflects the true DB state (whether the server refund worked or not).
-      // Without this, the client shows a stale pre-generation balance; the
-      // next page reload then appears to "deduct" credits when it's just
-      // catching up to the real balance.
       refreshBalance();
     } finally {
       setIsGenerating(false);
@@ -403,7 +415,9 @@ export default function DiscussPage() {
 
             <div className="flex justify-between items-center">
               <p className="text-sm text-muted-foreground">
-                Cost: HK${ttsCostHKD.toFixed(2)} | {charactersCount} characters
+                {usedOwnApiKey
+                  ? `Cost: HK$${ttsCostHKD.toFixed(2)} | ${charactersCount} characters`
+                  : `Credits spent: ${creditsConsumed} | ${charactersCount} characters`}
               </p>
               <Button onClick={handleExportDocx} variant="outline">
                 <FileText className="mr-2 h-4 w-4" />

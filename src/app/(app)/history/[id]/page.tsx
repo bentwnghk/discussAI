@@ -22,6 +22,8 @@ interface SessionData {
   audioUrl: string | null;
   charactersCount: number;
   ttsCostHKD: number;
+  usedOwnApiKey: boolean;
+  generationCost: number;
   createdAt: string;
 }
 
@@ -112,8 +114,11 @@ export default function SessionDetailPage() {
             <p className="text-sm text-muted-foreground">
               {new Date(session.createdAt).toLocaleString("en-HK", {
                 timeZone: "Asia/Hong_Kong",
-              })}{" "}
-              | HK${session.ttsCostHKD.toFixed(2)}
+              })}
+              {" | "}
+              {session.usedOwnApiKey
+                ? `HK$${session.ttsCostHKD.toFixed(2)}`
+                : `${session.generationCost} credits`}
             </p>
           </div>
           <div className="flex gap-2">

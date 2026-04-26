@@ -8,6 +8,7 @@ import {
   real,
   jsonb,
   primaryKey,
+  boolean,
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable("user", {
@@ -69,6 +70,7 @@ export const discussionSessions = pgTable("discussion_sessions", {
   audioUrl: text("audioUrl"),
   charactersCount: integer("charactersCount").notNull().default(0),
   ttsCostHKD: real("ttsCostHKD").notNull().default(0),
+  usedOwnApiKey: boolean("usedOwnApiKey").notNull().default(false),
   createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
 });
 

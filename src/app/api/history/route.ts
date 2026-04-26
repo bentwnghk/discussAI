@@ -46,6 +46,7 @@ export async function POST(req: NextRequest) {
       audioUrl,
       charactersCount,
       ttsCostHKD,
+      usedOwnApiKey,
     } = body;
 
     const [newSession] = await db
@@ -61,6 +62,7 @@ export async function POST(req: NextRequest) {
         audioUrl: audioUrl || null,
         charactersCount: charactersCount || 0,
         ttsCostHKD: ttsCostHKD || 0,
+        usedOwnApiKey: !!usedOwnApiKey,
       })
       .returning();
 
