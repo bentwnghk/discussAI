@@ -19,8 +19,8 @@ export default async function HomePage() {
         </p>
         <p className="mt-6 text-base leading-relaxed text-muted-foreground">
           Enhance speaking skills through AI-generated group discussions.
-          Transform any topics into realistic audio discussions with authentic
-          conversation strategies for HKDSE oral exam preparation.
+          Transform any Paper 4 questions into realistic audio discussions with authentic
+          conversation strategies for HKDSE speaking exam preparation.
         </p>
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2 max-w-2xl mx-auto text-left">
