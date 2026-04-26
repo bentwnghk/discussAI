@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { discussionSessions } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
+import { getGenerationCost } from "@/lib/db/credits";
 
 export async function GET() {
   try {
@@ -17,7 +18,7 @@ export async function GET() {
       .where(eq(discussionSessions.userId, session.user.id))
       .orderBy(desc(discussionSessions.createdAt));
 
-    return NextResponse.json(sessions);
+    return NextResponse.json({ sessions, generationCost: getGenerationCost() });
   } catch (error) {
     console.error("History GET error:", error);
     return NextResponse.json(

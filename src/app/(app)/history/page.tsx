@@ -13,7 +13,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Plus, Play, Eye, Pencil, Trash2, X, Check } from "lucide-react";
+import { Plus, Play, Eye, Pencil, Trash2, X, Check, Coins } from "lucide-react";
 
 interface HistoryItem {
   id: string;
@@ -27,6 +27,7 @@ interface HistoryItem {
 
 export default function HistoryPage() {
   const [items, setItems] = useState<HistoryItem[]>([]);
+  const [generationCost, setGenerationCost] = useState(10);
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [renameId, setRenameId] = useState<string | null>(null);
@@ -39,7 +40,8 @@ export default function HistoryPage() {
         const res = await fetch("/api/history");
         if (res.ok && !cancelled) {
           const data = await res.json();
-          setItems(data);
+          setItems(data.sessions || data);
+          if (data.generationCost) setGenerationCost(data.generationCost);
         }
       } catch {
         // silently fail
@@ -95,7 +97,10 @@ export default function HistoryPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Practice History</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold">Practice History</h1>
+          <Badge variant="secondary">{items.length}</Badge>
+        </div>
         <Link href="/discuss">
           <Button variant="outline" size="sm">
             <Plus className="mr-2 h-4 w-4" />
@@ -130,6 +135,10 @@ export default function HistoryPage() {
                       })}
                     </span>
                     <Badge variant="secondary">{item.dialogueMode}</Badge>
+                    <Badge variant="outline" className="gap-1">
+                      <Coins className="h-3 w-3" />
+                      {generationCost}
+                    </Badge>
                     <span>HK${item.ttsCostHKD.toFixed(2)}</span>
                   </div>
                 </div>
