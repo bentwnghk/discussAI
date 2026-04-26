@@ -15,20 +15,20 @@ export default async function HomePage() {
           Mr.🆖 DiscussAI
         </h1>
         <p className="mt-4 text-lg text-muted-foreground">
-          AI Speaking Tutor for Hong Kong Students
+          AI Group Discussion Tutor for Hong Kong Students
         </p>
         <p className="mt-6 text-base leading-relaxed text-muted-foreground">
           Enhance speaking skills through AI-generated group discussions.
-          Transform topics into realistic 4-student dialogues with authentic
+          Transform any topics into realistic audio discussions with authentic
           conversation strategies for HKDSE oral exam preparation.
         </p>
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2 max-w-2xl mx-auto text-left">
           {[
-            { emoji: "📁", title: "Upload & Go", desc: "Upload PDF, DOCX, or images of your exam papers" },
-            { emoji: "🗣️", title: "4-Student Dialogues", desc: "Realistic conversations with distinct AI voices" },
-            { emoji: "📚", title: "Study Notes", desc: "Comprehensive learning notes with vocabulary & strategies" },
-            { emoji: "📄", title: "DOCX Export", desc: "Download formatted Word documents for offline study" },
+            { emoji: "📁", title: "Upload & Go", desc: "Upload images, PDF, or DOCX of your speaking exam papers" },
+            { emoji: "🗣️", title: "4-Student Interaction", desc: "Realistic conversations with 4 distinct AI voices" },
+            { emoji: "📚", title: "Study Notes", desc: "Comprehensive learning notes with useful ideas, vocabulary & strategies" },
+            { emoji: "📄", title: "DOCX Export", desc: "Download Word documents for offline study" },
           ].map((f) => (
             <div key={f.title} className="rounded-lg border p-4">
               <div className="text-2xl mb-2">{f.emoji}</div>
