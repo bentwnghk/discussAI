@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Coins, CheckCircle, XCircle, Loader2, Star } from "lucide-react";
+import { Coins, CheckCircle, XCircle, Loader2, Star, ShoppingCart, MessageSquareText, Zap, Package } from "lucide-react";
 import Link from "next/link";
 
 interface PlanConfig {
@@ -38,6 +38,7 @@ export default function CreditsPage() {
   const router = useRouter();
   const { balance, refreshBalance } = useCredits();
   const [plans, setPlans] = useState<PlanConfig[]>([]);
+  const [generationCost, setGenerationCost] = useState(10);
   const [loading, setLoading] = useState<string | null>(null);
   const [purchases, setPurchases] = useState<PurchaseRecord[]>([]);
 
@@ -57,7 +58,10 @@ export default function CreditsPage() {
   useEffect(() => {
     fetch("/api/stripe/plans")
       .then((res) => res.json())
-      .then((data) => setPlans(data.plans || []))
+      .then((data) => {
+        setPlans(data.plans || []);
+        if (data.generationCost) setGenerationCost(data.generationCost);
+      })
       .catch(() => {});
   }, []);
 
@@ -130,67 +134,85 @@ export default function CreditsPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 mb-8">
-        {plans.map((plan) => (
-          <Card
-            key={plan.key}
-            className={`relative ${
-              plan.highlight
-                ? "border-primary shadow-lg scale-[1.02]"
-                : ""
-            }`}
-          >
-            {plan.highlight && (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <Badge className="bg-primary text-primary-foreground px-3 py-1">
-                  <Star className="mr-1 h-3 w-3" />
-                  Best Value
-                </Badge>
-              </div>
-            )}
-            <CardHeader className="text-center pb-2">
-              <CardTitle className="text-xl">{plan.label}</CardTitle>
-              <CardDescription>{plan.credits} Credits</CardDescription>
-            </CardHeader>
-            <CardContent className="text-center space-y-4">
-              <div>
-                <span className="text-4xl font-bold">
-                  HK${plan.priceHKD}
-                </span>
-              </div>
+        {plans.map((plan) => {
+          const discussions = Math.floor(plan.credits / generationCost);
+          const starterPlan = plans.find((p) => !p.highlight);
+          const savedPct = starterPlan
+            ? Math.round(
+                (1 -
+                  plan.priceHKD /
+                    (plan.credits *
+                      starterPlan.priceHKD /
+                      starterPlan.credits)) *
+                  100
+              )
+            : 0;
+
+          return (
+            <Card
+              key={plan.key}
+              className={`relative pt-4 ${
+                plan.highlight
+                  ? "border-primary shadow-lg scale-[1.02]"
+                  : ""
+              }`}
+            >
               {plan.highlight && (
-                <p className="text-sm text-muted-foreground">
-                  Save{" "}
-                  {Math.round(
-                    (1 -
-                      plan.priceHKD /
-                        (plan.credits *
-                          (plans.find((p) => !p.highlight)?.priceHKD ||
-                            1) /
-                          (plans.find((p) => !p.highlight)?.credits || 1))) *
-                      100
-                  )}
-                  % compared to Starter
-                </p>
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                  <Badge className="bg-primary text-primary-foreground px-3 py-1">
+                    <Star className="mr-1 h-3 w-3" />
+                    Best Value
+                  </Badge>
+                </div>
               )}
-              <Button
-                className="w-full"
-                variant={plan.highlight ? "default" : "outline"}
-                size="lg"
-                onClick={() => handlePurchase(plan.key)}
-                disabled={loading !== null}
-              >
-                {loading === plan.key ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Redirecting...
-                  </>
-                ) : (
-                  `Buy ${plan.credits} Credits`
+              <CardHeader className="text-center pb-2 items-center">
+                <div className="mb-2">
+                  {plan.highlight ? (
+                    <Zap className="h-8 w-8 text-primary" />
+                  ) : (
+                    <Package className="h-8 w-8 text-muted-foreground" />
+                  )}
+                </div>
+                <CardTitle className="text-xl">{plan.label}</CardTitle>
+                <CardDescription>{plan.credits} Credits</CardDescription>
+              </CardHeader>
+              <CardContent className="text-center space-y-4">
+                <div>
+                  <span className="text-4xl font-bold">
+                    HK${plan.priceHKD}
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {discussions} discussions (~HK${(plan.priceHKD / discussions).toFixed(1)} each)
+                </p>
+                {plan.highlight && savedPct > 0 && (
+                  <p className="text-sm font-medium text-primary">
+                    Save {savedPct}% compared to Starter
+                  </p>
                 )}
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
+                <Button
+                  className="w-full"
+                  variant={plan.highlight ? "default" : "outline"}
+                  size="lg"
+                  onClick={() => handlePurchase(plan.key)}
+                  disabled={loading !== null}
+                >
+                  {loading === plan.key ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Redirecting...
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart className="mr-2 h-4 w-4" />
+                      Buy {plan.credits} Credits
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {purchases.length > 0 && (
@@ -249,7 +271,10 @@ export default function CreditsPage() {
 
       <div className="text-center mt-8">
         <Link href="/discuss">
-          <Button variant="ghost">Back to Discuss</Button>
+          <Button variant="ghost">
+            <MessageSquareText className="mr-2 h-4 w-4" />
+            Back to Discuss
+          </Button>
         </Link>
       </div>
     </div>

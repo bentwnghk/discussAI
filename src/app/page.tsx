@@ -2,11 +2,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Rocket, Star, Coins } from "lucide-react";
+import { Rocket, Star, Coins, Zap, Package } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getCreditPlans } from "@/lib/stripe";
-import { getWelcomeCredits } from "@/lib/db/credits";
+import { getWelcomeCredits, getGenerationCost } from "@/lib/db/credits";
 
 export default async function HomePage() {
   const session = await auth();
@@ -14,6 +14,7 @@ export default async function HomePage() {
 
   const plans = getCreditPlans();
   const welcomeCredits = getWelcomeCredits();
+  const generationCost = getGenerationCost();
 
   return (
     <div className="container mx-auto px-4 py-16">
@@ -53,33 +54,58 @@ export default async function HomePage() {
             </span>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 max-w-2xl mx-auto">
-            {plans.map((plan) => (
-              <Card
-                key={plan.key}
-                className={`relative ${plan.highlight ? "border-primary shadow-lg" : ""}`}
-              >
-                {plan.highlight && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <Badge className="bg-primary text-primary-foreground px-3 py-1">
-                      <Star className="mr-1 h-3 w-3" />
-                      Best Value
-                    </Badge>
-                  </div>
-                )}
-                <CardHeader className="text-center pb-2">
-                  <CardTitle className="text-xl">{plan.label}</CardTitle>
-                  <CardDescription>{plan.credits} Credits</CardDescription>
-                </CardHeader>
-                <CardContent className="text-center">
-                  <span className="text-4xl font-bold">HK${plan.priceHKD}</span>
+            {plans.map((plan) => {
+              const discussions = Math.floor(plan.credits / generationCost);
+              const starterPlan = plans.find((p) => !p.highlight);
+              const savedPct = starterPlan
+                ? Math.round(
+                    (1 -
+                      plan.priceHKD /
+                        (plan.credits *
+                          starterPlan.priceHKD /
+                          starterPlan.credits)) *
+                      100
+                  )
+                : 0;
+
+              return (
+                <Card
+                  key={plan.key}
+                  className={`relative pt-4 ${plan.highlight ? "border-primary shadow-lg" : ""}`}
+                >
                   {plan.highlight && (
-                    <p className="text-sm text-muted-foreground mt-2">
-                      ~HK${(plan.priceHKD / plan.credits * 10).toFixed(1)} per discussion
-                    </p>
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                      <Badge className="bg-primary text-primary-foreground px-3 py-1">
+                        <Star className="mr-1 h-3 w-3" />
+                        Best Value
+                      </Badge>
+                    </div>
                   )}
-                </CardContent>
-              </Card>
-            ))}
+                  <CardHeader className="text-center pb-2 items-center">
+                    <div className="mb-2">
+                      {plan.highlight ? (
+                        <Zap className="h-8 w-8 text-primary" />
+                      ) : (
+                        <Package className="h-8 w-8 text-muted-foreground" />
+                      )}
+                    </div>
+                    <CardTitle className="text-xl">{plan.label}</CardTitle>
+                    <CardDescription>{plan.credits} Credits</CardDescription>
+                  </CardHeader>
+                  <CardContent className="text-center space-y-2">
+                    <span className="text-4xl font-bold">HK${plan.priceHKD}</span>
+                    <p className="text-sm text-muted-foreground">
+                      {discussions} discussions (~HK${(plan.priceHKD / discussions).toFixed(1)} each)
+                    </p>
+                    {plan.highlight && savedPct > 0 && (
+                      <p className="text-sm font-medium text-primary">
+                        Save {savedPct}% compared to Starter
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
 
