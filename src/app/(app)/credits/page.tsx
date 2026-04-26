@@ -225,7 +225,7 @@ export default function CreditsPage() {
                 <thead>
                   <tr className="border-b bg-muted/50">
                     <th className="p-3 text-left font-medium">Date</th>
-                    <th className="p-3 text-left font-medium">Plan</th>
+                    <th className="p-3 text-left font-medium">Package</th>
                     <th className="p-3 text-right font-medium">Amount</th>
                     <th className="p-3 text-right font-medium">Credits</th>
                     <th className="p-3 text-right font-medium">Status</th>
@@ -242,8 +242,8 @@ export default function CreditsPage() {
                           day: "numeric",
                         })}
                       </td>
-                      <td className="p-3 capitalize">
-                        {p.planName.replace("_", " ")}
+                      <td className="p-3">
+                        {p.planName}
                       </td>
                       <td className="p-3 text-right">HK${p.amountHKD}</td>
                       <td className="p-3 text-right">{p.creditsAmount}</td>

@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     await createPendingPurchase(
       session.user.id,
       checkoutSession.id,
-      plan.key,
+      plan.label,
       plan.credits,
       plan.priceHKD
     );

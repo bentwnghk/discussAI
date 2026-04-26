@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getStripe } from "@/lib/stripe";
+import { getStripe, getPlanByKey } from "@/lib/stripe";
 import { addCreditsFromPurchase, markPurchaseFailed } from "@/lib/db/credits";
 
 export async function POST(req: NextRequest) {
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
           credits,
           session.id,
           session.payment_intent as string | null,
-          planKey || "unknown",
+          planKey ? (getPlanByKey(planKey)?.label || planKey) : "unknown",
           amountHKD
         );
         break;
