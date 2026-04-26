@@ -53,7 +53,7 @@ export default async function HomePage() {
               Sign up and get {welcomeCredits} free credits ({Math.floor(welcomeCredits / 10)} free discussions!)
             </span>
           </div>
-          <div className="grid gap-6 sm:grid-cols-2 max-w-2xl mx-auto">
+          <div className="grid gap-6 sm:grid-cols-2 max-w-2xl mx-auto pt-4">
             {plans.map((plan) => {
               const discussions = Math.floor(plan.credits / generationCost);
               const starterPlan = plans.find((p) => !p.highlight);
@@ -71,7 +71,7 @@ export default async function HomePage() {
               return (
                 <Card
                   key={plan.key}
-                  className={`relative pt-4 ${plan.highlight ? "border-primary shadow-lg" : ""}`}
+                  className={`relative pt-6 ${plan.highlight ? "border-primary shadow-lg !overflow-visible" : ""}`}
                 >
                   {plan.highlight && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">

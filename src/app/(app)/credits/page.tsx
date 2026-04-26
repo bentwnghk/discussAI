@@ -133,7 +133,7 @@ export default function CreditsPage() {
         <span className="text-muted-foreground">remaining</span>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 mb-8">
+      <div className="grid gap-6 md:grid-cols-2 mb-8 pt-4">
         {plans.map((plan) => {
           const discussions = Math.floor(plan.credits / generationCost);
           const starterPlan = plans.find((p) => !p.highlight);
@@ -151,9 +151,9 @@ export default function CreditsPage() {
           return (
             <Card
               key={plan.key}
-              className={`relative pt-4 ${
+              className={`relative pt-6 ${
                 plan.highlight
-                  ? "border-primary shadow-lg scale-[1.02]"
+                  ? "border-primary shadow-lg scale-[1.02] !overflow-visible"
                   : ""
               }`}
             >
