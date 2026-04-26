@@ -36,10 +36,10 @@ export default async function HomePage() {
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2 max-w-2xl mx-auto text-left">
           {[
-            { emoji: "📁", title: "Upload & Go", desc: "Upload images, PDF, or DOCX of your speaking exam papers" },
-            { emoji: "🗣️", title: "4-Student Interaction", desc: "Realistic conversations with 4 distinct AI voices" },
-            { emoji: "📚", title: "Study Notes", desc: "Comprehensive learning notes with useful ideas, vocabulary & strategies" },
-            { emoji: "📄", title: "DOCX Export", desc: "Download Word documents for offline study or classroom use" },
+            { emoji: "📁", title: "Snap, Upload, Speak", desc: "Seamlessly upload images, PDFs, or DOCX files to generate custom speaking simulations on the fly." },
+            { emoji: "🗣️", title: "Authentic Group Dynamics", desc: "Engage in 4-student interactions featuring realistic voices and turn-taking strategies modeled after the HKDSE Paper 4 format." },
+            { emoji: "📚", title: "Comprehensive Smart Notes", desc: "Gain a competitive edge with structured learning notes, advanced vocabulary, and tactical interaction tips." },
+            { emoji: "📄", title: "Study Your Way—Online or Off", desc: "Learn seamlessly in-app or download a hard copy to highlight, annotate, and study distraction-free." },
           ].map((f) => (
             <div key={f.title} className="rounded-lg border p-4">
               <div className="text-2xl mb-2">{f.emoji}</div>
