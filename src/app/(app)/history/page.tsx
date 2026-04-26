@@ -13,7 +13,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Plus, Play, Eye, Pencil, Trash2, X, Check, Coins } from "lucide-react";
+import { Plus, Play, Eye, Pencil, Trash2, X, Check, Coins, MessageSquareText } from "lucide-react";
 
 interface HistoryItem {
   id: string;
@@ -99,7 +99,10 @@ export default function HistoryPage() {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-bold">Practice History</h1>
-          <Badge variant="secondary">{items.length}</Badge>
+          <Badge variant="secondary" className="gap-1">
+            <MessageSquareText className="h-3 w-3" />
+            {items.length}
+          </Badge>
         </div>
         <Link href="/discuss">
           <Button variant="outline" size="sm">
