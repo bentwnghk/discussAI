@@ -36,9 +36,9 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Settings</DialogTitle>
+          <DialogTitle>Prefer to use your own API key?</DialogTitle>
           <DialogDescription>
-            Configure your application settings.
+            Enter your API key below to bypass in-app credit usage.
           </DialogDescription>
         </DialogHeader>
         <form
