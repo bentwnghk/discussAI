@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
 
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: "payment",
-      payment_method_types: ["card"],
+      payment_method_types: ["card", "alipay", "wechat_pay"],
       line_items: [
         {
           price_data: {
