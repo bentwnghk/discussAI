@@ -28,7 +28,7 @@ export default async function HomePage() {
             { emoji: "📁", title: "Upload & Go", desc: "Upload images, PDF, or DOCX of your speaking exam papers" },
             { emoji: "🗣️", title: "4-Student Interaction", desc: "Realistic conversations with 4 distinct AI voices" },
             { emoji: "📚", title: "Study Notes", desc: "Comprehensive learning notes with useful ideas, vocabulary & strategies" },
-            { emoji: "📄", title: "DOCX Export", desc: "Download Word documents for offline study" },
+            { emoji: "📄", title: "DOCX Export", desc: "Download Word documents for offline study or classroom use" },
           ].map((f) => (
             <div key={f.title} className="rounded-lg border p-4">
               <div className="text-2xl mb-2">{f.emoji}</div>
