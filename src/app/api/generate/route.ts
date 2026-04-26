@@ -34,6 +34,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const generationId = deduction.transactionId!;
+
     const apiKey = await getUserApiKey(session.user.id);
 
     const formData = await req.formData();
@@ -137,6 +139,7 @@ export async function POST(req: NextRequest) {
       ttsCostHKD,
       title,
       extractedText: fullText,
+      generationId,
     });
   } catch (error: unknown) {
     const message =

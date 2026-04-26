@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { credits, creditTransactions, purchases } from "@/lib/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, and } from "drizzle-orm";
 
 const WELCOME_CREDITS = parseInt(process.env.WELCOME_CREDITS || "20", 10);
 const GENERATION_COST = parseInt(process.env.GENERATION_COST || "10", 10);
@@ -45,7 +45,7 @@ export async function deductCredits(
   userId: string,
   amount: number,
   description: string
-): Promise<{ success: boolean; balance: number; error?: string }> {
+): Promise<{ success: boolean; balance: number; transactionId?: string; error?: string }> {
   const [row] = await db
     .select({ balance: credits.balance })
     .from(credits)
@@ -71,14 +71,14 @@ export async function deductCredits(
     })
     .where(eq(credits.userId, userId));
 
-  await db.insert(creditTransactions).values({
+  const [txn] = await db.insert(creditTransactions).values({
     userId,
     amount: -amount,
     type: "generation",
     description,
-  });
+  }).returning({ id: creditTransactions.id });
 
-  return { success: true, balance: row.balance - amount };
+  return { success: true, balance: row.balance - amount, transactionId: txn.id };
 }
 
 export async function refundCredits(
@@ -183,4 +183,37 @@ export async function getUserPurchases(userId: string) {
     .from(purchases)
     .where(eq(purchases.userId, userId))
     .orderBy(sql`${purchases.createdAt} DESC`);
+}
+
+export async function refundGeneration(
+  userId: string,
+  transactionId: string
+): Promise<{ refunded: boolean; reason?: string }> {
+  const [txn] = await db
+    .select()
+    .from(creditTransactions)
+    .where(
+      and(
+        eq(creditTransactions.id, transactionId),
+        eq(creditTransactions.userId, userId),
+        eq(creditTransactions.type, "generation")
+      )
+    );
+
+  if (!txn) {
+    return { refunded: false, reason: "Transaction not found" };
+  }
+
+  const [existing] = await db
+    .select({ id: creditTransactions.id })
+    .from(creditTransactions)
+    .where(eq(creditTransactions.description, `Refund for ${transactionId}`));
+
+  if (existing) {
+    return { refunded: false, reason: "Already refunded" };
+  }
+
+  const refundAmount = Math.abs(txn.amount);
+  await refundCredits(userId, refundAmount, `Refund for ${transactionId}`);
+  return { refunded: true };
 }

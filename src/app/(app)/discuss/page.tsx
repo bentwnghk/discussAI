@@ -122,6 +122,7 @@ export default function DiscussPage() {
       }
 
       const data: GenerateResponse = await res.json();
+      const { generationId } = data;
       setDialogueItems(data.dialogue);
       setLearningNotes(data.learningNotes);
       setSessionTitle(data.title);
@@ -134,33 +135,48 @@ export default function DiscussPage() {
       setProgressLabel("Generating audio...");
       setProgress(40);
 
+      let audioFailed = false;
       const totalLines = data.dialogue.length;
       const audioChunks: ArrayBuffer[] = [];
       let completed = 0;
 
-      const batchSize = 5;
-      for (let i = 0; i < totalLines; i += batchSize) {
-        const batch = data.dialogue.slice(i, i + batchSize);
-        const promises = batch.map(async (item) => {
-          const voice = getVoiceForSpeaker(item.speaker as Speaker);
-          const ttsRes = await fetch("/api/tts", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              text: item.text,
-              voice,
-            }),
+      try {
+        const batchSize = 5;
+        for (let i = 0; i < totalLines; i += batchSize) {
+          const batch = data.dialogue.slice(i, i + batchSize);
+          const promises = batch.map(async (item) => {
+            const voice = getVoiceForSpeaker(item.speaker as Speaker);
+            const ttsRes = await fetch("/api/tts", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                text: item.text,
+                voice,
+              }),
+            });
+            if (!ttsRes.ok) throw new Error("TTS failed for a line.");
+            return ttsRes.arrayBuffer();
           });
-          if (!ttsRes.ok) throw new Error("TTS failed for a line.");
-          return ttsRes.arrayBuffer();
-        });
 
-        const results = await Promise.all(promises);
-        audioChunks.push(...results);
-        completed += batch.length;
-        const pct = 40 + Math.round((completed / totalLines) * 50);
-        setProgress(pct);
-        setProgressLabel(`Generating audio ${completed}/${totalLines}...`);
+          const results = await Promise.all(promises);
+          audioChunks.push(...results);
+          completed += batch.length;
+          const pct = 40 + Math.round((completed / totalLines) * 50);
+          setProgress(pct);
+          setProgressLabel(`Generating audio ${completed}/${totalLines}...`);
+        }
+      } catch {
+        audioFailed = true;
+      }
+
+      if (audioFailed) {
+        await fetch("/api/credits/refund", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ generationId }),
+        }).catch(() => {});
+        refreshBalance();
+        throw new Error("Audio generation failed. Your credits have been refunded.");
       }
 
       const totalLength = audioChunks.reduce(
@@ -214,7 +230,14 @@ export default function DiscussPage() {
           }),
         });
       } catch {
-        toast.warning("Session saved locally but could not sync to server.");
+        await fetch("/api/credits/refund", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ generationId }),
+        }).catch(() => {});
+        refreshBalance();
+        toast.warning("Failed to save session. Your credits have been refunded.");
+        return;
       }
 
       setProgress(100);

@@ -71,6 +71,7 @@ export interface GenerateResponse {
   ttsCostHKD: number;
   title: string;
   extractedText: string;
+  generationId: string;
 }
 
 export interface TTSRequest {
