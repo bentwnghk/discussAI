@@ -25,9 +25,11 @@ import type {
 import { Sparkles, FileText, History } from "lucide-react";
 import { getVoiceForSpeaker } from "@/lib/tts/generate";
 import { processPdf } from "@/lib/pdf-client";
+import { useCredits } from "@/hooks/use-credits";
 
 export default function DiscussPage() {
   const router = useRouter();
+  const { refreshBalance } = useCredits();
   const [inputMethod, setInputMethod] = useState<InputMethod>("Upload Files");
   const [dialogueMode, setDialogueMode] = useState<DialogueMode>("Normal");
   const [files, setFiles] = useState<File[]>([]);
@@ -111,6 +113,11 @@ export default function DiscussPage() {
 
       if (!res.ok) {
         const err = await res.json();
+        if (res.status === 402) {
+          throw new Error(
+            `Insufficient credits. You need ${err.creditsNeeded} credits but have ${err.currentBalance}. Go to Credits page to purchase more.`
+          );
+        }
         throw new Error(err.error || "Generation failed.");
       }
 
@@ -121,6 +128,8 @@ export default function DiscussPage() {
       setCharactersCount(data.charactersCount);
       setTtsCostHKD(data.ttsCostHKD);
       setExtractedText(data.extractedText);
+
+      refreshBalance();
 
       setProgressLabel("Generating audio...");
       setProgress(40);
@@ -220,7 +229,7 @@ export default function DiscussPage() {
     } finally {
       setIsGenerating(false);
     }
-  }, [inputMethod, dialogueMode, files, topicText]);
+  }, [inputMethod, dialogueMode, files, topicText, refreshBalance]);
 
   const handleExportDocx = useCallback(async () => {
     if (!dialogueItems.length || !learningNotes) return;

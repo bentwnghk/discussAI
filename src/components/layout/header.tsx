@@ -13,10 +13,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SettingsDialog } from "@/components/settings-dialog";
-import { Settings, LogOut, MessageSquareText, History, LogIn } from "lucide-react";
+import { Settings, LogOut, MessageSquareText, History, LogIn, Coins } from "lucide-react";
+import { useCredits } from "@/hooks/use-credits";
 
 export function Header() {
   const { data: session } = useSession();
+  const { balance } = useCredits();
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
@@ -42,6 +44,12 @@ export function Header() {
                 <Button variant="ghost" size="sm">
                   <History className="mr-2 h-4 w-4" />
                   History
+                </Button>
+              </Link>
+              <Link href="/credits">
+                <Button variant="ghost" size="sm">
+                  <Coins className="mr-2 h-4 w-4" />
+                  {balance !== null ? `${balance} Credits` : "Credits"}
                 </Button>
               </Link>
             </nav>
@@ -77,6 +85,12 @@ export function Header() {
                   <Link href="/history" className="flex items-center w-full">
                     <History className="mr-2 h-4 w-4" />
                     History
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="md:hidden">
+                  <Link href="/credits" className="flex items-center w-full">
+                    <Coins className="mr-2 h-4 w-4" />
+                    {balance !== null ? `${balance} Credits` : "Credits"}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="md:hidden" />
