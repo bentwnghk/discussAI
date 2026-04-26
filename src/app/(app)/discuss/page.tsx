@@ -304,7 +304,7 @@ export default function DiscussPage() {
                   <Label htmlFor="deeper">
                     Deeper
                     <span className="text-xs text-muted-foreground ml-1">
-                      (more elaboration)
+                      (More ideas & elaboration)
                     </span>
                   </Label>
                 </div>
@@ -331,7 +331,7 @@ export default function DiscussPage() {
               ) : (
                 <>
                   <Sparkles className="mr-2 h-4 w-4" />
-                  Generate Discussion with Audio and Study Notes
+                  Generate Discussion
                 </>
               )}
             </Button>

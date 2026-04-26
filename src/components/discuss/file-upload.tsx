@@ -74,7 +74,7 @@ export function FileUpload({ files, onFilesChange }: FileUploadProps) {
             Drag & drop files here, or click to browse
           </p>
           <p className="text-xs text-muted-foreground">
-            Supports PDF, DOCX, JPG, JPEG, PNG
+            Supports JPG, JPEG, PNG, PDF, DOCX
           </p>
         </div>
       </Card>
