@@ -13,7 +13,26 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Plus, Play, Eye, Pencil, Trash2, X, Check, Coins, MessageSquareText } from "lucide-react";
+import {
+  Plus,
+  Play,
+  Eye,
+  Pencil,
+  Trash2,
+  X,
+  Check,
+  Coins,
+  MessageSquareText,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface HistoryItem {
   id: string;
@@ -32,6 +51,15 @@ export default function HistoryPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [renameId, setRenameId] = useState<string | null>(null);
   const [renameTitle, setRenameTitle] = useState("");
+  const [pageSize, setPageSize] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedItems = items.slice(
+    (safePage - 1) * pageSize,
+    safePage * pageSize
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -126,7 +154,7 @@ export default function HistoryPage() {
         </Card>
       ) : (
         <div className="space-y-3">
-          {items.map((item) => (
+          {paginatedItems.map((item) => (
             <Card key={item.id}>
               <CardContent className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-4 gap-2">
                 <div className="space-y-1">
@@ -175,6 +203,56 @@ export default function HistoryPage() {
               </CardContent>
             </Card>
           ))}
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between pt-2">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span>Per page</span>
+                <Select
+                  value={String(pageSize)}
+                  onValueChange={(v) => {
+                    setPageSize(Number(v));
+                    setCurrentPage(1);
+                  }}
+                >
+                  <SelectTrigger size="sm" className="w-[72px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="20">20</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span>
+                  {(safePage - 1) * pageSize + 1}–
+                  {Math.min(safePage * pageSize, items.length)} of{" "}
+                  {items.length}
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={safePage <= 1}
+                  onClick={() => setCurrentPage(safePage - 1)}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="px-2 text-sm text-muted-foreground">
+                  {safePage} / {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={safePage >= totalPages}
+                  onClick={() => setCurrentPage(safePage + 1)}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
