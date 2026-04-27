@@ -1,6 +1,6 @@
 {
-  "name": "Mr.🆖 DiscussAI",
-  "short_name": "Mr.🆖 DiscussAI",
+  "name": "Mr.NG DiscussAI",
+  "short_name": "DiscussAI",
   "id": "mrng-discussai",
   "description": "Conquer HKDSE English Language Paper 4 exam with AI-powered realism.",
   "start_url": "/",
@@ -9,13 +9,8 @@
   "scope": "/",
   "theme_color": "#FFFFFF",
   "background_color": "#FFFFFF",
+  "prefer_related_applications": false,
   "icons": [
-    {
-      "src": "/logo.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
     {
       "src": "/icon-192x192.png",
       "sizes": "192x192",
