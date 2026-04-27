@@ -275,10 +275,10 @@ export function LandingPage({ plans, welcomeCredits, generationCost }: LandingPa
           <motion.div variants={heroItemVariants}>
             <Badge
               variant="outline"
-              className="mb-6 border-white/20 text-white/80 bg-white/5 backdrop-blur-sm"
+              className="mb-6 border-white/20 text-white/80 bg-white/5 backdrop-blur-sm px-4 py-1.5"
             >
               <Sparkles className="mr-1 h-3 w-3" />
-              HKDSE Paper 4 Simulator
+              The ultimate HKDSE Paper 4 simulator
             </Badge>
           </motion.div>
 
