@@ -37,7 +37,6 @@ export const metadata: Metadata = {
     template: `%s - ${APP_NAME}`,
   },
   description: APP_DESCRIPTION,
-  manifest: "/manifest.json",
   icons: {
     icon: [
       { url: "/logo.svg", type: "image/svg+xml" },
