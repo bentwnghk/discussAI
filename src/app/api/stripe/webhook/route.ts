@@ -7,6 +7,10 @@ export async function POST(req: NextRequest) {
   const signature = req.headers.get("stripe-signature");
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
+  console.log("[webhook] sig header:", signature?.slice(0, 80));
+  console.log("[webhook] secret prefix:", webhookSecret?.slice(0, 14));
+  console.log("[webhook] body length:", body.length, "first 80:", body.slice(0, 80));
+
   if (!signature || !webhookSecret) {
     return NextResponse.json({ error: "Missing signature or secret" }, { status: 400 });
   }
