@@ -304,8 +304,8 @@ export default function DiscussPage() {
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <span className="text-2xl">✅ Discussion Topic</span>
+            <CardTitle className="flex items-center gap-2 text-2xl">
+              <span>✅</span> Discussion Topic
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
