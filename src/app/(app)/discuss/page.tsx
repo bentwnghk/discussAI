@@ -22,7 +22,7 @@ import type {
   GenerateResponse,
   Speaker,
 } from "@/types";
-import { Sparkles, FileText, History } from "lucide-react";
+import { Sparkles, FileText, History, MessageSquareText } from "lucide-react";
 import { getVoiceForSpeaker } from "@/lib/tts/generate";
 import { processPdf } from "@/lib/pdf-client";
 import { useCredits } from "@/hooks/use-credits";
@@ -305,7 +305,7 @@ export default function DiscussPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <span className="text-2xl">✅ Discussion Topic</span>
+              <MessageSquareText className="size-6" /> Discussion Topic
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
