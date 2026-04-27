@@ -395,7 +395,7 @@ export default function DiscussPage() {
             {extractedText && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Task 任務</CardTitle>
+                  <CardTitle>📌 Task 任務</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="max-h-64 overflow-y-auto rounded-md bg-muted p-4">

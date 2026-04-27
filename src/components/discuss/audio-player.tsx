@@ -12,7 +12,7 @@ export function AudioPlayer({ src }: AudioPlayerProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Audio 錄音</CardTitle>
+        <CardTitle>🎧 Audio 錄音</CardTitle>
       </CardHeader>
       <CardContent>
         <audio controls className="w-full" src={src}>

@@ -58,7 +58,7 @@ function textParagraph(text: string, indent = 0): Paragraph {
 function buildTranscriptParagraphs(items: DialogueItem[]): (Paragraph | Table)[] {
   const elements: (Paragraph | Table)[] = [
     new Paragraph({
-      text: "Transcript 逐字稿",
+      text: "📄 Transcript 逐字稿",
       heading: HeadingLevel.HEADING_1,
     }),
     new Paragraph({ text: "" }),

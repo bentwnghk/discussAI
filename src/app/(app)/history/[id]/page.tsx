@@ -140,7 +140,7 @@ export default function SessionDetailPage() {
         {session.inputText && (
           <Card>
             <CardHeader>
-              <CardTitle>Task 任務</CardTitle>
+              <CardTitle>📌 Task 任務</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="max-h-64 overflow-y-auto rounded-md bg-muted p-4">
@@ -155,7 +155,7 @@ export default function SessionDetailPage() {
         {audioSrc && (
           <Card>
             <CardHeader>
-              <CardTitle>Audio 錄音</CardTitle>
+              <CardTitle>🎧 Audio 錄音</CardTitle>
             </CardHeader>
             <CardContent>
               <audio controls className="w-full" src={audioSrc}>
