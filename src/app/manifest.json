@@ -1,0 +1,30 @@
+{
+  "name": "Mr.🆖 DiscussAI",
+  "short_name": "Mr.🆖 DiscussAI",
+  "description": "Conquer HKDSE English Language Paper 4 exam with AI-powered realism.",
+  "start_url": "/discuss",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/",
+  "theme_color": "#FFFFFF",
+  "background_color": "#FFFFFF",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "50x50",
+      "type": "image/png"
+    }
+  ]
+}
