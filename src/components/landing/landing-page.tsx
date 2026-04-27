@@ -5,7 +5,6 @@ import Link from "next/link";
 import { motion, useInView } from "motion/react";
 import {
   Upload,
-  MessageSquareText,
   BookOpen,
   FileText,
   Rocket,
@@ -14,7 +13,7 @@ import {
   Zap,
   Package,
   Users,
-  Mic,
+  Headphones,
   Brain,
   Sparkles,
   ArrowRight,
@@ -22,6 +21,7 @@ import {
   Download,
   Volume2,
   Target,
+  History,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -236,7 +236,7 @@ export function LandingPage({ plans, welcomeCredits, generationCost }: LandingPa
     { icon: BookOpen, key: "notes", color: "text-purple-600 dark:text-purple-400", title: "Comprehensive Smart Notes", desc: "Gain a competitive edge with structured learning notes, advanced vocabulary, and tactical interaction tips." },
     { icon: Download, key: "export", color: "text-amber-600 dark:text-amber-400", title: "Study Your Way", desc: "Learn seamlessly in-app or download a hard copy to highlight, annotate, and study distraction-free." },
     { icon: Volume2, key: "tts", color: "text-teal-600 dark:text-teal-400", title: "Natural Voices", desc: "Listen to realistic AI-generated speech with authentic accents and exam-appropriate intonation." },
-    { icon: Brain, key: "ai", color: "text-indigo-600 dark:text-indigo-400", title: "AI-Powered Feedback", desc: "Receive instant, personalized feedback on your speaking performance with actionable improvement tips." },
+    { icon: History, key: "history", color: "text-indigo-600 dark:text-indigo-400", title: "Practice History", desc: "Review past discussions with color-coded transcripts, audio playback, learning notes, and one-click Word export." },
     { icon: Target, key: "exam", color: "text-rose-600 dark:text-rose-400", title: "Exam-Specific Vocabulary", desc: "Master the exact phrases, discourse markers, and expressions that HKDSE examiners look for." },
     { icon: Sparkles, key: "adaptive", color: "text-pink-600 dark:text-pink-400", title: "Adaptive Difficulty", desc: "Discussions adapt to your level, ensuring you're always challenged but never overwhelmed." },
   ];
@@ -245,8 +245,8 @@ export function LandingPage({ plans, welcomeCredits, generationCost }: LandingPa
     { num: 1, icon: Upload, key: "upload", label: "Upload Topic" },
     { num: 2, icon: FileText, key: "extract", label: "Extract & Analyze" },
     { num: 3, icon: Brain, key: "generate", label: "AI Generates Discussion" },
-    { num: 4, icon: Users, key: "simulate", label: "4-Student Simulation" },
-    { num: 5, icon: Mic, key: "speak", label: "Speak & Interact" },
+    { num: 4, icon: Headphones, key: "listen", label: "Listen to Discussion" },
+    { num: 5, icon: FileText, key: "transcript", label: "Read the Transcript" },
     { num: 6, icon: BookOpen, key: "notes", label: "Review Smart Notes" },
     { num: 7, icon: Download, key: "export", label: "Export & Study" },
   ];
@@ -260,12 +260,6 @@ export function LandingPage({ plans, welcomeCredits, generationCost }: LandingPa
     "Persuasion",
     "Active Listening",
     "Discourse Markers",
-  ];
-
-  const whyCards = [
-    { icon: Target, title: "Exam-Focused", desc: "Every simulation is tailored to HKDSE Paper 4 format with authentic exam conditions and scoring criteria.", color: "text-emerald-600 dark:text-emerald-400", colSpan: "" },
-    { icon: Zap, title: "Instant Practice", desc: "No scheduling needed. Practice anytime with AI partners who are always ready for a discussion.", color: "text-amber-600 dark:text-amber-400", colSpan: "" },
-    { icon: Coins, title: "Free to Start", desc: `Get ${welcomeCredits} free credits on sign up — that's ${Math.floor(welcomeCredits / generationCost)} full discussions to get started!`, color: "text-blue-600 dark:text-blue-400", colSpan: "md:col-span-2" },
   ];
 
   return (
@@ -334,53 +328,13 @@ export function LandingPage({ plans, welcomeCredits, generationCost }: LandingPa
           >
             <Coins className="h-4 w-4" />
             <span>
-              {welcomeCredits} free credits on sign up ({Math.floor(welcomeCredits / generationCost)} free discussions)
+              {welcomeCredits} free credits on sign up — that's {Math.floor(welcomeCredits / generationCost)} full discussions to get started!
             </span>
           </motion.div>
         </motion.div>
       </section>
 
       <WaveDivider />
-
-      <section className="py-20 px-4">
-        <div className="container mx-auto">
-          <AnimatedSection>
-            <motion.h2
-              variants={sectionTitleVariants}
-              className="text-3xl sm:text-4xl font-bold text-center mb-4"
-            >
-              Why You&apos;ll Love It
-            </motion.h2>
-            <motion.div
-              variants={sectionTitleVariants}
-              className="w-24 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 mx-auto rounded-full mb-12"
-            />
-          </AnimatedSection>
-
-          <AnimatedSection className="grid gap-6 md:grid-cols-2 max-w-4xl mx-auto">
-            {whyCards.map((card) => {
-              const Icon = card.icon;
-              return (
-                <motion.div
-                  key={card.title}
-                  variants={cardVariants}
-                  className={`rounded-2xl p-6 ${glassCard} ${card.colSpan}`}
-                >
-                  <div className="flex items-start gap-4">
-                    <div className={`p-3 rounded-xl bg-white/10 ${card.color}`}>
-                      <Icon className="h-6 w-6" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold">{card.title}</h3>
-                      <p className="mt-1 text-sm text-muted-foreground">{card.desc}</p>
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </AnimatedSection>
-        </div>
-      </section>
 
       <section className="py-20 px-4 bg-muted/30">
         <div className="container mx-auto">
