@@ -420,7 +420,7 @@ export function LandingPage({ plans, welcomeCredits, generationCost }: LandingPa
                     <div className="w-0.5 h-12 bg-gradient-to-b from-border to-transparent" />
                   )}
                 </div>
-                <div className="flex items-center gap-3 pb-12">
+                <div className={`flex items-center gap-3 ${idx < journey.length - 1 ? "pb-12" : ""}`}>
                   <div className="p-2 rounded-lg bg-muted">
                     <Icon className="h-4 w-4 text-muted-foreground" />
                   </div>
