@@ -284,7 +284,7 @@ export function LandingPage({ plans, welcomeCredits, generationCost }: LandingPa
 
           <motion.h1
             variants={heroItemVariants}
-            className="text-5xl sm:text-7xl font-bold tracking-tight text-white"
+            className="text-6xl sm:text-8xl font-extrabold tracking-tighter text-white"
           >
             Mr.
             <span className="inline-block mx-1">🆖</span>
@@ -295,14 +295,14 @@ export function LandingPage({ plans, welcomeCredits, generationCost }: LandingPa
 
           <motion.p
             variants={heroItemVariants}
-            className="mt-2 text-xl sm:text-2xl font-light text-white/60"
+            className="mt-3 text-2xl sm:text-3xl font-medium italic text-white/60 bg-gradient-to-r from-emerald-300/80 via-teal-300/80 to-cyan-300/80 bg-clip-text"
           >
             Speak like a 5** — anytime, anywhere.
           </motion.p>
 
           <motion.p
             variants={heroItemVariants}
-            className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/50"
+            className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/50"
           >
             Don&apos;t just practice; Simulate. Transform any discussion topic into
             a high-stakes HKDSE discussion featuring natural voices and
@@ -339,9 +339,15 @@ export function LandingPage({ plans, welcomeCredits, generationCost }: LandingPa
       <section className="py-20 px-4 bg-muted/30">
         <div className="container mx-auto">
           <AnimatedSection>
+            <motion.span
+              variants={sectionTitleVariants}
+              className="block text-center text-xs font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-3"
+            >
+              Features
+            </motion.span>
             <motion.h2
               variants={sectionTitleVariants}
-              className="text-3xl sm:text-4xl font-bold text-center mb-4"
+              className="text-3xl sm:text-5xl font-bold tracking-tight text-center mb-4"
             >
               Powerful Features
             </motion.h2>
@@ -367,8 +373,8 @@ export function LandingPage({ plans, welcomeCredits, generationCost }: LandingPa
                 <div className={`mb-3 p-2.5 rounded-xl bg-white/10 inline-block ${color}`}>
                   <Icon className="h-5 w-5" />
                 </div>
-                <h3 className="font-semibold text-sm mb-1">{title}</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
+                <h3 className="font-semibold text-base mb-1">{title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
               </motion.div>
             ))}
           </AnimatedSection>
@@ -378,9 +384,15 @@ export function LandingPage({ plans, welcomeCredits, generationCost }: LandingPa
       <section className="py-20 px-4">
         <div className="container mx-auto">
           <AnimatedSection>
+            <motion.span
+              variants={sectionTitleVariants}
+              className="block text-center text-xs font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-3"
+            >
+              How It Works
+            </motion.span>
             <motion.h2
               variants={sectionTitleVariants}
-              className="text-3xl sm:text-4xl font-bold text-center mb-4"
+              className="text-3xl sm:text-5xl font-bold tracking-tight text-center mb-4"
             >
               Your Discussion Journey
             </motion.h2>
@@ -412,7 +424,7 @@ export function LandingPage({ plans, welcomeCredits, generationCost }: LandingPa
                   <div className="p-2 rounded-lg bg-muted">
                     <Icon className="h-4 w-4 text-muted-foreground" />
                   </div>
-                  <span className="font-medium text-sm">{label}</span>
+                  <span className="font-medium text-base">{label}</span>
                 </div>
               </motion.div>
             ))}
@@ -423,9 +435,15 @@ export function LandingPage({ plans, welcomeCredits, generationCost }: LandingPa
       <section className="py-20 px-4 bg-muted/30">
         <div className="container mx-auto">
           <AnimatedSection>
+            <motion.span
+              variants={sectionTitleVariants}
+              className="block text-center text-xs font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-3"
+            >
+              Skills
+            </motion.span>
             <motion.h2
               variants={sectionTitleVariants}
-              className="text-3xl sm:text-4xl font-bold text-center mb-4"
+              className="text-3xl sm:text-5xl font-bold tracking-tight text-center mb-4"
             >
               Skills You&apos;ll Master
             </motion.h2>
@@ -453,9 +471,15 @@ export function LandingPage({ plans, welcomeCredits, generationCost }: LandingPa
       <section className="py-20 px-4">
         <div className="container mx-auto">
           <AnimatedSection>
+            <motion.span
+              variants={sectionTitleVariants}
+              className="block text-center text-xs font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-3"
+            >
+              Pricing
+            </motion.span>
             <motion.h2
               variants={sectionTitleVariants}
-              className="text-3xl sm:text-4xl font-bold text-center mb-4"
+              className="text-3xl sm:text-5xl font-bold tracking-tight text-center mb-4"
             >
               Simple, Transparent Pricing
             </motion.h2>
@@ -518,7 +542,7 @@ export function LandingPage({ plans, welcomeCredits, generationCost }: LandingPa
                     </div>
                     <h3 className="text-xl font-semibold">{plan.label}</h3>
                     <p className="text-sm text-muted-foreground">{plan.credits} Credits</p>
-                    <div className="text-4xl font-bold">
+                    <div className="text-5xl font-extrabold tracking-tight">
                       <span className="text-lg align-top">HK$</span>
                       {plan.priceHKD}
                     </div>
@@ -544,7 +568,7 @@ export function LandingPage({ plans, welcomeCredits, generationCost }: LandingPa
           <AnimatedSection>
             <motion.h2
               variants={sectionTitleVariants}
-              className="text-3xl sm:text-4xl font-bold text-white mb-4"
+              className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white mb-4"
             >
               Ready to Ace HKDSE Paper 4?
             </motion.h2>
