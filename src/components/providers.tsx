@@ -4,6 +4,7 @@ import { SessionProvider } from "next-auth/react";
 import { Toaster } from "@/components/ui/sonner";
 import { ApiKeyProvider } from "@/hooks/use-api-key";
 import { CreditsProvider } from "@/hooks/use-credits";
+import { PWAInstallPrompt } from "@/components/pwa-install-prompt";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -11,6 +12,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <ApiKeyProvider>
         <CreditsProvider>{children}</CreditsProvider>
       </ApiKeyProvider>
+      <PWAInstallPrompt />
       <Toaster position="top-right" richColors />
     </SessionProvider>
   );

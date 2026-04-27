@@ -20,7 +20,16 @@ export const metadata: Metadata = {
   title: "Mr.🆖 DiscussAI - The ultimate HKDSE Speaking simulator",
   description:
     "Conquer HKDSE English Language Paper 4 exam with AI-powered realism.",
-  icons: { icon: "/icon.png" },
+  icons: { icon: "/icon.png", apple: "/apple-touch-icon.png" },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Mr.🆖 DiscussAI",
+  },
+  applicationName: "Mr.🆖 DiscussAI",
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 export default function RootLayout({
