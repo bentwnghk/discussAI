@@ -1,31 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe, getPlanByKey } from "@/lib/stripe";
 import { addCreditsFromPurchase, markPurchaseFailed } from "@/lib/db/credits";
-import crypto from "crypto";
 
 export async function POST(req: NextRequest) {
   const body = await req.text();
   const signature = req.headers.get("stripe-signature");
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
-  console.log("[webhook] sig header:", signature?.slice(0, 80));
-  console.log("[webhook] secret prefix:", webhookSecret?.slice(0, 14));
-  console.log("[webhook] secret length:", webhookSecret?.length);
-  console.log("[webhook] body length:", body.length, "first 80:", body.slice(0, 80));
-  console.log("[webhook] body has CRLF:", body.includes('\r\n'));
-  console.log("[webhook] body hex[0..20]:", Buffer.from(body.slice(0, 20)).toString('hex'));
-
-  // manually compute the expected HMAC to isolate body vs secret mismatch
-  if (signature && webhookSecret) {
-    const timestamp = signature.split(',')[0]?.split('=')[1];
-    const expectedV1 = signature.split(',')[1]?.split('=')[1];
-    const computed = crypto.createHmac('sha256', webhookSecret)
-      .update(`${timestamp}.${body}`, 'utf8')
-      .digest('hex');
-    console.log("[webhook] expected v1  :", expectedV1);
-    console.log("[webhook] computed hmac:", computed);
-    console.log("[webhook] hmac match:", computed === expectedV1);
-  }
 
   if (!signature || !webhookSecret) {
     return NextResponse.json({ error: "Missing signature or secret" }, { status: 400 });
