@@ -233,12 +233,12 @@ export function LandingPage({ plans, welcomeCredits, generationCost }: LandingPa
   const features = [
     { icon: Upload, key: "upload", color: "text-blue-600 dark:text-blue-400", title: "Snap, Upload, Speak", desc: "Seamlessly upload images, PDFs, or DOCX files to generate custom speaking simulations on the fly." },
     { icon: Users, key: "group", color: "text-emerald-600 dark:text-emerald-400", title: "Authentic Group Dynamics", desc: "Engage in 4-student interactions featuring realistic voices and turn-taking strategies modeled after HKDSE Paper 4." },
-    { icon: BookOpen, key: "notes", color: "text-purple-600 dark:text-purple-400", title: "Comprehensive Smart Notes", desc: "Gain a competitive edge with structured learning notes, advanced vocabulary, and tactical interaction tips." },
-    { icon: Download, key: "export", color: "text-amber-600 dark:text-amber-400", title: "Study Your Way", desc: "Learn seamlessly in-app or download a hard copy to highlight, annotate, and study distraction-free." },
     { icon: Volume2, key: "tts", color: "text-teal-600 dark:text-teal-400", title: "Natural Voices", desc: "Listen to realistic AI-generated speech with authentic accents and exam-appropriate intonation." },
-    { icon: History, key: "history", color: "text-indigo-600 dark:text-indigo-400", title: "Practice History", desc: "Review past discussions with color-coded transcripts, audio playback, learning notes, and one-click Word export." },
+    { icon: BookOpen, key: "notes", color: "text-purple-600 dark:text-purple-400", title: "Comprehensive Smart Notes", desc: "Gain a competitive edge with structured learning notes, advanced vocabulary, and tactical interaction tips." },
     { icon: Target, key: "exam", color: "text-rose-600 dark:text-rose-400", title: "Exam-Specific Vocabulary", desc: "Master the exact phrases, discourse markers, and expressions that HKDSE examiners look for." },
     { icon: Sparkles, key: "adaptive", color: "text-pink-600 dark:text-pink-400", title: "Adaptive Difficulty", desc: "Discussions adapt to your level, ensuring you're always challenged but never overwhelmed." },
+    { icon: History, key: "history", color: "text-indigo-600 dark:text-indigo-400", title: "Practice History", desc: "Review past discussions with color-coded transcripts, audio playback, learning notes, and one-click Word export." },
+    { icon: Download, key: "export", color: "text-amber-600 dark:text-amber-400", title: "Study Your Way", desc: "Learn seamlessly in-app or download a hard copy to highlight, annotate, and study distraction-free." },
   ];
 
   const journey = [
@@ -324,9 +324,9 @@ export function LandingPage({ plans, welcomeCredits, generationCost }: LandingPa
 
           <motion.div
             variants={heroItemVariants}
-            className="mt-6 flex items-center justify-center gap-2 text-white/40 text-sm"
+            className="mt-6 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm text-white/80 text-sm"
           >
-            <Coins className="h-4 w-4" />
+            <Coins className="h-4 w-4 text-amber-400" />
             <span>
               {welcomeCredits} free credits on sign up — that's {Math.floor(welcomeCredits / generationCost)} full discussions to get started!
             </span>
@@ -467,7 +467,7 @@ export function LandingPage({ plans, welcomeCredits, generationCost }: LandingPa
               variants={sectionTitleVariants}
               className="text-center text-muted-foreground mb-12 max-w-xl mx-auto"
             >
-              Start free, upgrade when you&apos;re ready. Every plan gives you full access to all features.
+              Start free, upgrade when you&apos;re ready. Every package gives you full access to all features.
             </motion.p>
           </AnimatedSection>
 
