@@ -35,19 +35,19 @@ export function Header() {
           <div className="flex items-center gap-4">
             <nav className="hidden md:flex items-center gap-4">
               <Link href="/discuss">
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" className="font-heading">
                   <MessageSquareText className="mr-2 h-4 w-4" />
                   Discuss
                 </Button>
               </Link>
               <Link href="/history">
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" className="font-heading">
                   <History className="mr-2 h-4 w-4" />
                   History
                 </Button>
               </Link>
               <Link href="/credits">
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" className="font-heading">
                   <Coins className="mr-2 h-4 w-4" />
                   {balance !== null ? `${balance} Credits` : "Credits"}
                 </Button>
@@ -75,19 +75,19 @@ export function Header() {
                   {session.user.email}
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="md:hidden">
+                <DropdownMenuItem className="md:hidden font-heading">
                   <Link href="/discuss" className="flex items-center w-full">
                     <MessageSquareText className="mr-2 h-4 w-4" />
                     Discuss
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="md:hidden">
+                <DropdownMenuItem className="md:hidden font-heading">
                   <Link href="/history" className="flex items-center w-full">
                     <History className="mr-2 h-4 w-4" />
                     History
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="md:hidden">
+                <DropdownMenuItem className="md:hidden font-heading">
                   <Link href="/credits" className="flex items-center w-full">
                     <Coins className="mr-2 h-4 w-4" />
                     {balance !== null ? `${balance} Credits` : "Credits"}
@@ -100,6 +100,7 @@ export function Header() {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
+                  className="font-heading"
                   onClick={() => signOut({ callbackUrl: "/" })}
                 >
                   <LogOut className="mr-2 h-4 w-4" />
