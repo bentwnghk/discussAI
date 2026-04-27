@@ -105,7 +105,7 @@ export default function DiscussPage() {
         }
       }
 
-      setProgressLabel("Generating dialogue and study notes...");
+      setProgressLabel("Generating transcript and study notes...");
       setProgress(20);
 
       const res = await fetch("/api/generate", {
@@ -305,12 +305,12 @@ export default function DiscussPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <span className="text-2xl">Discussion Topic</span>
+              <span className="text-2xl">✅ Discussion Topic</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div>
-              <Label className="mb-2 block">Input Method</Label>
+              <Label className="mb-2 block">📁 Input Method</Label>
               <RadioGroup
                 value={inputMethod}
                 onValueChange={(v) => setInputMethod(v as InputMethod)}
@@ -318,11 +318,11 @@ export default function DiscussPage() {
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="Upload Files" id="upload" />
-                  <Label htmlFor="upload">Upload Files</Label>
+                  <Label htmlFor="upload">📎 Upload Files</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="Enter Topic" id="text" />
-                  <Label htmlFor="text">Enter Topic</Label>
+                  <Label htmlFor="text">✏️ Enter Topic</Label>
                 </div>
               </RadioGroup>
             </div>
@@ -339,7 +339,7 @@ export default function DiscussPage() {
             )}
 
             <div>
-              <Label className="mb-2 block">Depth of Discussion</Label>
+              <Label className="mb-2 block">🧠 Depth of Discussion</Label>
               <RadioGroup
                 value={dialogueMode}
                 onValueChange={(v) => setDialogueMode(v as DialogueMode)}
@@ -347,12 +347,12 @@ export default function DiscussPage() {
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="Normal" id="normal" />
-                  <Label htmlFor="normal">Normal</Label>
+                  <Label htmlFor="normal">🌿 Normal</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="Deeper" id="deeper" />
                   <Label htmlFor="deeper">
-                    Deeper
+                    🔍 Deeper
                     <span className="text-xs text-muted-foreground ml-1">
                       (More ideas & elaboration)
                     </span>
