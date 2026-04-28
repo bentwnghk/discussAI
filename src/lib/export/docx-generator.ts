@@ -551,9 +551,10 @@ export async function generateDocx(
   notes: LearningNotes,
   title: string = "Group Discussion Notes",
   taskText?: string | null,
-  accessCode?: string | null
+  accessCode?: string | null,
+  appOrigin?: string
 ): Promise<Buffer> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "";
+  const baseUrl = appOrigin || process.env.NEXTAUTH_URL || "";
   const listenUrl = accessCode ? `${baseUrl}/listen` : "";
 
   const qrBuffer = listenUrl
