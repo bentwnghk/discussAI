@@ -21,6 +21,7 @@ export default function ListenPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [session, setSession] = useState<SessionData | null>(null);
+  const [submittedCode, setSubmittedCode] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,15 +30,19 @@ export default function ListenPage() {
     setLoading(true);
     setError(null);
     setSession(null);
+    setSubmittedCode("");
+
+    const upperCode = code.trim().toUpperCase();
 
     try {
-      const res = await fetch(`/api/public/session?code=${encodeURIComponent(code.trim().toUpperCase())}`);
+      const res = await fetch(`/api/public/session?code=${encodeURIComponent(upperCode)}`);
       if (!res.ok) {
         const data = await res.json();
         setError(data.error || "Invalid access code.");
         return;
       }
       setSession(await res.json());
+      setSubmittedCode(upperCode);
     } catch {
       setError("Failed to fetch session.");
     } finally {
@@ -94,7 +99,7 @@ export default function ListenPage() {
                 {session.audioExpired ? (
                   <p className="text-muted-foreground">Audio has expired.</p>
                 ) : (
-                  <audio controls className="w-full" src={session.audioUrl}>
+                  <audio controls className="w-full" src={`/api/public/audio?code=${encodeURIComponent(submittedCode)}`}>
                     Your browser does not support the audio element.
                   </audio>
                 )}
