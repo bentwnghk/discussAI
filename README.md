@@ -152,6 +152,119 @@ Download your discussions and notes for offline study.
 
 ---
 
+### 📱 8. Progressive Web App (PWA)
+
+__Install Mr.🆖 DiscussAI on any device for a native app-like experience.__
+
+| Feature | Description |
+| --- | --- |
+| 📲 __Installable__ | Add to home screen on Android, iOS (Safari), and desktop browsers |
+| 🔄 __Offline Caching__ | Serwist-powered precaching with runtime caching strategies |
+| 🖼️ __App Icons__ | SVG, 192x192, 512x512 icons + maskable variants for all platforms |
+| 🍎 __iOS Support__ | Custom install prompt with step-by-step Safari instructions |
+| 🤖 __Android/Desktop__ | Native "Install App" prompt via `react-use-pwa-install` |
+| 🔕 __Dismissable__ | Session-persistent dismiss — prompt won't reappear until next visit |
+
+---
+
+## PWA Technical Details
+
+### Architecture
+
+The app is a fully installable PWA built with **Serwist** (a service worker library for Next.js):
+
+```
+┌─────────────────────────────────────────────────────┐
+│  next.config.ts                                     │
+│  └─ withSerwistInit() wraps config at build time    │
+│     ├─ swSrc: src/app/sw.ts (service worker source) │
+│     └─ swDest: public/sw.js (compiled output)       │
+├─────────────────────────────────────────────────────┤
+│  src/app/manifest.json                              │
+│  └─ Web App Manifest (Next.js metadata convention)  │
+│     ├─ display: standalone                          │
+│     ├─ orientation: portrait                        │
+│     └─ 5 icons: SVG + 192/512 PNG + maskable       │
+├─────────────────────────────────────────────────────┤
+│  src/app/sw.ts (Service Worker)                     │
+│  └─ Serwist instance with:                          │
+│     ├─ Precaching (build assets)                    │
+│     ├─ Runtime caching (defaultCache strategies)    │
+│     ├─ skipWaiting + clientsClaim                   │
+│     └─ Navigation preload                           │
+├─────────────────────────────────────────────────────┤
+│  Client Components                                  │
+│  ├─ ServiceWorkerRegistrar                          │
+│  │  └─ Registers /sw.js on mount                   │
+│  └─ PWAInstallPrompt                                │
+│     ├─ Android/Desktop: native install prompt       │
+│     └─ iOS: manual instructions (Share → Add)       │
+├─────────────────────────────────────────────────────┤
+│  providers.tsx                                      │
+│  └─ Mounts ServiceWorkerRegistrar + PWAInstallPrompt│
+│     at app root (outside auth boundaries)           │
+└─────────────────────────────────────────────────────┘
+```
+
+### Key Libraries
+
+| Library | Version | Purpose |
+| --- | --- |
+| `serwist` | ^9.5.7 | Service worker generation and runtime caching |
+| `@serwist/next` | ^9.5.7 | Next.js integration (build-time SW compilation) |
+| `react-use-pwa-install` | ^1.0.3 | React hook for native `beforeinstallprompt` event |
+
+### Web App Manifest (`src/app/manifest.json`)
+
+- **`display: standalone`** — hides browser UI for app-like experience
+- **`orientation: portrait`** — optimized for mobile usage
+- **`id: mrng-discussai`** — unique PWA identity
+- **Icons**: SVG (`logo.svg`) for scalable display + 192x192/512x512 PNG for all platforms + maskable variants for adaptive icons on Android
+
+### Service Worker (`src/app/sw.ts`)
+
+- **Precaching**: Build assets are precached via Serwist's injection manifest (`__SW_MANIFEST`)
+- **Runtime caching**: Uses `defaultCache` from `@serwist/next/worker` with standard strategies (CacheFirst for static assets, NetworkFirst for navigation)
+- **Lifecycle**: `skipWaiting` and `clientsClaim` ensure new SW versions activate immediately
+- **Navigation preload**: Enabled for faster page loads after SW activation
+
+### Build Integration (`next.config.ts`)
+
+Serwist is conditionally applied **only during production builds** (`PHASE_PRODUCTION_BUILD`) to avoid interfering with development:
+
+```ts
+if (phase === PHASE_PRODUCTION_BUILD) {
+  const withSerwist = withSerwistInit({
+    swSrc: "src/app/sw.ts",
+    swDest: "public/sw.js",
+    register: false, // Manual registration via ServiceWorkerRegistrar
+  });
+  return withSerwist(nextConfig);
+}
+```
+
+Manual registration (`register: false`) is used so the app controls when and how the SW is registered via the `ServiceWorkerRegistrar` component.
+
+### Install Prompt Behavior
+
+| Platform | Behavior |
+| --- | --- |
+| __Android (Chrome)__ | Native install prompt via `beforeinstallprompt` event; "Install App" button |
+| __Desktop (Chrome/Edge)__ | Native install prompt; "Install App" button |
+| __iOS (Safari)__ | Custom banner with step-by-step instructions (Share → Add to Home Screen) |
+| __Already installed__ | Prompt hidden (detects `display-mode: standalone` or `navigator.standalone`) |
+| __Dismissed__ | Hidden for current session via `sessionStorage` |
+
+### Middleware Exception
+
+`manifest.json` is excluded from auth middleware to allow the browser to fetch it unauthenticated:
+
+```ts
+matcher: ["/((?!_next/static|_next/image|favicon.ico|logo.png|icon.png|manifest.json|examples).*)"]
+```
+
+---
+
 ## Credits & Payment System
 
 | Aspect | Details |
@@ -205,6 +318,7 @@ Download your discussions and notes for offline study.
 | 🎭 __Icons__ | Lucide React |
 | 🎞️ __Animations__ | Motion (Framer Motion) |
 | 🔊 __TTS__ | OpenAI-compatible Speech API |
+| 📱 __PWA__ | Serwist (service worker + caching) |
 | 📄 __Document Export__ | docx |
 
 ---
@@ -255,6 +369,8 @@ docker compose up --build
 src/
 ├── middleware.ts                # Auth middleware (route protection, redirects)
 ├── app/                        # Next.js App Router
+│   ├── manifest.json           # PWA Web App Manifest
+│   ├── sw.ts                   # Service worker source (Serwist)
 │   ├── (app)/                  # Authenticated routes
 │   │   ├── discuss/            # Main discussion generation page
 │   │   ├── history/            # Session history + detail view
@@ -262,6 +378,9 @@ src/
 │   ├── (auth)/                 # Unauthenticated routes (login, error)
 │   └── api/                    # API route handlers
 ├── components/
+│   ├── pwa-install-prompt.tsx    # PWA install prompt (Android/iOS/Desktop)
+│   ├── service-worker-registrar.tsx # Service worker registration
+│   ├── providers.tsx             # Client providers (Session, PWA, Toaster)
 │   ├── discuss/                # Core discussion feature components
 │   │   ├── audio-player.tsx    # Audio playback with transcript sync
 │   │   ├── file-upload.tsx     # File upload (PDF, DOCX, images)
