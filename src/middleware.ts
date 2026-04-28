@@ -7,7 +7,7 @@ export default auth((req) => {
   const isApiRoute = pathname.startsWith("/api");
 
   if (isApiRoute) {
-    if (pathname.startsWith("/api/auth") || pathname.startsWith("/api/stripe/webhook")) return NextResponse.next();
+    if (pathname.startsWith("/api/auth") || pathname.startsWith("/api/stripe/webhook") || pathname.startsWith("/api/cron")) return NextResponse.next();
     if (!req.auth) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
