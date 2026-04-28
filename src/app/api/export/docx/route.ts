@@ -26,7 +26,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const buffer = await generateDocx(transcript, learningNotes, title, extractedText, accessCode, req.nextUrl.origin);
+    const host = req.headers.get("host");
+    const proto = req.headers.get("x-forwarded-proto") || "https";
+    const origin = host ? `${proto}://${host}` : process.env.NEXTAUTH_URL || "";
+
+    const buffer = await generateDocx(transcript, learningNotes, title, extractedText, accessCode, origin);
 
     const timestamp = new Date().toLocaleString("en-HK", { timeZone: "Asia/Hong_Kong" }).replace(/[/:, ]/g, "-");
     const filename = `Mr.NG-DiscussAI-notes-${timestamp}.docx`;

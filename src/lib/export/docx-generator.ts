@@ -554,7 +554,7 @@ export async function generateDocx(
   accessCode?: string | null,
   appOrigin?: string
 ): Promise<Buffer> {
-  const baseUrl = appOrigin || process.env.NEXTAUTH_URL || "";
+  const baseUrl = appOrigin || "";
   const listenUrl = accessCode ? `${baseUrl}/listen` : "";
 
   const qrBuffer = listenUrl
