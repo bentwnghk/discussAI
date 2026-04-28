@@ -57,14 +57,93 @@ function textParagraph(text: string, indent = 0): Paragraph {
   });
 }
 
-function buildTranscriptParagraphs(items: DialogueItem[]): (Paragraph | Table)[] {
-  const elements: (Paragraph | Table)[] = [
-    new Paragraph({
-      text: "📄 Transcript 逐字稿",
-      heading: HeadingLevel.HEADING_1,
-    }),
-    new Paragraph({ text: "" }),
-  ];
+function buildTranscriptParagraphs(items: DialogueItem[], qrBuffer?: Buffer | null, accessCode?: string | null): (Paragraph | Table)[] {
+  const elements: (Paragraph | Table)[] = [];
+
+  if (qrBuffer) {
+    elements.push(
+      new Table({
+        rows: [
+          new TableRow({
+            children: [
+              new TableCell({
+                children: [
+                  new Paragraph({
+                    text: "📄 Transcript 逐字稿",
+                    heading: HeadingLevel.HEADING_1,
+                  }),
+                ],
+                borders: {
+                  top: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+                  bottom: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+                  left: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+                  right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+                },
+                verticalAlign: "center",
+              }),
+              new TableCell({
+                children: [
+                  new Paragraph({
+                    children: [
+                      new ImageRun({
+                        data: qrBuffer,
+                        transformation: { width: 100, height: 100 },
+                        type: "png",
+                      }),
+                    ],
+                    alignment: AlignmentType.RIGHT,
+                  }),
+                  ...(accessCode
+                    ? [
+                        new Paragraph({
+                          children: [
+                            new TextRun({
+                              text: "Scan to listen 🔗",
+                              size: 14,
+                              color: "999999",
+                            }),
+                          ],
+                          alignment: AlignmentType.RIGHT,
+                          spacing: { before: 40 },
+                        }),
+                        new Paragraph({
+                          children: [
+                            new TextRun({
+                              text: `Access Code: ${accessCode}`,
+                              bold: true,
+                              size: 16,
+                              color: "666666",
+                            }),
+                          ],
+                          alignment: AlignmentType.RIGHT,
+                        }),
+                      ]
+                    : []),
+                ],
+                borders: {
+                  top: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+                  bottom: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+                  left: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+                  right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+                },
+                verticalAlign: "bottom",
+              }),
+            ],
+          }),
+        ],
+        width: { size: 100, type: WidthType.PERCENTAGE },
+      })
+    );
+  } else {
+    elements.push(
+      new Paragraph({
+        text: "📄 Transcript 逐字稿",
+        heading: HeadingLevel.HEADING_1,
+      })
+    );
+  }
+
+  elements.push(new Paragraph({ text: "" }));
 
   for (const item of items) {
     const bgColor =
@@ -671,50 +750,13 @@ export async function generateDocx(
                   width: { size: 100, type: WidthType.PERCENTAGE },
                 }),
                 new Paragraph({ text: "" }),
-                ...(qrBuffer
-                  ? [
-                      new Paragraph({
-                        children: [
-                          new ImageRun({
-                            data: qrBuffer,
-                            transformation: { width: 150, height: 150 },
-                            type: "png",
-                          }),
-                        ],
-                        alignment: AlignmentType.CENTER,
-                      }),
-                      new Paragraph({ text: "" }),
-                      new Paragraph({
-                        children: [
-                          new TextRun({
-                            text: "Scan to listen to the discussion audio 🔗",
-                            size: 20,
-                            color: "666666",
-                          }),
-                        ],
-                        alignment: AlignmentType.CENTER,
-                      }),
-                      new Paragraph({
-                        children: [
-                          new TextRun({
-                            text: `Access Code: ${accessCode}`,
-                            bold: true,
-                            size: 24,
-                            color: "333333",
-                          }),
-                        ],
-                        alignment: AlignmentType.CENTER,
-                        spacing: { after: 120 },
-                      }),
-                    ]
-                  : []),
               ]
             : []),
           new Paragraph({
             children: [],
             pageBreakBefore: true,
           }),
-          ...buildTranscriptParagraphs(items),
+          ...buildTranscriptParagraphs(items, qrBuffer, accessCode),
           new Paragraph({
             children: [],
             pageBreakBefore: true,

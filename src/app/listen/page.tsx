@@ -69,7 +69,7 @@ export default function ListenPage() {
               <Input
                 value={code}
                 onChange={(e) => setCode(e.target.value.toUpperCase())}
-                placeholder="Enter access code (e.g. ABC123)"
+                placeholder="e.g. ABC123"
                 className="text-center text-lg tracking-widest font-mono"
                 maxLength={6}
               />
