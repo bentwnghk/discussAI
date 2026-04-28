@@ -45,6 +45,8 @@ services:
       STRIPE_PLAN_B_PRICE_HKD: ${STRIPE_PLAN_B_PRICE_HKD:-49}
       WELCOME_CREDITS: ${WELCOME_CREDITS:-20}
       GENERATION_COST: ${GENERATION_COST:-10}
+      AUDIO_TTL_DAYS: ${AUDIO_TTL_DAYS:-365}
+      CRON_SECRET: ${CRON_SECRET}
     volumes:
       - audio_data:/app/tmp/audio
     depends_on:

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readFile, stat } from "fs/promises";
 import path from "path";
+import { AUDIO_TTL_MS } from "@/lib/audio-ttl";
 
 const AUDIO_DIR = path.join(process.cwd(), "tmp", "audio");
 
@@ -19,17 +20,19 @@ export async function GET(
     const filePath = path.join(AUDIO_DIR, filename);
     const fileStat = await stat(filePath);
 
-    const maxAge = 24 * 60 * 60;
-    if (Date.now() - fileStat.mtimeMs > maxAge * 1000) {
+    if (Date.now() - fileStat.mtimeMs > AUDIO_TTL_MS) {
       return new NextResponse("Not Found", { status: 404 });
     }
 
     const data = await readFile(filePath);
+    const ttlSeconds = Math.ceil(
+      (AUDIO_TTL_MS - (Date.now() - fileStat.mtimeMs)) / 1000
+    );
     return new NextResponse(data, {
       headers: {
         "Content-Type": "audio/mpeg",
         "Content-Length": data.length.toString(),
-        "Cache-Control": "public, max-age=86400",
+        "Cache-Control": `public, max-age=${ttlSeconds}`,
       },
     });
   } catch {

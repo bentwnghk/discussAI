@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { TranscriptDisplay } from "@/components/discuss/transcript-display";
 import { LearningNotes } from "@/components/discuss/learning-notes";
 import type { DialogueItem, LearningNotes as LearningNotesType } from "@/types";
-import { FileText, ArrowLeft } from "lucide-react";
+import { FileText, ArrowLeft, Download, Clock } from "lucide-react";
 
 interface SessionData {
   id: string;
@@ -20,6 +20,7 @@ interface SessionData {
   transcript: DialogueItem[];
   learningNotes: LearningNotesType;
   audioUrl: string | null;
+  audioExpiresAt: string | null;
   charactersCount: number;
   ttsCostHKD: number;
   usedOwnApiKey: boolean;
@@ -155,7 +156,33 @@ export default function SessionDetailPage() {
         {audioSrc && (
           <Card>
             <CardHeader>
-              <CardTitle>🎧 Audio 錄音</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>🎧 Audio 錄音</CardTitle>
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Clock className="h-3 w-3" />
+                    {session.audioExpiresAt
+                      ? `Expires in ${Math.max(0, Math.ceil((new Date(session.audioExpiresAt).getTime() - Date.now()) / (24 * 60 * 60 * 1000)))} days`
+                      : "No audio"}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const a = document.createElement("a");
+                      a.href = audioSrc;
+                      const timestamp = new Date(session.createdAt)
+                        .toLocaleString("en-HK", { timeZone: "Asia/Hong_Kong" })
+                        .replace(/[/:, ]/g, "-");
+                      a.download = `Mr.NG-DiscussAI-audio-${timestamp}.mp3`;
+                      a.click();
+                    }}
+                  >
+                    <Download className="mr-1 h-3 w-3" />
+                    Download
+                  </Button>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <audio controls className="w-full" src={audioSrc}>
