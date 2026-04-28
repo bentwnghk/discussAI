@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -51,6 +51,7 @@ export default function DiscussPage() {
   const [creditsConsumed, setCreditsConsumed] = useState(0);
   const [accessCode, setAccessCode] = useState<string | null>(null);
   const [expiryDays, setExpiryDays] = useState<number | null>(null);
+  const [generatedTimestamp, setGeneratedTimestamp] = useState<string | null>(null);
 
   const handleGenerate = useCallback(async () => {
     if (
@@ -261,6 +262,9 @@ export default function DiscussPage() {
           if (saved.audioExpiresAt) {
             setExpiryDays((new Date(saved.audioExpiresAt).getTime() - Date.now()) / (24 * 60 * 60 * 1000));
           }
+          if (saved.createdAt) {
+            setGeneratedTimestamp(new Date(saved.createdAt).toLocaleString("en-HK", { timeZone: "Asia/Hong_Kong" }).replace(/[/:, ]/g, "-"));
+          }
         }
       } catch {
         if (generationId) {
@@ -329,21 +333,18 @@ export default function DiscussPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      const timestamp = new Date().toLocaleString("en-HK", { timeZone: "Asia/Hong_Kong" }).replace(/[/:, ]/g, "-");
-      a.download = `Mr.NG-DiscussAI-notes-${timestamp}.docx`;
+      a.download = `Mr.NG-DiscussAI-notes-${generatedTimestamp || "unknown"}.docx`;
       a.click();
       URL.revokeObjectURL(url);
       toast.success("Document downloaded!");
     } catch {
       toast.error("Failed to export document.");
     }
-  }, [dialogueItems, learningNotes, sessionTitle, extractedText, accessCode]);
+  }, [dialogueItems, learningNotes, sessionTitle, extractedText, accessCode, generatedTimestamp]);
 
-  const audioDownloadName = useMemo(() => {
-    if (!audioUrl) return undefined;
-    const timestamp = new Date().toLocaleString("en-HK", { timeZone: "Asia/Hong_Kong" }).replace(/[/:, ]/g, "-");
-    return `Mr.NG-DiscussAI-audio-${timestamp}.mp3`;
-  }, [audioUrl]);
+  const audioDownloadName = generatedTimestamp
+    ? `Mr.NG-DiscussAI-audio-${generatedTimestamp}.mp3`
+    : undefined;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">

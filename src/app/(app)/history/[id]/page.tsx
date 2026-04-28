@@ -37,6 +37,7 @@ export default function SessionDetailPage() {
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
   const [audioDownloadName, setAudioDownloadName] = useState<string | undefined>();
   const [expiryDays, setExpiryDays] = useState<number | null>(null);
+  const [docxDownloadName, setDocxDownloadName] = useState<string | undefined>();
 
   useEffect(() => {
     async function load() {
@@ -52,6 +53,7 @@ export default function SessionDetailPage() {
 
         const timestamp = new Date(data.createdAt).toLocaleString("en-HK", { timeZone: "Asia/Hong_Kong" }).replace(/[/:, ]/g, "-");
         setAudioDownloadName(`Mr.NG-DiscussAI-audio-${timestamp}.mp3`);
+        setDocxDownloadName(`Mr.NG-DiscussAI-notes-${timestamp}.docx`);
 
         if (data.audioExpiresAt) {
           setExpiryDays((new Date(data.audioExpiresAt).getTime() - Date.now()) / (24 * 60 * 60 * 1000));
@@ -84,14 +86,13 @@ export default function SessionDetailPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      const timestamp = new Date(session.createdAt).toLocaleString("en-HK", { timeZone: "Asia/Hong_Kong" }).replace(/[/:, ]/g, "-");
-      a.download = `Mr.NG-DiscussAI-notes-${timestamp}.docx`;
+      a.download = docxDownloadName || "Mr.NG-DiscussAI-notes.docx";
       a.click();
       URL.revokeObjectURL(url);
     } catch {
       // silently fail
     }
-  }, [session]);
+  }, [session, docxDownloadName]);
 
   if (loading) {
     return (
