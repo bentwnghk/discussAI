@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { discussionSessions } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { getGenerationCost } from "@/lib/db/credits";
+import { generateUniqueAccessCode } from "@/lib/db/access-code";
 
 export async function GET() {
   try {
@@ -60,6 +61,7 @@ export async function POST(req: NextRequest) {
         transcript,
         learningNotes,
         audioUrl: audioUrl || null,
+        accessCode: await generateUniqueAccessCode(),
         charactersCount: charactersCount || 0,
         ttsCostHKD: ttsCostHKD || 0,
         usedOwnApiKey: !!usedOwnApiKey,

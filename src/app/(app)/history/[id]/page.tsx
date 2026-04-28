@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { TranscriptDisplay } from "@/components/discuss/transcript-display";
 import { LearningNotes } from "@/components/discuss/learning-notes";
 import type { DialogueItem, LearningNotes as LearningNotesType } from "@/types";
-import { FileText, ArrowLeft, Download, Clock } from "lucide-react";
+import { FileText, ArrowLeft, Download, Clock, KeyRound } from "lucide-react";
 
 interface SessionData {
   id: string;
@@ -21,6 +21,7 @@ interface SessionData {
   learningNotes: LearningNotesType;
   audioUrl: string | null;
   audioExpiresAt: string | null;
+  accessCode: string | null;
   charactersCount: number;
   ttsCostHKD: number;
   usedOwnApiKey: boolean;
@@ -65,6 +66,7 @@ export default function SessionDetailPage() {
           learningNotes: session.learningNotes,
           title: session.title,
           extractedText: session.inputText,
+          accessCode: session.accessCode,
         }),
       });
       if (!res.ok) throw new Error("Export failed.");
@@ -189,6 +191,13 @@ export default function SessionDetailPage() {
               <audio controls className="w-full" src={audioSrc}>
                 Your browser does not support the audio element.
               </audio>
+              {session.accessCode && (
+                <div className="mt-3 flex items-center gap-2 rounded-md bg-muted px-3 py-2">
+                  <KeyRound className="size-4 text-muted-foreground shrink-0" />
+                  <span className="text-sm text-muted-foreground">Access Code:</span>
+                  <span className="font-mono font-bold tracking-widest text-sm">{session.accessCode}</span>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}

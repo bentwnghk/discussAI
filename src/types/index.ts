@@ -51,6 +51,7 @@ export interface DiscussionSession {
   transcript: DialogueItem[];
   learningNotes: LearningNotes;
   audioUrl: string | null;
+  accessCode: string | null;
   charactersCount: number;
   ttsCostHKD: number;
   usedOwnApiKey: boolean;

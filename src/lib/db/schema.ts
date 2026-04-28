@@ -68,6 +68,7 @@ export const discussionSessions = pgTable("discussion_sessions", {
   transcript: jsonb("transcript").notNull(),
   learningNotes: jsonb("learningNotes").notNull(),
   audioUrl: text("audioUrl"),
+  accessCode: varchar("accessCode", { length: 8 }).unique(),
   charactersCount: integer("charactersCount").notNull().default(0),
   ttsCostHKD: real("ttsCostHKD").notNull().default(0),
   usedOwnApiKey: boolean("usedOwnApiKey").notNull().default(false),

@@ -49,6 +49,7 @@ export default function DiscussPage() {
   const [extractedText, setExtractedText] = useState<string | null>(null);
   const [usedOwnApiKey, setUsedOwnApiKey] = useState(false);
   const [creditsConsumed, setCreditsConsumed] = useState(0);
+  const [accessCode, setAccessCode] = useState<string | null>(null);
 
   const handleGenerate = useCallback(async () => {
     if (
@@ -222,7 +223,7 @@ export default function DiscussPage() {
       }
 
       try {
-        await fetch("/api/history", {
+        const saveRes = await fetch("/api/history", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -238,6 +239,10 @@ export default function DiscussPage() {
             usedOwnApiKey: data.usedOwnApiKey,
           }),
         });
+        if (saveRes.ok) {
+          const saved = await saveRes.json();
+          if (saved.accessCode) setAccessCode(saved.accessCode);
+        }
       } catch {
         if (generationId) {
           await fetch("/api/credits/refund", {
@@ -283,6 +288,7 @@ export default function DiscussPage() {
           learningNotes,
           title: sessionTitle,
           extractedText,
+          accessCode,
         }),
       });
       if (!res.ok) throw new Error("Export failed.");
@@ -298,7 +304,7 @@ export default function DiscussPage() {
     } catch {
       toast.error("Failed to export document.");
     }
-  }, [dialogueItems, learningNotes, sessionTitle]);
+  }, [dialogueItems, learningNotes, sessionTitle, extractedText, accessCode]);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">

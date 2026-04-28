@@ -7,14 +7,14 @@ export default auth((req) => {
   const isApiRoute = pathname.startsWith("/api");
 
   if (isApiRoute) {
-    if (pathname.startsWith("/api/auth") || pathname.startsWith("/api/stripe/webhook") || pathname.startsWith("/api/cron")) return NextResponse.next();
+    if (pathname.startsWith("/api/auth") || pathname.startsWith("/api/stripe/webhook") || pathname.startsWith("/api/cron") || pathname.startsWith("/api/public")) return NextResponse.next();
     if (!req.auth) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     return NextResponse.next();
   }
 
-  if (!req.auth && !isAuthPage && pathname !== "/") {
+  if (!req.auth && !isAuthPage && pathname !== "/" && !pathname.startsWith("/listen")) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 

@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS "discussion_sessions" (
   "transcript" JSONB NOT NULL,
   "learningNotes" JSONB NOT NULL,
   "audioUrl" TEXT,
+  "accessCode" VARCHAR(8) UNIQUE,
   "charactersCount" INTEGER NOT NULL DEFAULT 0,
   "ttsCostHKD" REAL NOT NULL DEFAULT 0,
   "usedOwnApiKey" BOOLEAN NOT NULL DEFAULT false,
@@ -101,6 +102,7 @@ CREATE INDEX IF NOT EXISTS "idx_account_provider" ON "account"("provider", "prov
 CREATE INDEX IF NOT EXISTS "idx_session_userId" ON "session"("userId");
 CREATE INDEX IF NOT EXISTS "idx_discussion_sessions_userId" ON "discussion_sessions"("userId");
 CREATE INDEX IF NOT EXISTS "idx_discussion_sessions_createdAt" ON "discussion_sessions"("createdAt" DESC);
+CREATE INDEX IF NOT EXISTS "idx_discussion_sessions_accessCode" ON "discussion_sessions"("accessCode") WHERE "accessCode" IS NOT NULL;
 CREATE INDEX IF NOT EXISTS "idx_credit_transactions_userId" ON "credit_transactions"("userId");
 CREATE INDEX IF NOT EXISTS "idx_credit_transactions_createdAt" ON "credit_transactions"("createdAt" DESC);
 CREATE INDEX IF NOT EXISTS "idx_purchases_userId" ON "purchases"("userId");

@@ -13,10 +13,12 @@ import {
   ShadingType,
   LevelFormat,
   BorderStyle,
+  ImageRun,
 } from "docx";
 import * as cheerio from "cheerio";
 import type { Element as DomElement, Text as DomText } from "domhandler";
 import type { DialogueItem, LearningNotes, Speaker } from "@/types";
+import QRCode from "qrcode";
 
 const SPEAKER_BG_COLORS: Record<Speaker, string> = {
   "Candidate A": "EFF6FF",
@@ -548,8 +550,21 @@ export async function generateDocx(
   items: DialogueItem[],
   notes: LearningNotes,
   title: string = "Group Discussion Notes",
-  taskText?: string | null
+  taskText?: string | null,
+  accessCode?: string | null
 ): Promise<Buffer> {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "";
+  const listenUrl = accessCode ? `${baseUrl}/listen` : "";
+
+  const qrBuffer = listenUrl
+    ? await QRCode.toBuffer(listenUrl, {
+        type: "png",
+        width: 200,
+        margin: 1,
+        color: { dark: "000000", light: "FFFFFF" },
+      })
+    : null;
+
   const doc = new Document({
     numbering: {
       config: [
@@ -655,6 +670,43 @@ export async function generateDocx(
                   width: { size: 100, type: WidthType.PERCENTAGE },
                 }),
                 new Paragraph({ text: "" }),
+                ...(qrBuffer
+                  ? [
+                      new Paragraph({
+                        children: [
+                          new ImageRun({
+                            data: qrBuffer,
+                            transformation: { width: 150, height: 150 },
+                            type: "png",
+                          }),
+                        ],
+                        alignment: AlignmentType.CENTER,
+                      }),
+                      new Paragraph({ text: "" }),
+                      new Paragraph({
+                        children: [
+                          new TextRun({
+                            text: "Scan to listen to the discussion audio 🔗",
+                            size: 20,
+                            color: "666666",
+                          }),
+                        ],
+                        alignment: AlignmentType.CENTER,
+                      }),
+                      new Paragraph({
+                        children: [
+                          new TextRun({
+                            text: `Access Code: ${accessCode}`,
+                            bold: true,
+                            size: 24,
+                            color: "333333",
+                          }),
+                        ],
+                        alignment: AlignmentType.CENTER,
+                        spacing: { after: 120 },
+                      }),
+                    ]
+                  : []),
               ]
             : []),
           new Paragraph({
