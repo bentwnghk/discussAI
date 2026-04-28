@@ -5,6 +5,7 @@ import { discussionSessions } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { getGenerationCost } from "@/lib/db/credits";
 import { generateUniqueAccessCode } from "@/lib/db/access-code";
+import { AUDIO_TTL_MS } from "@/lib/audio-ttl";
 
 export async function GET() {
   try {
@@ -68,7 +69,11 @@ export async function POST(req: NextRequest) {
       })
       .returning();
 
-    return NextResponse.json(newSession, { status: 201 });
+    const audioExpiresAt = newSession.audioUrl
+      ? new Date(new Date(newSession.createdAt).getTime() + AUDIO_TTL_MS).toISOString()
+      : null;
+
+    return NextResponse.json({ ...newSession, audioExpiresAt }, { status: 201 });
   } catch (error) {
     console.error("History POST error:", error);
     return NextResponse.json(

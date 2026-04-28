@@ -50,6 +50,7 @@ export default function DiscussPage() {
   const [usedOwnApiKey, setUsedOwnApiKey] = useState(false);
   const [creditsConsumed, setCreditsConsumed] = useState(0);
   const [accessCode, setAccessCode] = useState<string | null>(null);
+  const [expiryDays, setExpiryDays] = useState<number | null>(null);
 
   const handleGenerate = useCallback(async () => {
     if (
@@ -257,6 +258,9 @@ export default function DiscussPage() {
         if (saveRes.ok) {
           const saved = await saveRes.json();
           if (saved.accessCode) setAccessCode(saved.accessCode);
+          if (saved.audioExpiresAt) {
+            setExpiryDays((new Date(saved.audioExpiresAt).getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+          }
         }
       } catch {
         if (generationId) {
@@ -452,7 +456,7 @@ export default function DiscussPage() {
             <AudioPlayer
               src={audioUrl}
               accessCode={accessCode}
-              expiryDays={audioUrl ? 1 : undefined}
+              expiryDays={expiryDays}
               downloadFileName={audioDownloadName}
             />
 
