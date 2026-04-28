@@ -282,6 +282,7 @@ export default function DiscussPage() {
           transcript: dialogueItems,
           learningNotes,
           title: sessionTitle,
+          extractedText,
         }),
       });
       if (!res.ok) throw new Error("Export failed.");

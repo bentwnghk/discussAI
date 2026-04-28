@@ -64,6 +64,7 @@ export default function SessionDetailPage() {
           transcript: session.transcript,
           learningNotes: session.learningNotes,
           title: session.title,
+          extractedText: session.inputText,
         }),
       });
       if (!res.ok) throw new Error("Export failed.");

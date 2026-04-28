@@ -11,10 +11,11 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { transcript, learningNotes, title } = body as {
+    const { transcript, learningNotes, title, extractedText } = body as {
       transcript: DialogueItem[];
       learningNotes: LearningNotes;
       title?: string;
+      extractedText?: string;
     };
 
     if (!transcript || !learningNotes) {
@@ -24,7 +25,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const buffer = await generateDocx(transcript, learningNotes, title);
+    const buffer = await generateDocx(transcript, learningNotes, title, extractedText);
 
     const timestamp = new Date().toLocaleString("en-HK", { timeZone: "Asia/Hong_Kong" }).replace(/[/:, ]/g, "-");
     const filename = `Mr.NG-DiscussAI-notes-${timestamp}.docx`;

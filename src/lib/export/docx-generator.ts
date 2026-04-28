@@ -547,7 +547,8 @@ function buildSectionContent(html: string): (Paragraph | Table)[] {
 export async function generateDocx(
   items: DialogueItem[],
   notes: LearningNotes,
-  title: string = "Group Discussion Notes"
+  title: string = "Group Discussion Notes",
+  taskText?: string | null
 ): Promise<Buffer> {
   const doc = new Document({
     numbering: {
@@ -614,6 +615,23 @@ export async function generateDocx(
             alignment: AlignmentType.CENTER,
           }),
           new Paragraph({ text: "" }),
+          ...(taskText
+            ? [
+                new Paragraph({
+                  text: "📌 Task 任務",
+                  heading: HeadingLevel.HEADING_1,
+                }),
+                new Paragraph({ text: "" }),
+                ...taskText.split("\n").map(
+                  (line) =>
+                    new Paragraph({
+                      children: [new TextRun({ text: line, size: 22 })],
+                      spacing: { after: 60 },
+                    })
+                ),
+                new Paragraph({ text: "" }),
+              ]
+            : []),
           ...buildTranscriptParagraphs(items),
           new Paragraph({ text: "", pageBreakBefore: true }),
           new Paragraph({
