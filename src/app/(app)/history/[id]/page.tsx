@@ -71,7 +71,7 @@ export default function SessionDetailPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      const timestamp = new Date().toLocaleString("en-HK", { timeZone: "Asia/Hong_Kong" }).replace(/[/:, ]/g, "-");
+      const timestamp = new Date(session.createdAt).toLocaleString("en-HK", { timeZone: "Asia/Hong_Kong" }).replace(/[/:, ]/g, "-");
       a.download = `Mr.NG-DiscussAI-notes-${timestamp}.docx`;
       a.click();
       URL.revokeObjectURL(url);
