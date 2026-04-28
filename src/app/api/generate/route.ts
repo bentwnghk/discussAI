@@ -8,6 +8,8 @@ import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
 
+export const maxDuration = 120;
+
 export async function POST(req: NextRequest) {
   let userId: string | undefined;
   let generationId: string | undefined;
