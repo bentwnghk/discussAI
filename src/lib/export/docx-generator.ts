@@ -622,18 +622,50 @@ export async function generateDocx(
                   heading: HeadingLevel.HEADING_1,
                 }),
                 new Paragraph({ text: "" }),
-                ...taskText.split("\n").map(
-                  (line) =>
-                    new Paragraph({
-                      children: [new TextRun({ text: line, size: 22 })],
-                      spacing: { after: 60 },
-                    })
-                ),
+                new Table({
+                  rows: [
+                    new TableRow({
+                      children: [
+                        new TableCell({
+                          children: taskText
+                            .split("\n")
+                            .map(
+                              (line) =>
+                                new Paragraph({
+                                  children: [new TextRun({ text: line || " ", size: 22 })],
+                                  spacing: { after: 60 },
+                                })
+                            ),
+                          borders: {
+                            top: { style: BorderStyle.SINGLE, size: 1, color: "999999" },
+                            bottom: { style: BorderStyle.SINGLE, size: 1, color: "999999" },
+                            left: { style: BorderStyle.SINGLE, size: 1, color: "999999" },
+                            right: { style: BorderStyle.SINGLE, size: 1, color: "999999" },
+                          },
+                          margins: {
+                            top: 100,
+                            bottom: 100,
+                            left: 140,
+                            right: 140,
+                          },
+                        }),
+                      ],
+                    }),
+                  ],
+                  width: { size: 100, type: WidthType.PERCENTAGE },
+                }),
                 new Paragraph({ text: "" }),
               ]
             : []),
+          new Paragraph({
+            children: [],
+            pageBreakBefore: true,
+          }),
           ...buildTranscriptParagraphs(items),
-          new Paragraph({ text: "", pageBreakBefore: true }),
+          new Paragraph({
+            children: [],
+            pageBreakBefore: true,
+          }),
           new Paragraph({
             text: "📚 Study Notes 學習筆記",
             heading: HeadingLevel.HEADING_1,
