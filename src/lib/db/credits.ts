@@ -185,6 +185,39 @@ export async function getUserPurchases(userId: string) {
     .orderBy(sql`${purchases.createdAt} DESC`);
 }
 
+export async function refundLastGeneration(
+  userId: string
+): Promise<{ refunded: boolean; reason?: string }> {
+  const [lastGen] = await db
+    .select()
+    .from(creditTransactions)
+    .where(
+      and(
+        eq(creditTransactions.userId, userId),
+        eq(creditTransactions.type, "generation")
+      )
+    )
+    .orderBy(sql`${creditTransactions.createdAt} DESC`)
+    .limit(1);
+
+  if (!lastGen) {
+    return { refunded: false, reason: "No generation transaction found" };
+  }
+
+  const [existing] = await db
+    .select({ id: creditTransactions.id })
+    .from(creditTransactions)
+    .where(eq(creditTransactions.description, `Refund for ${lastGen.id}`));
+
+  if (existing) {
+    return { refunded: false, reason: "Already refunded" };
+  }
+
+  const refundAmount = Math.abs(lastGen.amount);
+  await refundCredits(userId, refundAmount, `Refund for ${lastGen.id}`);
+  return { refunded: true };
+}
+
 export async function refundGeneration(
   userId: string,
   transactionId: string

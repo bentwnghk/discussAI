@@ -68,6 +68,8 @@ export default function DiscussPage() {
     setProgress(5);
     setProgressLabel("Preparing files...");
 
+    let generationId: string | null = null;
+
     try {
       const formData = new FormData();
       formData.append("inputMethod", inputMethod);
@@ -115,17 +117,30 @@ export default function DiscussPage() {
       });
 
       if (!res.ok) {
-        const err = await res.json();
-        if (res.status === 402) {
-          throw new Error(
-            `Insufficient credits. You need ${err.creditsNeeded} credits but have ${err.currentBalance}. Go to Credits page to purchase more.`
-          );
+        let errorMsg = "Generation failed.";
+        try {
+          const err = await res.json();
+          if (res.status === 402) {
+            throw new Error(
+              `Insufficient credits. You need ${err.creditsNeeded} credits but have ${err.currentBalance}. Go to Credits page to purchase more.`
+            );
+          }
+          errorMsg = err.error || errorMsg;
+        } catch (jsonError) {
+          if (
+            jsonError instanceof Error &&
+            jsonError.message.startsWith("Insufficient credits")
+          ) {
+            throw jsonError;
+          }
+          errorMsg =
+            "Server returned an unexpected response. Your credits will be refunded if they were deducted.";
         }
-        throw new Error(err.error || "Generation failed.");
+        throw new Error(errorMsg);
       }
 
       const data: GenerateResponse = await res.json();
-      const { generationId } = data;
+      generationId = data.generationId ?? null;
       setDialogueItems(data.dialogue);
       setLearningNotes(data.learningNotes);
       setSessionTitle(data.title);
@@ -271,6 +286,20 @@ export default function DiscussPage() {
       const message =
         error instanceof Error ? error.message : "An error occurred.";
       toast.error(message);
+
+      if (generationId) {
+        await fetch("/api/credits/refund", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ generationId }),
+        }).catch(() => {});
+      } else {
+        await fetch("/api/credits/refund", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refundLast: true }),
+        }).catch(() => {});
+      }
       refreshBalance();
     } finally {
       setIsGenerating(false);
