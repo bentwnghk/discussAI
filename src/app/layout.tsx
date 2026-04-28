@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Poppins, Plus_Jakarta_Sans } from "next/font/google";
+import { Poppins, Inter } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -10,13 +10,13 @@ const APP_DESCRIPTION =
   "Conquer HKDSE English Language Paper 4 exam with AI-powered realism.";
 
 const poppins = Poppins({
-  variable: "--font-heading",
+  variable: "--font-poppins",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800", "900"],
 });
 
-const plusJakartaSans = Plus_Jakarta_Sans({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -71,7 +71,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${poppins.variable} ${plusJakartaSans.variable} h-full antialiased`}
+      className={`${poppins.variable} ${inter.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
