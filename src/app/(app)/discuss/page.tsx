@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -335,6 +335,12 @@ export default function DiscussPage() {
     }
   }, [dialogueItems, learningNotes, sessionTitle, extractedText, accessCode]);
 
+  const audioDownloadName = useMemo(() => {
+    if (!audioUrl) return undefined;
+    const timestamp = new Date().toLocaleString("en-HK", { timeZone: "Asia/Hong_Kong" }).replace(/[/:, ]/g, "-");
+    return `Mr.NG-DiscussAI-audio-${timestamp}.mp3`;
+  }, [audioUrl]);
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
       <div className="space-y-6">
@@ -443,7 +449,12 @@ export default function DiscussPage() {
               </Card>
             )}
 
-            <AudioPlayer src={audioUrl} />
+            <AudioPlayer
+              src={audioUrl}
+              accessCode={accessCode}
+              expiryDays={audioUrl ? 1 : undefined}
+              downloadFileName={audioDownloadName}
+            />
 
             <TranscriptDisplay items={dialogueItems} />
 

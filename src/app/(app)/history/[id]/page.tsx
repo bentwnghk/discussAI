@@ -8,8 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { TranscriptDisplay } from "@/components/discuss/transcript-display";
 import { LearningNotes } from "@/components/discuss/learning-notes";
+import { AudioPlayer } from "@/components/discuss/audio-player";
 import type { DialogueItem, LearningNotes as LearningNotesType } from "@/types";
-import { FileText, ArrowLeft, Download, Clock, KeyRound } from "lucide-react";
+import { FileText, ArrowLeft } from "lucide-react";
 
 interface SessionData {
   id: string;
@@ -34,6 +35,8 @@ export default function SessionDetailPage() {
   const [session, setSession] = useState<SessionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
+  const [audioDownloadName, setAudioDownloadName] = useState<string | undefined>();
+  const [expiryDays, setExpiryDays] = useState<number | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -45,6 +48,13 @@ export default function SessionDetailPage() {
 
         if (data.audioUrl) {
           setAudioSrc(data.audioUrl);
+        }
+
+        const timestamp = new Date(data.createdAt).toLocaleString("en-HK", { timeZone: "Asia/Hong_Kong" }).replace(/[/:, ]/g, "-");
+        setAudioDownloadName(`Mr.NG-DiscussAI-audio-${timestamp}.mp3`);
+
+        if (data.audioExpiresAt) {
+          setExpiryDays((new Date(data.audioExpiresAt).getTime() - Date.now()) / (24 * 60 * 60 * 1000));
         }
       } catch {
         // session not found
@@ -156,51 +166,12 @@ export default function SessionDetailPage() {
           </Card>
         )}
 
-        {audioSrc && (
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>🎧 Audio 錄音</CardTitle>
-                <div className="flex items-center gap-2">
-                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Clock className="h-3 w-3" />
-                    {session.audioExpiresAt
-                      ? `Expires in ${Math.max(0, Math.ceil((new Date(session.audioExpiresAt).getTime() - Date.now()) / (24 * 60 * 60 * 1000)))} days`
-                      : "No audio"}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const a = document.createElement("a");
-                      a.href = audioSrc;
-                      const timestamp = new Date(session.createdAt)
-                        .toLocaleString("en-HK", { timeZone: "Asia/Hong_Kong" })
-                        .replace(/[/:, ]/g, "-");
-                      a.download = `Mr.NG-DiscussAI-audio-${timestamp}.mp3`;
-                      a.click();
-                    }}
-                  >
-                    <Download className="mr-1 h-3 w-3" />
-                    Download
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <audio controls className="w-full" src={audioSrc}>
-                Your browser does not support the audio element.
-              </audio>
-              {session.accessCode && (
-                <div className="mt-3 flex items-center gap-2 rounded-md bg-muted px-3 py-2">
-                  <KeyRound className="size-4 text-muted-foreground shrink-0" />
-                  <span className="text-sm text-muted-foreground">Access Code:</span>
-                  <span className="font-mono font-bold tracking-widest text-sm">{session.accessCode}</span>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
+        <AudioPlayer
+          src={audioSrc}
+          expiryDays={expiryDays}
+          accessCode={session.accessCode}
+          downloadFileName={audioDownloadName}
+        />
 
         <TranscriptDisplay items={session.transcript} />
 
