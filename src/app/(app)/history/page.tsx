@@ -23,6 +23,7 @@ import {
   Check,
   Coins,
   MessageSquareText,
+  History,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -125,8 +126,9 @@ export default function HistoryPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div className="flex items-center gap-2">
+          <History className="size-6" />
           <h1 className="text-2xl font-bold">Practice History</h1>
           <Badge variant="secondary" className="gap-1">
             <MessageSquareText className="h-3 w-3" />
