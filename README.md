@@ -112,7 +112,7 @@ Listen to the full discussion with distinct AI voices for each candidate.
 | --- | --- |
 | 🎙️ __4 Distinct Voices__ | nova, alloy, fable, echo — one per candidate |
 | ▶️ __Audio Player__ | Play, pause, seek with speaker-highlighted transcript sync |
-| 💾 __Persistent Storage__ | Audio saved and accessible for 24 hours |
+| 💾 __Persistent Storage__ | Audio saved and accessible for up to 365 days (configurable via `AUDIO_TTL_DAYS`) |
 
 ---
 
@@ -149,10 +149,24 @@ Download your discussions and notes for offline study.
 | --- | --- |
 | 🗣️ __Transcript__ | Full dialogue with speaker labels and color coding |
 | 📖 __Learning Notes__ | Ideas, vocabulary table, and communication strategies |
+| 🎧 __Access Code__ | Each export includes a unique access code for online audio playback |
 
 ---
 
-### 📱 8. Progressive Web App (PWA)
+### 🎧 8. Access Code Listening
+
+__Share discussion audio via unique access codes.__ Each exported DOCX contains a unique access code that can be used on the public `/listen` page to replay the audio — no login required.
+
+| Feature | Description |
+| --- | --- |
+| 📝 __Access Code__ | Unique 6-character code included in every DOCX export |
+| 🔓 __No Login Required__ | Public `/listen` page accessible without authentication |
+| ▶️ __Audio Playback__ | Stream discussion audio directly in the browser |
+| 📋 __Transcript View__ | Full transcript displayed alongside audio player |
+
+---
+
+### 📱 9. Progressive Web App (PWA)
 
 __Install Mr.🆖 DiscussAI on any device for a native app-like experience.__
 
@@ -372,15 +386,18 @@ src/
 │   ├── manifest.json           # PWA Web App Manifest
 │   ├── sw.ts                   # Service worker source (Serwist)
 │   ├── (app)/                  # Authenticated routes
-│   │   ├── discuss/            # Main discussion generation page
+│   │   ├── discuss/            # Main discussion generation page + history detail
 │   │   ├── history/            # Session history + detail view
 │   │   └── credits/            # Credit purchase page
 │   ├── (auth)/                 # Unauthenticated routes (login, error)
+│   ├── listen/                 # Public access code listening page
 │   └── api/                    # API route handlers
 ├── components/
 │   ├── pwa-install-prompt.tsx    # PWA install prompt (Android/iOS/Desktop)
 │   ├── service-worker-registrar.tsx # Service worker registration
-│   ├── providers.tsx             # Client providers (Session, PWA, Toaster)
+│   ├── providers.tsx             # Client providers (Session, API Key, Credits, PWA, Toaster)
+│   ├── settings-dialog.tsx       # Settings dialog
+│   ├── sign-in.tsx               # Sign-in component
 │   ├── discuss/                # Core discussion feature components
 │   │   ├── audio-player.tsx    # Audio playback with transcript sync
 │   │   ├── file-upload.tsx     # File upload (PDF, DOCX, images)
@@ -392,12 +409,15 @@ src/
 ├── hooks/                      # React Context hooks (API key, credits)
 ├── lib/
 │   ├── ai/                     # AI dialogue generation + prompts + schemas
+│   ├── audio-ttl.ts            # Audio TTL configuration
 │   ├── db/                     # Drizzle ORM setup + schema + queries
-│   ├── file-processing/        # PDF, DOCX, image OCR processing
-│   ├── tts/                    # Text-to-speech generation
 │   ├── export/                 # DOCX export
+│   ├── file-processing/        # PDF, DOCX, image OCR processing
+│   ├── pdf-client.ts           # Client-side PDF processing
+│   ├── tts/                    # Text-to-speech generation
 │   ├── auth.ts                 # NextAuth v5 configuration
-│   └── stripe.ts               # Stripe client + plan definitions
+│   ├── stripe.ts               # Stripe client + plan definitions
+│   └── utils.ts                # Utility functions (cn)
 └── types/                      # TypeScript types + speaker mappings
 ```
 
@@ -410,9 +430,9 @@ src/
 | `/api/generate` | POST | Generate dialogue from topic/file |
 | `/api/tts` | POST | Text-to-speech generation |
 | `/api/upload-audio` | POST | Upload audio file |
-| `/api/audio/[...path]` | GET | Serve audio files (24h TTL) |
+| `/api/audio/[...path]` | GET | Serve audio files (configurable TTL) |
 | `/api/history` | GET/POST | List/save discussion sessions |
-| `/api/history/[id]` | GET/DELETE | Individual session operations |
+| `/api/history/[id]` | GET/PATCH/DELETE | Individual session operations |
 | `/api/export/docx` | POST | Generate DOCX download |
 | `/api/stripe/checkout` | POST | Create Stripe Checkout session |
 | `/api/stripe/plans` | GET | List available credit plans |
@@ -421,6 +441,9 @@ src/
 | `/api/user/api-key` | GET/PUT | Manage user API key |
 | `/api/user/credits` | GET | Get credit balance |
 | `/api/user/purchases` | GET | Get purchase history |
+| `/api/public/session` | GET | Get session by access code (public) |
+| `/api/public/audio` | GET | Serve audio by access code (public) |
+| `/api/cron/cleanup-audio` | GET | Cleanup expired audio files |
 
 ---
 
@@ -437,6 +460,11 @@ See [`.env.example`](.env.example) for the full list. Key variables:
 | `DATABASE_URL` | PostgreSQL connection string |
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Google OAuth credentials |
 | `STRIPE_SECRET_KEY` | Stripe API key |
+| `STRIPE_PUBLISHABLE_KEY` | Stripe publishable key |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret |
+| `AUDIO_TTL_DAYS` | Audio file retention period (default: 365) |
+| `CRON_SECRET` | Secret for cron job endpoints |
+| `NEXTAUTH_URL` | App URL for auth callbacks |
 
 ---
 
