@@ -26,6 +26,7 @@ import {
   History,
   ChevronLeft,
   ChevronRight,
+  Search,
 } from "lucide-react";
 import {
   Select,
@@ -53,12 +54,27 @@ export default function HistoryPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [renameId, setRenameId] = useState<string | null>(null);
   const [renameTitle, setRenameTitle] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+  const filteredItems = items.filter((item) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      item.title.toLowerCase().includes(q) ||
+      item.dialogueMode.toLowerCase().includes(q) ||
+      item.inputMethod.toLowerCase().includes(q) ||
+      new Date(item.createdAt)
+        .toLocaleString("en-HK", { timeZone: "Asia/Hong_Kong" })
+        .toLowerCase()
+        .includes(q)
+    );
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / pageSize));
   const safePage = Math.min(currentPage, totalPages);
-  const paginatedItems = items.slice(
+  const paginatedItems = filteredItems.slice(
     (safePage - 1) * pageSize,
     safePage * pageSize
   );
@@ -157,108 +173,142 @@ export default function HistoryPage() {
         </Card>
       ) : (
         <div className="space-y-3">
-          {paginatedItems.map((item) => (
-            <Card key={item.id}>
-              <CardContent className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-4 gap-2">
-                <div className="space-y-1">
-                  <p className="font-medium">{item.title}</p>
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                    <span>
-                      {new Date(item.createdAt).toLocaleString("en-HK", {
-                        timeZone: "Asia/Hong_Kong",
-                      })}
-                    </span>
-                    <Badge variant="secondary">{item.dialogueMode}</Badge>
-                    {!item.usedOwnApiKey && (
-                      <Badge variant="outline" className="gap-1">
-                        <Coins className="h-3 w-3" />
-                        {generationCost}
-                      </Badge>
-                    )}
-                    {item.usedOwnApiKey && (
-                      <span>HK${item.ttsCostHKD.toFixed(2)}</span>
-                    )}
-                  </div>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Link href={`/history/${item.id}`}>
-                    <Button variant="outline" size="sm">
-                      <Eye className="mr-2 h-4 w-4" />
-                      Load
-                    </Button>
-                  </Link>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setRenameId(item.id);
-                      setRenameTitle(item.title);
-                    }}
-                  >
-                    <Pencil className="mr-2 h-4 w-4" />
-                    Rename
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => setDeleteId(item.id)}
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
-                  </Button>
-                </div>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search by title, mode, method, or date..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="pl-9"
+            />
+          </div>
+
+          {filteredItems.length === 0 ? (
+            <Card>
+              <CardContent className="py-8 text-center">
+                <p className="text-muted-foreground">
+                  No discussions match &quot;{searchQuery}&quot;
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-3"
+                  onClick={() => setSearchQuery("")}
+                >
+                  Clear search
+                </Button>
               </CardContent>
             </Card>
-          ))}
+          ) : (
+            <>
+              {paginatedItems.map((item) => (
+                <Card key={item.id}>
+                  <CardContent className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-4 gap-2">
+                    <div className="space-y-1">
+                      <p className="font-medium">{item.title}</p>
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                        <span>
+                          {new Date(item.createdAt).toLocaleString("en-HK", {
+                            timeZone: "Asia/Hong_Kong",
+                          })}
+                        </span>
+                        <Badge variant="secondary">{item.dialogueMode}</Badge>
+                        {!item.usedOwnApiKey && (
+                          <Badge variant="outline" className="gap-1">
+                            <Coins className="h-3 w-3" />
+                            {generationCost}
+                          </Badge>
+                        )}
+                        {item.usedOwnApiKey && (
+                          <span>HK${item.ttsCostHKD.toFixed(2)}</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Link href={`/history/${item.id}`}>
+                        <Button variant="outline" size="sm">
+                          <Eye className="mr-2 h-4 w-4" />
+                          Load
+                        </Button>
+                      </Link>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setRenameId(item.id);
+                          setRenameTitle(item.title);
+                        }}
+                      >
+                        <Pencil className="mr-2 h-4 w-4" />
+                        Rename
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => setDeleteId(item.id)}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
 
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between pt-2">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>Per page</span>
-                <Select
-                  value={String(pageSize)}
-                  onValueChange={(v) => {
-                    setPageSize(Number(v));
-                    setCurrentPage(1);
-                  }}
-                >
-                  <SelectTrigger size="sm" className="w-[72px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="10">10</SelectItem>
-                    <SelectItem value="20">20</SelectItem>
-                    <SelectItem value="50">50</SelectItem>
-                  </SelectContent>
-                </Select>
-                <span>
-                  {(safePage - 1) * pageSize + 1}–
-                  {Math.min(safePage * pageSize, items.length)} of{" "}
-                  {items.length}
-                </span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={safePage <= 1}
-                  onClick={() => setCurrentPage(safePage - 1)}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <span className="px-2 text-sm text-muted-foreground">
-                  {safePage} / {totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={safePage >= totalPages}
-                  onClick={() => setCurrentPage(safePage + 1)}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between pt-2">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span>Per page</span>
+                    <Select
+                      value={String(pageSize)}
+                      onValueChange={(v) => {
+                        setPageSize(Number(v));
+                        setCurrentPage(1);
+                      }}
+                    >
+                      <SelectTrigger size="sm" className="w-[72px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="10">10</SelectItem>
+                        <SelectItem value="20">20</SelectItem>
+                        <SelectItem value="50">50</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <span>
+                      {(safePage - 1) * pageSize + 1}–
+                      {Math.min(safePage * pageSize, filteredItems.length)} of{" "}
+                      {filteredItems.length}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={safePage <= 1}
+                      onClick={() => setCurrentPage(safePage - 1)}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span className="px-2 text-sm text-muted-foreground">
+                      {safePage} / {totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={safePage >= totalPages}
+                      onClick={() => setCurrentPage(safePage + 1)}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
