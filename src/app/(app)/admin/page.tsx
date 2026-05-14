@@ -91,6 +91,7 @@ export default function AdminDashboardPage() {
   const [discussions, setDiscussions] = useState<DiscussionRow[]>([]);
   const [purchases, setPurchases] = useState<PurchaseRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [generationCost, setGenerationCost] = useState(10);
   const [search, setSearch] = useState("");
   const [dSortBy, setDSortBy] = useState<DiscussionSortKey>("createdAt");
   const [dSortDesc, setDSortDesc] = useState(true);
@@ -137,6 +138,7 @@ export default function AdminDashboardPage() {
         if (res.ok && !cancelled) {
           const data = await res.json();
           setDiscussions(data.discussions || []);
+          if (data.generationCost) setGenerationCost(data.generationCost);
         }
       } catch {}
     }
@@ -302,15 +304,20 @@ export default function AdminDashboardPage() {
                         </Badge>
                       </td>
                       <td className="p-3 whitespace-nowrap">
-                        {d.usedOwnApiKey ? (
-                          <span className="text-muted-foreground">
-                            HK${d.ttsCostHKD.toFixed(2)}
-                          </span>
-                        ) : (
-                          <Badge variant="outline" className="gap-1">
-                            <Coins className="h-3 w-3" />
-                            System credits
-                          </Badge>
+                        <div>
+                          {d.usedOwnApiKey ? (
+                            <span className="text-muted-foreground">Own key</span>
+                          ) : (
+                            <Badge variant="outline" className="gap-1">
+                              <Coins className="h-3 w-3" />
+                              {generationCost} credits
+                            </Badge>
+                          )}
+                        </div>
+                        {d.ttsCostHKD > 0 && (
+                          <div className="text-xs text-muted-foreground mt-0.5">
+                            TTS HK${d.ttsCostHKD.toFixed(2)}
+                          </div>
                         )}
                       </td>
                     </tr>

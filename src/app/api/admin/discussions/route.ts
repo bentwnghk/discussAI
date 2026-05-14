@@ -4,6 +4,7 @@ import { isAdminEmail } from "@/lib/admin";
 import { db } from "@/lib/db";
 import { discussionSessions, users } from "@/lib/db/schema";
 import { desc, asc, sql, ilike, or } from "drizzle-orm";
+import { getGenerationCost } from "@/lib/db/credits";
 
 export async function GET(req: NextRequest) {
   try {
@@ -57,7 +58,7 @@ export async function GET(req: NextRequest) {
           .orderBy(orderFn(orderColumn))
       : await query.orderBy(orderFn(orderColumn));
 
-    return NextResponse.json({ discussions: rows });
+    return NextResponse.json({ discussions: rows, generationCost: getGenerationCost() });
   } catch (error) {
     console.error("Admin discussions GET error:", error);
     return NextResponse.json(
