@@ -4,6 +4,7 @@ import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { db } from "@/lib/db";
 import { users, accounts, verificationTokens } from "@/lib/db/schema";
 import { ensureCreditsRecord } from "@/lib/db/credits";
+import { isAdminEmail } from "@/lib/admin";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: DrizzleAdapter(db, {
@@ -28,12 +29,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.isAdmin = isAdminEmail(user.email);
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user && token.id) {
         session.user.id = token.id as string;
+      }
+      if (session.user) {
+        (session.user as typeof session.user & { isAdmin?: boolean }).isAdmin =
+          (token.isAdmin as boolean) ?? false;
       }
       return session;
     },

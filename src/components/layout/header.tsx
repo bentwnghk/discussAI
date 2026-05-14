@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SettingsDialog } from "@/components/settings-dialog";
-import { Settings, LogOut, MessageSquareText, History, LogIn, Coins } from "lucide-react";
+import { Settings, LogOut, MessageSquareText, History, LogIn, Coins, ShieldCheck } from "lucide-react";
 import { useCredits } from "@/hooks/use-credits";
 
 export function Header() {
@@ -94,6 +94,17 @@ export function Header() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="md:hidden" />
+                {(session.user as typeof session.user & { isAdmin?: boolean }).isAdmin && (
+                  <DropdownMenuItem className="font-heading">
+                    <Link href="/admin" className="flex items-center w-full">
+                      <ShieldCheck className="mr-2 h-4 w-4" />
+                      Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                {(session.user as typeof session.user & { isAdmin?: boolean }).isAdmin && (
+                  <DropdownMenuSeparator />
+                )}
                 <DropdownMenuItem className="font-heading" onClick={() => setSettingsOpen(true)}>
                   <Settings className="mr-2 h-4 w-4" />
                   Settings
