@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { db } from "@/lib/db";
-import { users, accounts, verificationTokens } from "@/lib/db/schema";
+import { users, accounts, verificationTokens, signInLogs } from "@/lib/db/schema";
 import { ensureCreditsRecord } from "@/lib/db/credits";
 import { isAdminEmail } from "@/lib/admin";
 
@@ -19,9 +19,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     error: "/auth/error",
   },
   events: {
-    async signIn({ user }) {
+    async signIn({ user, account }) {
       if (user.id) {
         await ensureCreditsRecord(user.id);
+        await db.insert(signInLogs).values({
+          userId: user.id,
+          provider: account?.provider || "unknown",
+        });
       }
     },
   },

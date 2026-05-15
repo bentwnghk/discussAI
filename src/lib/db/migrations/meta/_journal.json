@@ -8,6 +8,13 @@
       "when": 1777345513410,
       "tag": "0000_easy_gamora",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1778857583987,
+      "tag": "0001_burly_flatman",
+      "breakpoints": true
     }
   ]
 }

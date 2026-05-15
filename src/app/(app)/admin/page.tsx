@@ -14,6 +14,7 @@ import {
   Coins,
   ShieldCheck,
   ShoppingCart,
+  LogIn,
 } from "lucide-react";
 
 interface DiscussionRow {
@@ -38,8 +39,17 @@ interface PurchaseRow {
   createdAt: string;
 }
 
+interface SignInRow {
+  id: string;
+  userName: string | null;
+  email: string | null;
+  provider: string;
+  createdAt: string;
+}
+
 type DiscussionSortKey = "userName" | "createdAt" | "title" | "dialogueMode";
 type PurchaseSortKey = "userName" | "createdAt" | "planName" | "amountHKD";
+type SignInSortKey = "userName" | "createdAt";
 
 function formatDateHK(dateStr: string): string {
   return new Date(dateStr).toLocaleString("en-HK", {
@@ -90,6 +100,7 @@ function SortableTh({
 export default function AdminDashboardPage() {
   const [discussions, setDiscussions] = useState<DiscussionRow[]>([]);
   const [purchases, setPurchases] = useState<PurchaseRow[]>([]);
+  const [signIns, setSignIns] = useState<SignInRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [generationCost, setGenerationCost] = useState(10);
   const [search, setSearch] = useState("");
@@ -97,6 +108,8 @@ export default function AdminDashboardPage() {
   const [dSortDesc, setDSortDesc] = useState(true);
   const [pSortBy, setPSortBy] = useState<PurchaseSortKey>("createdAt");
   const [pSortDesc, setPSortDesc] = useState(true);
+  const [sSortBy, setSSortBy] = useState<SignInSortKey>("createdAt");
+  const [sSortDesc, setSSortDesc] = useState(true);
   const initialLoad = useRef(true);
 
   const toggleDSort = useCallback(
@@ -123,6 +136,19 @@ export default function AdminDashboardPage() {
       }
     },
     [pSortBy]
+  );
+
+  const toggleSSort = useCallback(
+    (key: string) => {
+      const k = key as SignInSortKey;
+      if (sSortBy === k) {
+        setSSortDesc((prev) => !prev);
+      } else {
+        setSSortBy(k);
+        setSSortDesc(false);
+      }
+    },
+    [sSortBy]
   );
 
   useEffect(() => {
@@ -157,22 +183,39 @@ export default function AdminDashboardPage() {
       } catch {}
     }
 
-    if (initialLoad.current) {
-      Promise.all([loadDiscussions(), loadPurchases()]).finally(() => {
-        if (!cancelled) {
-          setLoading(false);
-          initialLoad.current = false;
+    async function loadSignIns() {
+      try {
+        const params = new URLSearchParams({
+          sortBy: sSortBy,
+          sortOrder: sSortDesc ? "desc" : "asc",
+        });
+        const res = await fetch(`/api/admin/sign-ins?${params}`);
+        if (res.ok && !cancelled) {
+          const data = await res.json();
+          setSignIns(data.signIns || []);
         }
-      });
+      } catch {}
+    }
+
+    if (initialLoad.current) {
+      Promise.all([loadDiscussions(), loadPurchases(), loadSignIns()]).finally(
+        () => {
+          if (!cancelled) {
+            setLoading(false);
+            initialLoad.current = false;
+          }
+        }
+      );
     } else {
       loadDiscussions();
       loadPurchases();
+      loadSignIns();
     }
 
     return () => {
       cancelled = true;
     };
-  }, [dSortBy, dSortDesc, pSortBy, pSortDesc, search]);
+  }, [dSortBy, dSortDesc, pSortBy, pSortDesc, sSortBy, sSortDesc, search]);
 
   if (loading) {
     return (
@@ -208,6 +251,13 @@ export default function AdminDashboardPage() {
             Purchases
             <Badge variant="secondary" className="ml-1 text-xs">
               {purchases.length}
+            </Badge>
+          </TabsTrigger>
+          <TabsTrigger value="signins" className="gap-1.5">
+            <LogIn className="h-4 w-4" />
+            Sign-ins
+            <Badge variant="secondary" className="ml-1 text-xs">
+              {signIns.length}
             </Badge>
           </TabsTrigger>
         </TabsList>
@@ -306,7 +356,9 @@ export default function AdminDashboardPage() {
                       <td className="p-3 whitespace-nowrap">
                         <div>
                           {d.usedOwnApiKey ? (
-                            <span className="text-muted-foreground">Own key</span>
+                            <span className="text-muted-foreground">
+                              Own key
+                            </span>
                           ) : (
                             <Badge variant="outline" className="gap-1">
                               <Coins className="h-3 w-3" />
@@ -406,6 +458,65 @@ export default function AdminDashboardPage() {
                         >
                           {p.status}
                         </Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="signins" className="mt-4 space-y-4">
+          {signIns.length === 0 ? (
+            <Card>
+              <CardContent className="py-8 text-center">
+                <p className="text-muted-foreground">
+                  No sign-in records found.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="rounded-md border overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b bg-muted/50">
+                    <SortableTh
+                      label="User"
+                      sortKey="userName"
+                      activeSortKey={sSortBy}
+                      isDesc={sSortDesc}
+                      onSort={toggleSSort}
+                    />
+                    <SortableTh
+                      label="Date &amp; Time"
+                      sortKey="createdAt"
+                      activeSortKey={sSortBy}
+                      isDesc={sSortDesc}
+                      onSort={toggleSSort}
+                    />
+                    <th className="p-3 text-left font-medium">Provider</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {signIns.map((s) => (
+                    <tr
+                      key={s.id}
+                      className="border-b last:border-0 hover:bg-muted/30 transition-colors"
+                    >
+                      <td className="p-3">
+                        <div className="font-medium">
+                          {s.userName || "Unknown"}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {s.email}
+                        </div>
+                      </td>
+                      <td className="p-3 whitespace-nowrap">
+                        {formatDateHK(s.createdAt)}
+                      </td>
+                      <td className="p-3">
+                        <Badge variant="secondary">{s.provider}</Badge>
                       </td>
                     </tr>
                   ))}
