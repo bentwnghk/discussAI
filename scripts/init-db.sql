@@ -96,6 +96,14 @@ CREATE TABLE IF NOT EXISTS "purchases" (
   "createdAt" TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+-- Sign-in Logs
+CREATE TABLE IF NOT EXISTS "sign_in_logs" (
+  "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "userId" UUID NOT NULL REFERENCES "user"("id") ON DELETE CASCADE,
+  "provider" VARCHAR(50) NOT NULL,
+  "createdAt" TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
 -- Indexes
 CREATE INDEX IF NOT EXISTS "idx_account_userId" ON "account"("userId");
 CREATE INDEX IF NOT EXISTS "idx_account_provider" ON "account"("provider", "providerAccountId");
@@ -107,5 +115,7 @@ CREATE INDEX IF NOT EXISTS "idx_credit_transactions_userId" ON "credit_transacti
 CREATE INDEX IF NOT EXISTS "idx_credit_transactions_createdAt" ON "credit_transactions"("createdAt" DESC);
 CREATE INDEX IF NOT EXISTS "idx_purchases_userId" ON "purchases"("userId");
 CREATE INDEX IF NOT EXISTS "idx_purchases_createdAt" ON "purchases"("createdAt" DESC);
+CREATE INDEX IF NOT EXISTS "idx_sign_in_logs_userId" ON "sign_in_logs"("userId");
+CREATE INDEX IF NOT EXISTS "idx_sign_in_logs_createdAt" ON "sign_in_logs"("createdAt" DESC);
 
 COMMIT;
