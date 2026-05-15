@@ -279,6 +279,79 @@ matcher: ["/((?!_next/static|_next/image|favicon.ico|logo.png|icon.png|manifest.
 
 ---
 
+## Admin Dashboard
+
+An admin dashboard for monitoring app usage, purchases, and user activity. Accessible only to users whose email is listed in the `ADMIN_EMAIL` environment variable.
+
+### Access Control
+
+| Layer | Mechanism |
+| --- | --- |
+| 🔑 __Configuration__ | `ADMIN_EMAIL` env var — comma-separated list of admin email addresses |
+| 🛡️ __JWT Token__ | `isAdmin` boolean set in NextAuth JWT/session callbacks via `src/lib/auth.ts` |
+| 🚪 __Server Guard__ | `src/app/(app)/admin/layout.tsx` — server component redirects non-admins to `/discuss` |
+| 🔒 __API Routes__ | Each `/api/admin/*` route verifies `auth()` + `isAdminEmail()` before returning data |
+| 📱 __Header__ | "Dashboard" menu item (with ShieldCheck icon) only appears for admin users |
+
+### Dashboard Tabs
+
+| Tab | Data | Features |
+| --- | --- | --- |
+| 💰 __Usage__ | All discussion sessions across all users | Search by name/email/title/mode; sort by user, date, title, mode; shows credits consumed or TTS cost |
+| 🛒 __Purchases__ | All Stripe purchases across all users | Sort by user, date, package, amount paid; shows status (completed/pending/failed) |
+| 🔑 __Sign-ins__ | All user sign-in events | Sort by user or date; shows provider (e.g. google) |
+
+### Architecture
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│  Configuration                                                   │
+│  └─ ADMIN_EMAIL=admin@a.com,admin@b.com  (env var)              │
+├──────────────────────────────────────────────────────────────────┤
+│  Auth Integration (src/lib/auth.ts)                              │
+│  └─ JWT callback: token.isAdmin = isAdminEmail(user.email)      │
+│  └─ Session callback: session.user.isAdmin = token.isAdmin      │
+│  └─ signIn event: INSERT INTO sign_in_logs (userId, provider)   │
+├──────────────────────────────────────────────────────────────────┤
+│  Server-side Guard (src/app/(app)/admin/layout.tsx)              │
+│  └─ auth() + isAdminEmail() → redirect to /discuss if !admin    │
+├──────────────────────────────────────────────────────────────────┤
+│  API Routes (src/app/api/admin/)                                 │
+│  ├─ /discussions  GET  → all sessions joined with users          │
+│  │   └─ Query params: sortBy, sortOrder, q (search)             │
+│  ├─ /purchases    GET  → all purchases joined with users         │
+│  │   └─ Query params: sortBy, sortOrder                          │
+│  └─ /sign-ins     GET  → all sign_in_logs joined with users     │
+│      └─ Query params: sortBy, sortOrder                          │
+├──────────────────────────────────────────────────────────────────┤
+│  Client Dashboard (src/app/(app)/admin/page.tsx)                 │
+│  └─ Tabs: Usage | Purchases | Sign-ins                           │
+│  └─ Server-side sorting via API query params                     │
+│  └─ Client-side search input (Usage tab)                         │
+│  └─ All dates displayed in Asia/Hong_Kong timezone               │
+├──────────────────────────────────────────────────────────────────┤
+│  Database                                                        │
+│  └─ sign_in_logs table (id, userId, provider, createdAt)         │
+│  └─ Populated by NextAuth signIn event on every authentication   │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+### Key Files
+
+| File | Purpose |
+| --- | --- |
+| `src/lib/admin.ts` | `isAdminEmail()` — parses `ADMIN_EMAIL` env var |
+| `src/lib/auth.ts` | Injects `isAdmin` into JWT/session; logs sign-ins to `sign_in_logs` |
+| `src/types/next-auth.d.ts` | TypeScript augmentation for `isAdmin` on session/JWT types |
+| `src/app/(app)/admin/layout.tsx` | Server-side admin guard |
+| `src/app/(app)/admin/page.tsx` | Admin dashboard UI (3 tabs) |
+| `src/app/api/admin/discussions/route.ts` | All users' discussions API |
+| `src/app/api/admin/purchases/route.ts` | All users' purchases API |
+| `src/app/api/admin/sign-ins/route.ts` | All sign-in logs API |
+| `src/components/layout/header.tsx` | Conditional "Dashboard" menu item |
+
+---
+
 ## Credits & Payment System
 
 | Aspect | Details |
@@ -386,6 +459,7 @@ src/
 │   ├── manifest.json           # PWA Web App Manifest
 │   ├── sw.ts                   # Service worker source (Serwist)
 │   ├── (app)/                  # Authenticated routes
+│   │   ├── admin/             # Admin dashboard (usage, purchases, sign-ins)
 │   │   ├── discuss/            # Main discussion generation page + history detail
 │   │   ├── history/            # Session history + detail view
 │   │   └── credits/            # Credit purchase page
@@ -416,6 +490,7 @@ src/
 │   ├── pdf-client.ts           # Client-side PDF processing
 │   ├── tts/                    # Text-to-speech generation
 │   ├── auth.ts                 # NextAuth v5 configuration
+│   ├── admin.ts                # Admin email validation helper
 │   ├── stripe.ts               # Stripe client + plan definitions
 │   └── utils.ts                # Utility functions (cn)
 └── types/                      # TypeScript types + speaker mappings
@@ -441,6 +516,9 @@ src/
 | `/api/user/api-key` | GET/PUT | Manage user API key |
 | `/api/user/credits` | GET | Get credit balance |
 | `/api/user/purchases` | GET | Get purchase history |
+| `/api/admin/discussions` | GET | All users' discussions (admin only) |
+| `/api/admin/purchases` | GET | All users' purchases (admin only) |
+| `/api/admin/sign-ins` | GET | All sign-in logs (admin only) |
 | `/api/public/session` | GET | Get session by access code (public) |
 | `/api/public/audio` | GET | Serve audio by access code (public) |
 | `/api/cron/cleanup-audio` | GET | Cleanup expired audio files |
@@ -464,6 +542,7 @@ See [`.env.example`](.env.example) for the full list. Key variables:
 | `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret |
 | `AUDIO_TTL_DAYS` | Audio file retention period (default: 365) |
 | `CRON_SECRET` | Secret for cron job endpoints |
+| `ADMIN_EMAIL` | Comma-separated admin email addresses |
 | `NEXTAUTH_URL` | App URL for auth callbacks |
 
 ---
