@@ -32,6 +32,7 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Pagination } from "@/components/admin-pagination";
 
 interface DiscussionRow {
   id: string;
@@ -142,6 +143,12 @@ export default function AdminDashboardPage() {
   const [pSortDesc, setPSortDesc] = useState(true);
   const [sSortBy, setSSortBy] = useState<SignInSortKey>("createdAt");
   const [sSortDesc, setSSortDesc] = useState(true);
+  const [dPage, setDPage] = useState(1);
+  const [dPageSize, setDPageSize] = useState(20);
+  const [pPage, setPPage] = useState(1);
+  const [pPageSize, setPPagesize] = useState(20);
+  const [sPage, setSPage] = useState(1);
+  const [sPageSize, setSPagesize] = useState(20);
   const [detailId, setDetailId] = useState<string | null>(null);
   const [detailSession, setDetailSession] = useState<DetailSession | null>(
     null
@@ -158,6 +165,7 @@ export default function AdminDashboardPage() {
         setDSortBy(k);
         setDSortDesc(false);
       }
+      setDPage(1);
     },
     [dSortBy]
   );
@@ -171,6 +179,7 @@ export default function AdminDashboardPage() {
         setPSortBy(k);
         setPSortDesc(false);
       }
+      setPPage(1);
     },
     [pSortBy]
   );
@@ -184,6 +193,7 @@ export default function AdminDashboardPage() {
         setSSortBy(k);
         setSSortDesc(false);
       }
+      setSPage(1);
     },
     [sSortBy]
   );
@@ -331,7 +341,10 @@ export default function AdminDashboardPage() {
               type="text"
               placeholder="Search by name, email, title, or mode..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setDPage(1);
+              }}
               className="pl-9"
             />
           </div>
@@ -347,105 +360,122 @@ export default function AdminDashboardPage() {
               </CardContent>
             </Card>
           ) : (
-            <div className="rounded-md border overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-muted/50">
-                    <SortableTh
-                      label="User"
-                      sortKey="userName"
-                      activeSortKey={dSortBy}
-                      isDesc={dSortDesc}
-                      onSort={toggleDSort}
-                    />
-                    <SortableTh
-                      label="Date"
-                      sortKey="createdAt"
-                      activeSortKey={dSortBy}
-                      isDesc={dSortDesc}
-                      onSort={toggleDSort}
-                    />
-                    <SortableTh
-                      label="Title"
-                      sortKey="title"
-                      activeSortKey={dSortBy}
-                      isDesc={dSortDesc}
-                      onSort={toggleDSort}
-                    />
-                    <SortableTh
-                      label="Mode"
-                      sortKey="dialogueMode"
-                      activeSortKey={dSortBy}
-                      isDesc={dSortDesc}
-                      onSort={toggleDSort}
-                    />
-                    <th className="p-3 text-left font-medium">
-                      Credits / Cost
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {discussions.map((d) => (
-                    <tr
-                      key={d.id}
-                      className="border-b last:border-0 hover:bg-muted/30 transition-colors"
-                    >
-                      <td className="p-3">
-                        <div className="font-medium">
-                          {d.userName || "Unknown"}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {d.email}
-                        </div>
-                      </td>
-                      <td className="p-3 whitespace-nowrap">
-                        {formatDateHK(d.createdAt)}
-                      </td>
-                      <td className="p-3 max-w-[300px]">
-                        <button
-                          type="button"
-                          className="truncate text-left hover:underline cursor-pointer"
-                          title={d.title}
-                          onClick={() => setDetailId(d.id)}
-                        >
-                          {d.title}
-                        </button>
-                      </td>
-                      <td className="p-3">
-                        <Badge
-                          variant={
-                            d.dialogueMode === "Deeper"
-                              ? "default"
-                              : "secondary"
-                          }
-                        >
-                          {d.dialogueMode}
-                        </Badge>
-                      </td>
-                      <td className="p-3 whitespace-nowrap">
-                        <div>
-                          {d.usedOwnApiKey ? (
-                            <span className="text-muted-foreground">
-                              Own key
-                            </span>
-                          ) : (
-                            <Badge variant="outline" className="gap-1">
-                              <Coins className="h-3 w-3" />
-                              {generationCost} credits
-                            </Badge>
-                          )}
-                        </div>
-                        {d.ttsCostHKD > 0 && (
-                          <div className="text-xs text-muted-foreground mt-0.5">
-                            TTS HK${d.ttsCostHKD.toFixed(2)}
-                          </div>
-                        )}
-                      </td>
+            <>
+              <div className="rounded-md border overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b bg-muted/50">
+                      <SortableTh
+                        label="User"
+                        sortKey="userName"
+                        activeSortKey={dSortBy}
+                        isDesc={dSortDesc}
+                        onSort={toggleDSort}
+                      />
+                      <SortableTh
+                        label="Date"
+                        sortKey="createdAt"
+                        activeSortKey={dSortBy}
+                        isDesc={dSortDesc}
+                        onSort={toggleDSort}
+                      />
+                      <SortableTh
+                        label="Title"
+                        sortKey="title"
+                        activeSortKey={dSortBy}
+                        isDesc={dSortDesc}
+                        onSort={toggleDSort}
+                      />
+                      <SortableTh
+                        label="Mode"
+                        sortKey="dialogueMode"
+                        activeSortKey={dSortBy}
+                        isDesc={dSortDesc}
+                        onSort={toggleDSort}
+                      />
+                      <th className="p-3 text-left font-medium">
+                        Credits / Cost
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {discussions
+                      .slice(
+                        (Math.min(dPage, Math.max(1, Math.ceil(discussions.length / dPageSize))) - 1) * dPageSize,
+                        Math.min(dPage, Math.max(1, Math.ceil(discussions.length / dPageSize))) * dPageSize
+                      )
+                      .map((d) => (
+                        <tr
+                          key={d.id}
+                          className="border-b last:border-0 hover:bg-muted/30 transition-colors"
+                        >
+                          <td className="p-3">
+                            <div className="font-medium">
+                              {d.userName || "Unknown"}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {d.email}
+                            </div>
+                          </td>
+                          <td className="p-3 whitespace-nowrap">
+                            {formatDateHK(d.createdAt)}
+                          </td>
+                          <td className="p-3 max-w-[300px]">
+                            <button
+                              type="button"
+                              className="truncate text-left hover:underline cursor-pointer"
+                              title={d.title}
+                              onClick={() => setDetailId(d.id)}
+                            >
+                              {d.title}
+                            </button>
+                          </td>
+                          <td className="p-3">
+                            <Badge
+                              variant={
+                                d.dialogueMode === "Deeper"
+                                  ? "default"
+                                  : "secondary"
+                              }
+                            >
+                              {d.dialogueMode}
+                            </Badge>
+                          </td>
+                          <td className="p-3 whitespace-nowrap">
+                            <div>
+                              {d.usedOwnApiKey ? (
+                                <span className="text-muted-foreground">
+                                  Own key
+                                </span>
+                              ) : (
+                                <Badge variant="outline" className="gap-1">
+                                  <Coins className="h-3 w-3" />
+                                  {generationCost} credits
+                                </Badge>
+                              )}
+                            </div>
+                            {d.ttsCostHKD > 0 && (
+                              <div className="text-xs text-muted-foreground mt-0.5">
+                                TTS HK${d.ttsCostHKD.toFixed(2)}
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+              <Pagination
+                total={discussions.length}
+                pageSize={dPageSize}
+                currentPage={dPage}
+                onPageChange={setDPage}
+                onPageSizeChange={(size) => {
+                  setDPageSize(size);
+                  setDPage(1);
+                }}
+              />
+            </>
           )}
         </TabsContent>
 
@@ -457,82 +487,99 @@ export default function AdminDashboardPage() {
               </CardContent>
             </Card>
           ) : (
-            <div className="rounded-md border overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-muted/50">
-                    <SortableTh
-                      label="User"
-                      sortKey="userName"
-                      activeSortKey={pSortBy}
-                      isDesc={pSortDesc}
-                      onSort={togglePSort}
-                    />
-                    <SortableTh
-                      label="Date"
-                      sortKey="createdAt"
-                      activeSortKey={pSortBy}
-                      isDesc={pSortDesc}
-                      onSort={togglePSort}
-                    />
-                    <SortableTh
-                      label="Package"
-                      sortKey="planName"
-                      activeSortKey={pSortBy}
-                      isDesc={pSortDesc}
-                      onSort={togglePSort}
-                    />
-                    <SortableTh
-                      label="Amount Paid"
-                      sortKey="amountHKD"
-                      activeSortKey={pSortBy}
-                      isDesc={pSortDesc}
-                      onSort={togglePSort}
-                    />
-                    <th className="p-3 text-left font-medium">Credits</th>
-                    <th className="p-3 text-left font-medium">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {purchases.map((p) => (
-                    <tr
-                      key={p.id}
-                      className="border-b last:border-0 hover:bg-muted/30 transition-colors"
-                    >
-                      <td className="p-3">
-                        <div className="font-medium">
-                          {p.userName || "Unknown"}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {p.email}
-                        </div>
-                      </td>
-                      <td className="p-3 whitespace-nowrap">
-                        {formatDateHK(p.createdAt)}
-                      </td>
-                      <td className="p-3">{p.planName}</td>
-                      <td className="p-3 whitespace-nowrap font-medium">
-                        HK${p.amountHKD.toFixed(2)}
-                      </td>
-                      <td className="p-3">{p.creditsAmount}</td>
-                      <td className="p-3">
-                        <Badge
-                          variant={
-                            p.status === "completed"
-                              ? "default"
-                              : p.status === "pending"
-                                ? "secondary"
-                                : "destructive"
-                          }
-                        >
-                          {p.status}
-                        </Badge>
-                      </td>
+            <>
+              <div className="rounded-md border overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b bg-muted/50">
+                      <SortableTh
+                        label="User"
+                        sortKey="userName"
+                        activeSortKey={pSortBy}
+                        isDesc={pSortDesc}
+                        onSort={togglePSort}
+                      />
+                      <SortableTh
+                        label="Date"
+                        sortKey="createdAt"
+                        activeSortKey={pSortBy}
+                        isDesc={pSortDesc}
+                        onSort={togglePSort}
+                      />
+                      <SortableTh
+                        label="Package"
+                        sortKey="planName"
+                        activeSortKey={pSortBy}
+                        isDesc={pSortDesc}
+                        onSort={togglePSort}
+                      />
+                      <SortableTh
+                        label="Amount Paid"
+                        sortKey="amountHKD"
+                        activeSortKey={pSortBy}
+                        isDesc={pSortDesc}
+                        onSort={togglePSort}
+                      />
+                      <th className="p-3 text-left font-medium">Credits</th>
+                      <th className="p-3 text-left font-medium">Status</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {purchases
+                      .slice(
+                        (Math.min(pPage, Math.max(1, Math.ceil(purchases.length / pPageSize))) - 1) * pPageSize,
+                        Math.min(pPage, Math.max(1, Math.ceil(purchases.length / pPageSize))) * pPageSize
+                      )
+                      .map((p) => (
+                        <tr
+                          key={p.id}
+                          className="border-b last:border-0 hover:bg-muted/30 transition-colors"
+                        >
+                          <td className="p-3">
+                            <div className="font-medium">
+                              {p.userName || "Unknown"}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {p.email}
+                            </div>
+                          </td>
+                          <td className="p-3 whitespace-nowrap">
+                            {formatDateHK(p.createdAt)}
+                          </td>
+                          <td className="p-3">{p.planName}</td>
+                          <td className="p-3 whitespace-nowrap font-medium">
+                            HK${p.amountHKD.toFixed(2)}
+                          </td>
+                          <td className="p-3">{p.creditsAmount}</td>
+                          <td className="p-3">
+                            <Badge
+                              variant={
+                                p.status === "completed"
+                                  ? "default"
+                                  : p.status === "pending"
+                                    ? "secondary"
+                                    : "destructive"
+                              }
+                            >
+                              {p.status}
+                            </Badge>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+              <Pagination
+                total={purchases.length}
+                pageSize={pPageSize}
+                currentPage={pPage}
+                onPageChange={setPPage}
+                onPageSizeChange={(size) => {
+                  setPPagesize(size);
+                  setPPage(1);
+                }}
+              />
+            </>
           )}
         </TabsContent>
 
@@ -546,52 +593,69 @@ export default function AdminDashboardPage() {
               </CardContent>
             </Card>
           ) : (
-            <div className="rounded-md border overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-muted/50">
-                    <SortableTh
-                      label="User"
-                      sortKey="userName"
-                      activeSortKey={sSortBy}
-                      isDesc={sSortDesc}
-                      onSort={toggleSSort}
-                    />
-                    <SortableTh
-                      label="Date &amp; Time"
-                      sortKey="createdAt"
-                      activeSortKey={sSortBy}
-                      isDesc={sSortDesc}
-                      onSort={toggleSSort}
-                    />
-                    <th className="p-3 text-left font-medium">Provider</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {signIns.map((s) => (
-                    <tr
-                      key={s.id}
-                      className="border-b last:border-0 hover:bg-muted/30 transition-colors"
-                    >
-                      <td className="p-3">
-                        <div className="font-medium">
-                          {s.userName || "Unknown"}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {s.email}
-                        </div>
-                      </td>
-                      <td className="p-3 whitespace-nowrap">
-                        {formatDateHK(s.createdAt)}
-                      </td>
-                      <td className="p-3">
-                        <Badge variant="secondary">{s.provider}</Badge>
-                      </td>
+            <>
+              <div className="rounded-md border overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b bg-muted/50">
+                      <SortableTh
+                        label="User"
+                        sortKey="userName"
+                        activeSortKey={sSortBy}
+                        isDesc={sSortDesc}
+                        onSort={toggleSSort}
+                      />
+                      <SortableTh
+                        label="Date &amp; Time"
+                        sortKey="createdAt"
+                        activeSortKey={sSortBy}
+                        isDesc={sSortDesc}
+                        onSort={toggleSSort}
+                      />
+                      <th className="p-3 text-left font-medium">Provider</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {signIns
+                      .slice(
+                        (Math.min(sPage, Math.max(1, Math.ceil(signIns.length / sPageSize))) - 1) * sPageSize,
+                        Math.min(sPage, Math.max(1, Math.ceil(signIns.length / sPageSize))) * sPageSize
+                      )
+                      .map((s) => (
+                        <tr
+                          key={s.id}
+                          className="border-b last:border-0 hover:bg-muted/30 transition-colors"
+                        >
+                          <td className="p-3">
+                            <div className="font-medium">
+                              {s.userName || "Unknown"}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {s.email}
+                            </div>
+                          </td>
+                          <td className="p-3 whitespace-nowrap">
+                            {formatDateHK(s.createdAt)}
+                          </td>
+                          <td className="p-3">
+                            <Badge variant="secondary">{s.provider}</Badge>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+              <Pagination
+                total={signIns.length}
+                pageSize={sPageSize}
+                currentPage={sPage}
+                onPageChange={setSPage}
+                onPageSizeChange={(size) => {
+                  setSPagesize(size);
+                  setSPage(1);
+                }}
+              />
+            </>
           )}
         </TabsContent>
       </Tabs>
