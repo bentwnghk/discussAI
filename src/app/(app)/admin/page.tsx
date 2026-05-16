@@ -3,8 +3,22 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { TranscriptDisplay } from "@/components/discuss/transcript-display";
+import { LearningNotes } from "@/components/discuss/learning-notes";
+import { AudioPlayer } from "@/components/discuss/audio-player";
+import type {
+  DialogueItem,
+  LearningNotes as LearningNotesType,
+} from "@/types";
 import {
   ArrowUpDown,
   ArrowUp,
@@ -15,7 +29,9 @@ import {
   ShieldCheck,
   ShoppingCart,
   LogIn,
+  X,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface DiscussionRow {
   id: string;
@@ -50,6 +66,22 @@ interface SignInRow {
 type DiscussionSortKey = "userName" | "createdAt" | "title" | "dialogueMode";
 type PurchaseSortKey = "userName" | "createdAt" | "planName" | "amountHKD";
 type SignInSortKey = "userName" | "createdAt";
+
+interface DetailSession {
+  id: string;
+  title: string;
+  dialogueMode: string;
+  inputText: string | null;
+  transcript: DialogueItem[];
+  learningNotes: LearningNotesType;
+  audioUrl: string | null;
+  audioExpiresAt: string | null;
+  accessCode: string | null;
+  ttsCostHKD: number;
+  usedOwnApiKey: boolean;
+  generationCost: number;
+  createdAt: string;
+}
 
 function formatDateHK(dateStr: string): string {
   return new Date(dateStr).toLocaleString("en-HK", {
@@ -110,6 +142,11 @@ export default function AdminDashboardPage() {
   const [pSortDesc, setPSortDesc] = useState(true);
   const [sSortBy, setSSortBy] = useState<SignInSortKey>("createdAt");
   const [sSortDesc, setSSortDesc] = useState(true);
+  const [detailId, setDetailId] = useState<string | null>(null);
+  const [detailSession, setDetailSession] = useState<DetailSession | null>(
+    null
+  );
+  const [detailLoading, setDetailLoading] = useState(false);
   const initialLoad = useRef(true);
 
   const toggleDSort = useCallback(
@@ -216,6 +253,31 @@ export default function AdminDashboardPage() {
       cancelled = true;
     };
   }, [dSortBy, dSortDesc, pSortBy, pSortDesc, sSortBy, sSortDesc, search]);
+
+  useEffect(() => {
+    if (!detailId) {
+      setDetailSession(null);
+      return;
+    }
+    let cancelled = false;
+    setDetailLoading(true);
+    async function loadDetail() {
+      try {
+        const res = await fetch(`/api/admin/discussions/${detailId}`);
+        if (res.ok && !cancelled) {
+          const data = await res.json();
+          setDetailSession(data);
+        }
+      } catch {
+      } finally {
+        if (!cancelled) setDetailLoading(false);
+      }
+    }
+    loadDetail();
+    return () => {
+      cancelled = true;
+    };
+  }, [detailId]);
 
   if (loading) {
     return (
@@ -339,8 +401,15 @@ export default function AdminDashboardPage() {
                       <td className="p-3 whitespace-nowrap">
                         {formatDateHK(d.createdAt)}
                       </td>
-                      <td className="p-3 max-w-[300px] truncate">
-                        {d.title}
+                      <td className="p-3 max-w-[300px]">
+                        <button
+                          type="button"
+                          className="truncate text-left hover:underline cursor-pointer"
+                          title={d.title}
+                          onClick={() => setDetailId(d.id)}
+                        >
+                          {d.title}
+                        </button>
                       </td>
                       <td className="p-3">
                         <Badge
@@ -526,6 +595,83 @@ export default function AdminDashboardPage() {
           )}
         </TabsContent>
       </Tabs>
+
+      <Dialog
+        open={!!detailId}
+        onOpenChange={(open) => {
+          if (!open) setDetailId(null);
+        }}
+      >
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          {detailLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              <span className="ml-2 text-muted-foreground">Loading...</span>
+            </div>
+          ) : detailSession ? (
+            <div className="space-y-4">
+              <DialogHeader>
+                <DialogTitle>{detailSession.title}</DialogTitle>
+              </DialogHeader>
+              <p className="text-sm text-muted-foreground">
+                {new Date(detailSession.createdAt).toLocaleString("en-HK", {
+                  timeZone: "Asia/Hong_Kong",
+                })}
+                {" | "}
+                {detailSession.usedOwnApiKey
+                  ? `HK$${detailSession.ttsCostHKD.toFixed(2)}`
+                  : `${detailSession.generationCost} credits`}
+              </p>
+              <Separator />
+              {detailSession.inputText && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>📌 Task 任務</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="max-h-64 overflow-y-auto rounded-md bg-muted p-4">
+                      <pre className="whitespace-pre-wrap text-sm leading-relaxed font-sans">
+                        {detailSession.inputText}
+                      </pre>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+              {detailSession.audioUrl &&
+              detailSession.audioExpiresAt &&
+              new Date(detailSession.audioExpiresAt).getTime() > Date.now() ? (
+                <AudioPlayer
+                  src={detailSession.audioUrl}
+                  expiryDays={
+                    (new Date(detailSession.audioExpiresAt).getTime() -
+                      Date.now()) /
+                    (24 * 60 * 60 * 1000)
+                  }
+                  accessCode={detailSession.accessCode}
+                />
+              ) : detailSession.audioUrl || detailSession.accessCode ? (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>🎧 Audio 錄音</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      Audio has expired and is no longer available.
+                    </p>
+                    {detailSession.accessCode && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Access code: {detailSession.accessCode}
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              ) : null}
+              <TranscriptDisplay items={detailSession.transcript} />
+              <LearningNotes notes={detailSession.learningNotes} />
+            </div>
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
