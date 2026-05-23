@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -289,6 +289,18 @@ export default function AdminDashboardPage() {
     };
   }, [detailId]);
 
+  const userCumulative = useMemo(() => {
+    const map = new Map<string, { credits: number; ttsHKD: number }>();
+    for (const d of discussions) {
+      const key = d.email || d.userName || "";
+      const prev = map.get(key) || { credits: 0, ttsHKD: 0 };
+      if (!d.usedOwnApiKey) prev.credits += generationCost;
+      prev.ttsHKD += d.ttsCostHKD;
+      map.set(key, prev);
+    }
+    return map;
+  }, [discussions, generationCost]);
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-7xl">
@@ -396,6 +408,9 @@ export default function AdminDashboardPage() {
                       <th className="p-3 text-left font-medium">
                         Credits / Cost
                       </th>
+                      <th className="p-3 text-left font-medium">
+                        Cumulative
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -459,6 +474,16 @@ export default function AdminDashboardPage() {
                                 TTS HK${d.ttsCostHKD.toFixed(2)}
                               </div>
                             )}
+                          </td>
+                          <td className="p-3 whitespace-nowrap text-xs text-muted-foreground">
+                            {(() => {
+                              const cum = userCumulative.get(d.email || d.userName || "");
+                              if (!cum) return null;
+                              const parts: string[] = [];
+                              if (cum.credits > 0) parts.push(`${cum.credits} credits`);
+                              if (cum.ttsHKD > 0) parts.push(`HK${cum.ttsHKD.toFixed(2)}`);
+                              return parts.length > 0 ? parts.join(" + ") : "—";
+                            })()}
                           </td>
                         </tr>
                       ))}
