@@ -9,9 +9,6 @@ import {
   FileText,
   Rocket,
   Coins,
-  Star,
-  Zap,
-  Package,
   Users,
   Headphones,
   Brain,
@@ -24,7 +21,6 @@ import {
   History,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 const easeOut: [number, number, number, number] = [0.25, 0.46, 0.45, 0.94];
 
@@ -215,21 +211,12 @@ function GoogleIcon() {
   );
 }
 
-interface CreditPlan {
-  key: string;
-  label: string;
-  credits: number;
-  priceHKD: number;
-  highlight?: boolean;
-}
-
 interface LandingPageProps {
-  plans: CreditPlan[];
   welcomeCredits: number;
   generationCost: number;
 }
 
-export function LandingPage({ plans, welcomeCredits, generationCost }: LandingPageProps) {
+export function LandingPage({ welcomeCredits, generationCost }: LandingPageProps) {
   const features = [
     { icon: Upload, key: "upload", color: "text-blue-600 dark:text-blue-400", title: "Snap, Upload, Speak", desc: "Seamlessly upload images, PDFs, or DOCX files to generate custom speaking simulations on the fly." },
     { icon: Users, key: "group", color: "text-emerald-600 dark:text-emerald-400", title: "Authentic Group Dynamics", desc: "Engage in 4-student interactions featuring realistic voices and turn-taking strategies modeled after HKDSE Paper 4." },
@@ -461,100 +448,6 @@ export function LandingPage({ plans, welcomeCredits, generationCost }: LandingPa
                 {skill}
               </motion.span>
             ))}
-          </AnimatedSection>
-        </div>
-      </section>
-
-      <section className="py-20 px-4">
-        <div className="container mx-auto">
-          <AnimatedSection>
-            <motion.span
-              variants={sectionTitleVariants}
-              className="block text-center text-xs font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-3"
-            >
-              Pricing
-            </motion.span>
-            <motion.h2
-              variants={sectionTitleVariants}
-              className="text-3xl sm:text-5xl font-bold tracking-tight text-center mb-4"
-            >
-              Simple, Transparent Pricing
-            </motion.h2>
-            <motion.div
-              variants={sectionTitleVariants}
-              className="w-24 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 mx-auto rounded-full mb-4"
-            />
-            <motion.p
-              variants={sectionTitleVariants}
-              className="text-center text-muted-foreground mb-12 max-w-xl mx-auto"
-            >
-              Start free, upgrade when you&apos;re ready. Every package gives you full access to all features.
-            </motion.p>
-          </AnimatedSection>
-
-          <AnimatedSection className="grid gap-6 sm:grid-cols-2 max-w-2xl mx-auto">
-            {plans.map((plan) => {
-              const discussions = Math.floor(plan.credits / generationCost);
-              const starterPlan = plans.find((p) => !p.highlight);
-              const savedPct = starterPlan
-                ? Math.round(
-                    (1 -
-                      plan.priceHKD /
-                        (plan.credits *
-                          starterPlan.priceHKD /
-                          starterPlan.credits)) *
-                      100
-                  )
-                : 0;
-
-              return (
-                <motion.div
-                  key={plan.key}
-                  variants={cardVariants}
-                  className={`relative rounded-2xl p-6 ${glassCard} ${
-                    plan.highlight
-                      ? "ring-2 ring-emerald-500/50 shadow-lg shadow-emerald-500/10"
-                      : ""
-                  }`}
-                >
-                  {plan.highlight && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <Badge className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-0 px-3 py-1">
-                        <Star className="mr-1 h-3 w-3" />
-                        Best Value
-                      </Badge>
-                    </div>
-                  )}
-                  <div className="text-center space-y-3">
-                    <div className="flex justify-center">
-                      {plan.highlight ? (
-                        <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                          <Zap className="h-6 w-6" />
-                        </div>
-                      ) : (
-                        <div className="p-2 rounded-xl bg-white/10 text-muted-foreground">
-                          <Package className="h-6 w-6" />
-                        </div>
-                      )}
-                    </div>
-                    <h3 className="text-xl font-semibold">{plan.label}</h3>
-                    <p className="text-sm text-muted-foreground">{plan.credits} Credits</p>
-                    <div className="text-5xl font-extrabold tracking-tight">
-                      <span className="text-lg align-top">HK$</span>
-                      {plan.priceHKD}
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {discussions} discussions (~HK${(plan.priceHKD / discussions).toFixed(1)} each)
-                    </p>
-                    {plan.highlight && savedPct > 0 && (
-                      <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
-                        Save {savedPct}% compared to Starter
-                      </p>
-                    )}
-                  </div>
-                </motion.div>
-              );
-            })}
           </AnimatedSection>
         </div>
       </section>
