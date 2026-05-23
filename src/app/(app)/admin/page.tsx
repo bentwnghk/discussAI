@@ -289,16 +289,21 @@ export default function AdminDashboardPage() {
     };
   }, [detailId]);
 
-  const userCumulative = useMemo(() => {
-    const map = new Map<string, { credits: number; ttsHKD: number }>();
-    for (const d of discussions) {
+  const discussionCumulative = useMemo(() => {
+    const sorted = [...discussions].sort(
+      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
+    const running = new Map<string, { credits: number; ttsHKD: number }>();
+    const result = new Map<string, { credits: number; ttsHKD: number }>();
+    for (const d of sorted) {
       const key = d.email || d.userName || "";
-      const prev = map.get(key) || { credits: 0, ttsHKD: 0 };
+      const prev = running.get(key) || { credits: 0, ttsHKD: 0 };
       if (!d.usedOwnApiKey) prev.credits += generationCost;
       prev.ttsHKD += d.ttsCostHKD;
-      map.set(key, prev);
+      running.set(key, prev);
+      result.set(d.id, { credits: prev.credits, ttsHKD: prev.ttsHKD });
     }
-    return map;
+    return result;
   }, [discussions, generationCost]);
 
   if (loading) {
@@ -477,11 +482,11 @@ export default function AdminDashboardPage() {
                           </td>
                           <td className="p-3 whitespace-nowrap text-xs text-muted-foreground">
                             {(() => {
-                              const cum = userCumulative.get(d.email || d.userName || "");
+                              const cum = discussionCumulative.get(d.id);
                               if (!cum) return null;
                               const parts: string[] = [];
                               if (cum.credits > 0) parts.push(`${cum.credits} credits`);
-                              if (cum.ttsHKD > 0) parts.push(`HK${cum.ttsHKD.toFixed(2)}`);
+                              if (cum.ttsHKD > 0) parts.push(`HK$${cum.ttsHKD.toFixed(2)}`);
                               return parts.length > 0 ? parts.join(" + ") : "—";
                             })()}
                           </td>
