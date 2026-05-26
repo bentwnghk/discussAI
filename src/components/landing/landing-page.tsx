@@ -18,7 +18,8 @@ import {
   Download,
   Volume2,
   Target,
-  History,
+  Mic,
+  MessageSquareText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -214,28 +215,35 @@ function GoogleIcon() {
 interface LandingPageProps {
   welcomeCredits: number;
   generationCost: number;
+  responseCost: number;
 }
 
-export function LandingPage({ welcomeCredits, generationCost }: LandingPageProps) {
+export function LandingPage({ welcomeCredits, generationCost, responseCost }: LandingPageProps) {
   const features = [
+    { icon: Users, key: "group", color: "text-emerald-600 dark:text-emerald-400", title: "Group Discussion (Part A)", desc: "Engage in realistic 4-student interactions featuring authentic voices, turn-taking, and strategies modeled after HKDSE Paper 4 Part A." },
+    { icon: Mic, key: "respond", color: "text-cyan-600 dark:text-cyan-400", title: "Individual Response (Part B)", desc: "Practice 1-minute individual responses to exam-style questions with natural speech, targeted feedback, and exam-appropriate language." },
     { icon: Upload, key: "upload", color: "text-blue-600 dark:text-blue-400", title: "Snap, Upload, Speak", desc: "Seamlessly upload images, PDFs, or DOCX files to generate custom speaking simulations on the fly." },
-    { icon: Users, key: "group", color: "text-emerald-600 dark:text-emerald-400", title: "Authentic Group Dynamics", desc: "Engage in 4-student interactions featuring realistic voices and turn-taking strategies modeled after HKDSE Paper 4." },
-    { icon: Volume2, key: "tts", color: "text-teal-600 dark:text-teal-400", title: "Natural Voices", desc: "Listen to realistic AI-generated speech with authentic accents and exam-appropriate intonation." },
-    { icon: BookOpen, key: "notes", color: "text-purple-600 dark:text-purple-400", title: "Comprehensive Smart Notes", desc: "Gain a competitive edge with structured learning notes, advanced vocabulary, and tactical interaction tips." },
+    { icon: Volume2, key: "tts", color: "text-teal-600 dark:text-teal-400", title: "Natural Voices", desc: "Listen to realistic AI-generated speech with authentic accents, exam-appropriate intonation, and your choice of voice." },
+    { icon: BookOpen, key: "notes", color: "text-purple-600 dark:text-purple-400", title: "Comprehensive Smart Notes", desc: "Gain a competitive edge with structured learning notes covering ideas, advanced vocabulary, and communication strategies." },
     { icon: Target, key: "exam", color: "text-rose-600 dark:text-rose-400", title: "Exam-Specific Vocabulary", desc: "Master the exact phrases, discourse markers, and expressions that HKDSE examiners look for." },
-    { icon: Sparkles, key: "adaptive", color: "text-pink-600 dark:text-pink-400", title: "Adaptive Difficulty", desc: "Discussions adapt to your level, ensuring you're always challenged but never overwhelmed." },
-    { icon: History, key: "history", color: "text-indigo-600 dark:text-indigo-400", title: "Practice History", desc: "Review past discussions with color-coded transcripts, audio playback, learning notes, and one-click Word export." },
-    { icon: Download, key: "export", color: "text-amber-600 dark:text-amber-400", title: "Study Your Way", desc: "Learn seamlessly in-app or download a hard copy to highlight, annotate, and study distraction-free." },
+    { icon: Sparkles, key: "adaptive", color: "text-pink-600 dark:text-pink-400", title: "Adaptive Difficulty", desc: "Practice at your level with content that adapts to ensure you're always challenged but never overwhelmed." },
+    { icon: Download, key: "export", color: "text-amber-600 dark:text-amber-400", title: "Study Your Way", desc: "Review color-coded transcripts, listen to audio playback, or download Word documents to study offline." },
   ];
 
-  const journey = [
-    { num: 1, icon: Upload, key: "upload", label: "Upload Topic" },
-    { num: 2, icon: FileText, key: "extract", label: "Extract & Analyze" },
-    { num: 3, icon: Brain, key: "generate", label: "AI Generates Discussion" },
-    { num: 4, icon: Headphones, key: "listen", label: "Listen to Discussion" },
-    { num: 5, icon: FileText, key: "transcript", label: "Read the Transcript" },
-    { num: 6, icon: BookOpen, key: "notes", label: "Review Smart Notes" },
-    { num: 7, icon: Download, key: "export", label: "Export & Study" },
+  const discussionJourney = [
+    { num: 1, icon: Upload, key: "d-upload", label: "Upload Discussion Topic" },
+    { num: 2, icon: Brain, key: "d-generate", label: "AI Generates 4-Student Discussion" },
+    { num: 3, icon: Headphones, key: "d-listen", label: "Listen to Group Interaction" },
+    { num: 4, icon: FileText, key: "d-transcript", label: "Read the Transcript" },
+    { num: 5, icon: BookOpen, key: "d-notes", label: "Review Smart Notes" },
+  ];
+
+  const responseJourney = [
+    { num: 1, icon: Upload, key: "r-upload", label: "Upload Exam Material" },
+    { num: 2, icon: MessageSquareText, key: "r-extract", label: "AI Extracts Part B Questions" },
+    { num: 3, icon: Brain, key: "r-generate", label: "AI Generates 1-Minute Response" },
+    { num: 4, icon: Headphones, key: "r-listen", label: "Listen to Your Response" },
+    { num: 5, icon: BookOpen, key: "r-notes", label: "Review Smart Notes" },
   ];
 
   const skills = [
@@ -247,6 +255,10 @@ export function LandingPage({ welcomeCredits, generationCost }: LandingPageProps
     "Persuasion",
     "Active Listening",
     "Discourse Markers",
+    "Expressing Opinions",
+    "Giving Justifications",
+    "Time Management",
+    "Organizing Ideas",
   ];
 
   return (
@@ -288,10 +300,11 @@ export function LandingPage({ welcomeCredits, generationCost }: LandingPageProps
             variants={heroItemVariants}
             className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/50"
           >
-            Don&apos;t just practice; Simulate. Transform any discussion topic into
-            a high-stakes HKDSE discussion featuring natural voices and
-            exam-specific vocabulary. Master the art of authentic interaction
-            and turn-taking with strategies modeled after real exam success.
+            Don&apos;t just practice; Simulate. Master both parts of HKDSE Paper 4 —
+            from realistic group discussions to individual response practice.
+            Transform any topic into natural-voiced conversations with
+            exam-specific vocabulary, smart study notes, and strategies modeled
+            after real exam success.
           </motion.p>
 
           <motion.div variants={heroItemVariants} className="mt-10">
@@ -312,7 +325,7 @@ export function LandingPage({ welcomeCredits, generationCost }: LandingPageProps
           >
             <Coins className="h-4 w-4 text-amber-400" />
             <span>
-              {welcomeCredits} free credits on sign up — that's {Math.floor(welcomeCredits / generationCost)} full discussions to get started!
+              {welcomeCredits} free credits — {Math.floor(welcomeCredits / generationCost)} discussions &amp; {Math.floor(welcomeCredits / responseCost)} individual responses!
             </span>
           </motion.div>
         </motion.div>
@@ -343,7 +356,7 @@ export function LandingPage({ welcomeCredits, generationCost }: LandingPageProps
               variants={sectionTitleVariants}
               className="text-center text-muted-foreground mb-12 max-w-xl mx-auto"
             >
-              Everything you need to ace HKDSE Paper 4, powered by cutting-edge AI.
+              Both parts of HKDSE Paper 4 — group discussion and individual response — powered by cutting-edge AI.
             </motion.p>
           </AnimatedSection>
 
@@ -378,7 +391,7 @@ export function LandingPage({ welcomeCredits, generationCost }: LandingPageProps
               variants={sectionTitleVariants}
               className="text-3xl sm:text-5xl font-bold tracking-tight text-center mb-4"
             >
-              Your Discussion Journey
+              Your Paper 4 Journey
             </motion.h2>
             <motion.div
               variants={sectionTitleVariants}
@@ -386,33 +399,73 @@ export function LandingPage({ welcomeCredits, generationCost }: LandingPageProps
             />
           </AnimatedSection>
 
-          <AnimatedSection
-            className="max-w-3xl mx-auto space-y-0"
-            staggerDelay={0.1}
-          >
-            {journey.map(({ num, icon: Icon, key, label }, idx) => (
-              <motion.div
-                key={key}
-                variants={cardVariants}
-                className="relative flex items-center gap-4"
-              >
-                <div className="relative flex flex-col items-center">
-                  <div className={`flex items-center justify-center w-10 h-10 rounded-full text-sm font-bold text-white shrink-0 ${idx === 0 ? "bg-gradient-to-br from-emerald-500 to-teal-500" : "bg-gradient-to-br from-slate-500 to-slate-600"}`}>
-                    {num.toString().padStart(2, "0")}
+          <div className="grid gap-8 sm:grid-cols-2 max-w-5xl mx-auto">
+            <div>
+              <AnimatedSection className="space-y-0" staggerDelay={0.08}>
+                <div className="flex items-center gap-2 mb-6">
+                  <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
+                    <Users className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                   </div>
-                  {idx < journey.length - 1 && (
-                    <div className="w-0.5 h-12 bg-gradient-to-b from-border to-transparent" />
-                  )}
+                  <h3 className="text-lg font-bold">Part A: Group Discussion</h3>
                 </div>
-                <div className={`flex items-center gap-3 ${idx < journey.length - 1 ? "pb-12" : ""}`}>
-                  <div className="p-2 rounded-lg bg-muted">
-                    <Icon className="h-4 w-4 text-muted-foreground" />
+                {discussionJourney.map(({ num, icon: Icon, key, label }, idx) => (
+                  <motion.div
+                    key={key}
+                    variants={cardVariants}
+                    className="relative flex items-center gap-4"
+                  >
+                    <div className="relative flex flex-col items-center">
+                      <div className={`flex items-center justify-center w-9 h-9 rounded-full text-xs font-bold text-white shrink-0 ${idx === 0 ? "bg-gradient-to-br from-emerald-500 to-teal-500" : "bg-gradient-to-br from-slate-500 to-slate-600"}`}>
+                        {num.toString().padStart(2, "0")}
+                      </div>
+                      {idx < discussionJourney.length - 1 && (
+                        <div className="w-0.5 h-10 bg-gradient-to-b from-border to-transparent" />
+                      )}
+                    </div>
+                    <div className={`flex items-center gap-3 ${idx < discussionJourney.length - 1 ? "pb-10" : ""}`}>
+                      <div className="p-1.5 rounded-lg bg-muted">
+                        <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                      </div>
+                      <span className="font-medium text-sm">{label}</span>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatedSection>
+            </div>
+
+            <div>
+              <AnimatedSection className="space-y-0" staggerDelay={0.08}>
+                <div className="flex items-center gap-2 mb-6">
+                  <div className="p-2 rounded-lg bg-cyan-100 dark:bg-cyan-900/30">
+                    <Mic className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
                   </div>
-                  <span className="font-medium text-base">{label}</span>
+                  <h3 className="text-lg font-bold">Part B: Individual Response</h3>
                 </div>
-              </motion.div>
-            ))}
-          </AnimatedSection>
+                {responseJourney.map(({ num, icon: Icon, key, label }, idx) => (
+                  <motion.div
+                    key={key}
+                    variants={cardVariants}
+                    className="relative flex items-center gap-4"
+                  >
+                    <div className="relative flex flex-col items-center">
+                      <div className={`flex items-center justify-center w-9 h-9 rounded-full text-xs font-bold text-white shrink-0 ${idx === 0 ? "bg-gradient-to-br from-cyan-500 to-blue-500" : "bg-gradient-to-br from-slate-500 to-slate-600"}`}>
+                        {num.toString().padStart(2, "0")}
+                      </div>
+                      {idx < responseJourney.length - 1 && (
+                        <div className="w-0.5 h-10 bg-gradient-to-b from-border to-transparent" />
+                      )}
+                    </div>
+                    <div className={`flex items-center gap-3 ${idx < responseJourney.length - 1 ? "pb-10" : ""}`}>
+                      <div className="p-1.5 rounded-lg bg-muted">
+                        <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                      </div>
+                      <span className="font-medium text-sm">{label}</span>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatedSection>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -466,7 +519,7 @@ export function LandingPage({ welcomeCredits, generationCost }: LandingPageProps
               variants={sectionTitleVariants}
               className="text-white/50 mb-8 max-w-xl mx-auto"
             >
-              Join thousands of students who are already practicing smarter, not harder.
+              Join thousands of students mastering both parts of Paper 4 — group discussions and individual responses.
             </motion.p>
             <motion.div variants={heroItemVariants}>
               <Link href="/login">

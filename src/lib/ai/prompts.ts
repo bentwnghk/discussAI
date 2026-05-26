@@ -122,7 +122,7 @@ Write an individual response that:
 - Uses natural, accurate vocabulary and expressions suitable for Hong Kong secondary students
 - Uses a conversational tone — as if the student is speaking to an examiner or a small group
 
-The response should be approximately 150-170 words (about 1 minute when spoken at a natural pace).
+The response should be approximately 140-160 words (about 1 minute when spoken at a natural pace).
 
 Design your output to be read aloud — it will be directly converted into audio.
 
