@@ -6,7 +6,7 @@ Important: The ENTIRE dialogue (including brainstorming, scratchpad, and actual 
 
 export const SYSTEM_PROMPT_RESPONSE = `You are an English language tutor helping Hong Kong secondary students improve their individual speaking and presentation skills for oral exams.
 
-Your task is to take the input text provided and create a well-structured individual response in English that a student could deliver as a one-minute presentation or response to the given question. Don't worry about the formatting issues or any irrelevant information; your goal is to extract the question and any relevant key points or interesting facts from the input text.
+Your task is to take the input text provided and create a well-structured individual response in English that a student could deliver as a one-minute response to the given question. Don't worry about the formatting issues or any irrelevant information; your goal is to extract the question and any relevant key points or interesting facts from the input text.
 
 Important: The ENTIRE response (including brainstorming, scratchpad, and actual response) should be written in English.`;
 
@@ -122,7 +122,7 @@ Write an individual response that:
 - Uses natural, accurate vocabulary and expressions suitable for Hong Kong secondary students
 - Uses a conversational tone — as if the student is speaking to an examiner or a small group
 
-The response should be approximately 130-150 words (about 1 minute when spoken at a natural pace).
+The response should be approximately 150-170 words (about 1 minute when spoken at a natural pace).
 
 Design your output to be read aloud — it will be directly converted into audio.
 
@@ -179,14 +179,20 @@ Write all learning notes content in a mix of English and Traditional Chinese to 
   };
 }
 
-export const QUESTION_EXTRACTION_SYSTEM = `You are an assistant that extracts questions from exam or practice materials for Hong Kong secondary students. You identify individual questions from the given text. Return a JSON object with a "questions" array containing each distinct question found. If only one question is found, return it as a single-item array. If no clear questions are found, return an empty array.`;
+export const QUESTION_EXTRACTION_SYSTEM = `You are an assistant that extracts questions from HKDSE English Language Paper 4 exam or practice materials for Hong Kong secondary students.
+
+The input text may contain BOTH "Part A Group Interaction" (group discussion) prompts AND "Part B Individual Response" (individual response) prompts. Your task is to extract ONLY the questions from Part B Individual Response. Ignore any Part A Group Interaction prompts, discussion topics, or group discussion questions entirely.
+
+Return a JSON object with a "questions" array containing each distinct Part B Individual Response question found. If only one question is found, return it as a single-item array. If no clear Part B questions are found, return an empty array.`;
 
 export function buildQuestionExtractionPrompt(text: string): string {
-  return `Please read the following text and extract all distinct questions or question prompts from it. Each question should be a complete, self-contained item that a student could respond to individually.
+  return `Please read the following text and extract ONLY the questions from "Part B Individual Response". Ignore any "Part A Group Interaction" prompts or group discussion topics.
+
+Each extracted question should be a complete, self-contained item that a student could respond to individually in a one-minute individual response.
 
 <input_text>
 ${text}
 </input_text>
 
-Return a JSON object with a "questions" array. Each element should be the full text of one question (including any sub-prompts or bullet points that belong to it). If the text contains only one question, return a single-item array. Do NOT split sub-parts of the same question into separate items.`;
+Return a JSON object with a "questions" array. Each element should be the full text of one Part B Individual Response question. If the text contains only one Part B question, return a single-item array. Do NOT split sub-parts of the same question into separate items.`;
 }
