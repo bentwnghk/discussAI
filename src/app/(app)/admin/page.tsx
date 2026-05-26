@@ -443,8 +443,7 @@ export default function AdminDashboardPage() {
                           <td className="p-3 max-w-[300px]">
                             <button
                               type="button"
-                              className="truncate text-left hover:underline cursor-pointer"
-                              title={d.title}
+                              className="text-left hover:underline cursor-pointer break-words"
                               onClick={() => setDetailId(d.id)}
                             >
                               {d.title}
