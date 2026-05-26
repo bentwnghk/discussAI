@@ -29,7 +29,9 @@ import {
   ShieldCheck,
   ShoppingCart,
   LogIn,
+  X,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/admin-pagination";
 
 interface DiscussionRow {
@@ -152,13 +154,7 @@ export default function AdminDashboardPage() {
     null
   );
   const [detailLoading, setDetailLoading] = useState(false);
-  const [nowMs, setNowMs] = useState(Date.now);
   const initialLoad = useRef(true);
-
-  useEffect(() => {
-    const timer = setInterval(() => setNowMs(Date.now()), 60_000);
-    return () => clearInterval(timer);
-  }, []);
 
   const toggleDSort = useCallback(
     (key: string) => {
@@ -268,22 +264,13 @@ export default function AdminDashboardPage() {
     };
   }, [dSortBy, dSortDesc, pSortBy, pSortDesc, sSortBy, sSortDesc, search]);
 
-  const openDetail = useCallback((id: string) => {
-    setDetailId(id);
-    setDetailLoading(true);
-    setDetailSession(null);
-  }, []);
-
-  const closeDetail = useCallback(() => {
-    setDetailId(null);
-    setDetailSession(null);
-  }, []);
-
   useEffect(() => {
     if (!detailId) {
+      setDetailSession(null);
       return;
     }
     let cancelled = false;
+    setDetailLoading(true);
     async function loadDetail() {
       try {
         const res = await fetch(`/api/admin/discussions/${detailId}`);
@@ -457,7 +444,7 @@ export default function AdminDashboardPage() {
                             <button
                               type="button"
                               className="text-left hover:underline cursor-pointer break-words"
-                              onClick={() => openDetail(d.id)}
+                              onClick={() => setDetailId(d.id)}
                             >
                               {d.title}
                             </button>
@@ -705,7 +692,7 @@ export default function AdminDashboardPage() {
       <Dialog
         open={!!detailId}
         onOpenChange={(open) => {
-          if (!open) closeDetail();
+          if (!open) setDetailId(null);
         }}
       >
         <DialogContent className="sm:max-w-3xl md:max-w-4xl lg:max-w-5xl max-h-[90vh] overflow-y-auto">
@@ -745,12 +732,12 @@ export default function AdminDashboardPage() {
               )}
               {detailSession.audioUrl &&
               detailSession.audioExpiresAt &&
-              new Date(detailSession.audioExpiresAt).getTime() > nowMs ? (
+              new Date(detailSession.audioExpiresAt).getTime() > Date.now() ? (
                 <AudioPlayer
                   src={detailSession.audioUrl}
                   expiryDays={
                     (new Date(detailSession.audioExpiresAt).getTime() -
-                      nowMs) /
+                      Date.now()) /
                     (24 * 60 * 60 * 1000)
                   }
                   accessCode={detailSession.accessCode}

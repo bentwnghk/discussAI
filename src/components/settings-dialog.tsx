@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -23,13 +23,9 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   const { apiKey, setApiKey } = useApiKey();
   const [draft, setDraft] = useState(apiKey);
 
-  const handleOpenChange = useCallback(
-    (nextOpen: boolean) => {
-      if (nextOpen) setDraft(apiKey);
-      onOpenChange(nextOpen);
-    },
-    [apiKey, onOpenChange]
-  );
+  useEffect(() => {
+    if (open) setDraft(apiKey);
+  }, [open, apiKey]);
 
   const handleSave = () => {
     setApiKey(draft);
@@ -37,7 +33,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Prefer to use your own API key?</DialogTitle>
