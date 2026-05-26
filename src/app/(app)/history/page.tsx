@@ -15,7 +15,6 @@ import {
 import { Input } from "@/components/ui/input";
 import {
   Plus,
-  Play,
   Eye,
   Pencil,
   Trash2,
@@ -23,6 +22,7 @@ import {
   Check,
   Coins,
   MessageSquareText,
+  Mic,
   History,
   ChevronLeft,
   ChevronRight,
@@ -35,10 +35,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { SessionType } from "@/types";
 
 interface HistoryItem {
   id: string;
   title: string;
+  sessionType: SessionType;
   dialogueMode: string;
   inputMethod: string;
   charactersCount: number;
@@ -47,9 +49,12 @@ interface HistoryItem {
   createdAt: string;
 }
 
+type FilterType = "all" | "discussion" | "response";
+
 export default function HistoryPage() {
   const [items, setItems] = useState<HistoryItem[]>([]);
   const [generationCost, setGenerationCost] = useState(10);
+  const [responseCost, setResponseCost] = useState(2);
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [renameId, setRenameId] = useState<string | null>(null);
@@ -57,14 +62,17 @@ export default function HistoryPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
+  const [filterType, setFilterType] = useState<FilterType>("all");
 
   const filteredItems = items.filter((item) => {
+    if (filterType !== "all" && item.sessionType !== filterType) return false;
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
     return (
       item.title.toLowerCase().includes(q) ||
       item.dialogueMode.toLowerCase().includes(q) ||
       item.inputMethod.toLowerCase().includes(q) ||
+      item.sessionType.toLowerCase().includes(q) ||
       new Date(item.createdAt)
         .toLocaleString("en-HK", { timeZone: "Asia/Hong_Kong" })
         .toLowerCase()
@@ -88,6 +96,7 @@ export default function HistoryPage() {
           const data = await res.json();
           setItems(data.sessions || data);
           if (data.generationCost) setGenerationCost(data.generationCost);
+          if (data.responseCost) setResponseCost(data.responseCost);
         }
       } catch {
         // silently fail
@@ -151,24 +160,68 @@ export default function HistoryPage() {
             {items.length}
           </Badge>
         </div>
-        <Link href="/discuss">
-          <Button variant="outline" size="sm">
-            <Plus className="mr-2 h-4 w-4" />
-            New Discussion
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          <Link href="/discuss">
+            <Button variant="outline" size="sm">
+              <Plus className="mr-2 h-4 w-4" />
+              Discussion
+            </Button>
+          </Link>
+          <Link href="/respond">
+            <Button variant="outline" size="sm">
+              <Plus className="mr-2 h-4 w-4" />
+              Response
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      <div className="flex gap-2 mb-4">
+        <Button
+          variant={filterType === "all" ? "default" : "outline"}
+          size="sm"
+          onClick={() => { setFilterType("all"); setCurrentPage(1); }}
+        >
+          All
+        </Button>
+        <Button
+          variant={filterType === "discussion" ? "default" : "outline"}
+          size="sm"
+          onClick={() => { setFilterType("discussion"); setCurrentPage(1); }}
+          className="gap-1"
+        >
+          <MessageSquareText className="h-3 w-3" />
+          Discussions
+        </Button>
+        <Button
+          variant={filterType === "response" ? "default" : "outline"}
+          size="sm"
+          onClick={() => { setFilterType("response"); setCurrentPage(1); }}
+          className="gap-1"
+        >
+          <Mic className="h-3 w-3" />
+          Responses
+        </Button>
       </div>
 
       {items.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground">No discussions yet.</p>
-            <Link href="/discuss">
-              <Button className="mt-4">
-                <Play className="mr-2 h-4 w-4" />
-                Start Practicing
-              </Button>
-            </Link>
+            <p className="text-muted-foreground">No practice sessions yet.</p>
+            <div className="flex justify-center gap-3 mt-4">
+              <Link href="/discuss">
+                <Button>
+                  <MessageSquareText className="mr-2 h-4 w-4" />
+                  Start a Discussion
+                </Button>
+              </Link>
+              <Link href="/respond">
+                <Button variant="outline">
+                  <Mic className="mr-2 h-4 w-4" />
+                  Start a Response
+                </Button>
+              </Link>
+            </div>
           </CardContent>
         </Card>
       ) : (
@@ -191,7 +244,7 @@ export default function HistoryPage() {
             <Card>
               <CardContent className="py-8 text-center">
                 <p className="text-muted-foreground">
-                  No discussions match &quot;{searchQuery}&quot;
+                  No sessions match &quot;{searchQuery}&quot;
                 </p>
                 <Button
                   variant="outline"
@@ -209,7 +262,20 @@ export default function HistoryPage() {
                 <Card key={item.id}>
                   <CardContent className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-4 gap-2">
                     <div className="space-y-1">
-                      <p className="font-medium">{item.title}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium">{item.title}</p>
+                        {item.sessionType === "response" ? (
+                          <Badge variant="secondary" className="gap-1 text-xs">
+                            <Mic className="h-3 w-3" />
+                            Response
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="gap-1 text-xs">
+                            <MessageSquareText className="h-3 w-3" />
+                            Discussion
+                          </Badge>
+                        )}
+                      </div>
                       <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                         <span>
                           {new Date(item.createdAt).toLocaleString("en-HK", {
@@ -220,7 +286,7 @@ export default function HistoryPage() {
                         {!item.usedOwnApiKey && (
                           <Badge variant="outline" className="gap-1">
                             <Coins className="h-3 w-3" />
-                            {generationCost}
+                            {item.sessionType === "response" ? responseCost : generationCost}
                           </Badge>
                         )}
                         {item.usedOwnApiKey && (
@@ -316,10 +382,10 @@ export default function HistoryPage() {
       <Dialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Discussion</DialogTitle>
+            <DialogTitle>Delete Session</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            Are you sure you want to delete this discussion? This action cannot
+            Are you sure you want to delete this session? This action cannot
             be undone.
           </p>
           <DialogFooter>
@@ -338,7 +404,7 @@ export default function HistoryPage() {
       <Dialog open={!!renameId} onOpenChange={() => setRenameId(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Rename Discussion</DialogTitle>
+            <DialogTitle>Rename Session</DialogTitle>
           </DialogHeader>
           <Input
             value={renameTitle}

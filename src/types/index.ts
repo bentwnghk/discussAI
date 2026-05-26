@@ -10,6 +10,7 @@ export const SPEAKER_COLORS: Record<string, string> = {
   "Candidate B": "bg-yellow-50 dark:bg-yellow-950 border-l-yellow-400",
   "Candidate C": "bg-green-50 dark:bg-green-950 border-l-green-400",
   "Candidate D": "bg-pink-50 dark:bg-pink-950 border-l-pink-400",
+  "Speaker": "bg-indigo-50 dark:bg-indigo-950 border-l-indigo-400",
 };
 
 export const SPEAKER_COLORS_HEX: Record<string, string> = {
@@ -23,10 +24,12 @@ export type Speaker = "Candidate A" | "Candidate B" | "Candidate C" | "Candidate
 
 export type DialogueMode = "Normal" | "Deeper";
 export type InputMethod = "Upload Files" | "Enter Topic";
+export type SessionType = "discussion" | "response";
+export type VoiceOption = "nova" | "alloy" | "fable" | "echo";
 
 export interface DialogueItem {
   text: string;
-  speaker: Speaker;
+  speaker: Speaker | "Speaker";
 }
 
 export interface LearningNotes {
@@ -45,6 +48,7 @@ export interface DiscussionSession {
   id: string;
   userId: string;
   title: string;
+  sessionType: SessionType;
   dialogueMode: DialogueMode;
   inputMethod: InputMethod;
   inputText: string | null;
@@ -76,6 +80,24 @@ export interface GenerateResponse {
   generationId: string | null;
   usedOwnApiKey: boolean;
   creditsConsumed: number;
+}
+
+export interface RespondResponse {
+  response: DialogueItem[];
+  learningNotes: LearningNotes;
+  scratchpad: string;
+  charactersCount: number;
+  ttsCostHKD: number;
+  title: string;
+  extractedText: string;
+  generationId: string | null;
+  usedOwnApiKey: boolean;
+  creditsConsumed: number;
+}
+
+export interface PrepareResponse {
+  questions: string[] | null;
+  extractedText: string;
 }
 
 export interface TTSRequest {

@@ -4,9 +4,14 @@ import { eq, sql, and } from "drizzle-orm";
 
 const WELCOME_CREDITS = parseInt(process.env.WELCOME_CREDITS || "20", 10);
 const GENERATION_COST = parseInt(process.env.GENERATION_COST || "10", 10);
+const RESPONSE_COST = parseInt(process.env.RESPONSE_COST || "2", 10);
 
 export function getGenerationCost() {
   return GENERATION_COST;
+}
+
+export function getResponseCost() {
+  return RESPONSE_COST;
 }
 
 export function getWelcomeCredits() {

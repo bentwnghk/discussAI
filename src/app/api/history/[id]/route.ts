@@ -5,7 +5,7 @@ import { discussionSessions } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { unlink } from "fs/promises";
 import path from "path";
-import { getGenerationCost } from "@/lib/db/credits";
+import { getGenerationCost, getResponseCost } from "@/lib/db/credits";
 import { AUDIO_TTL_MS } from "@/lib/audio-ttl";
 
 const AUDIO_DIR = path.join(process.cwd(), "tmp", "audio");
@@ -41,7 +41,7 @@ export async function GET(
 
     return NextResponse.json({
       ...result,
-      generationCost: getGenerationCost(),
+      generationCost: result.sessionType === "response" ? getResponseCost() : getGenerationCost(),
       audioExpiresAt,
     });
   } catch (error) {

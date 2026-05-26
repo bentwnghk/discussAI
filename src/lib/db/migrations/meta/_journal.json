@@ -15,6 +15,13 @@
       "when": 1778857583987,
       "tag": "0001_burly_flatman",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1779762978321,
+      "tag": "0002_peaceful_black_tom",
+      "breakpoints": true
     }
   ]
 }

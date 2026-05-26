@@ -57,8 +57,10 @@ function textParagraph(text: string, indent = 0): Paragraph {
   });
 }
 
-function buildTranscriptParagraphs(items: DialogueItem[], qrBuffer?: Buffer | null, accessCode?: string | null): (Paragraph | Table)[] {
+function buildTranscriptParagraphs(items: DialogueItem[], qrBuffer?: Buffer | null, accessCode?: string | null, sessionType?: string): (Paragraph | Table)[] {
   const elements: (Paragraph | Table)[] = [];
+
+  const transcriptHeading = sessionType === "response" ? "📄 Transcript 逐字稿" : "📄 Transcript 逐字稿";
 
   if (qrBuffer) {
     elements.push(
@@ -69,7 +71,7 @@ function buildTranscriptParagraphs(items: DialogueItem[], qrBuffer?: Buffer | nu
               new TableCell({
                 children: [
                   new Paragraph({
-                    text: "📄 Transcript 逐字稿",
+                    text: transcriptHeading,
                     heading: HeadingLevel.HEADING_1,
                   }),
                 ],
@@ -137,7 +139,7 @@ function buildTranscriptParagraphs(items: DialogueItem[], qrBuffer?: Buffer | nu
   } else {
     elements.push(
       new Paragraph({
-        text: "📄 Transcript 逐字稿",
+        text: transcriptHeading,
         heading: HeadingLevel.HEADING_1,
       })
     );
@@ -146,57 +148,66 @@ function buildTranscriptParagraphs(items: DialogueItem[], qrBuffer?: Buffer | nu
   elements.push(new Paragraph({ text: "" }));
 
   for (const item of items) {
-    const bgColor =
-      SPEAKER_BG_COLORS[item.speaker as Speaker] || "FFFFFF";
-    const borderColor =
-      SPEAKER_BORDER_COLORS[item.speaker as Speaker] || "000000";
+    if (sessionType === "response") {
+      elements.push(
+        new Paragraph({
+          children: [new TextRun({ text: item.text, size: 22 })],
+          spacing: { after: 160 },
+        })
+      );
+    } else {
+      const bgColor =
+        SPEAKER_BG_COLORS[item.speaker as Speaker] || "FFFFFF";
+      const borderColor =
+        SPEAKER_BORDER_COLORS[item.speaker as Speaker] || "000000";
 
-    elements.push(
-      new Table({
-        rows: [
-          new TableRow({
-            children: [
-              new TableCell({
-                children: [
-                  new Paragraph({
-                    children: [
-                      new TextRun({
-                        text: `${item.speaker}:`,
-                        bold: true,
-                        size: 22,
-                      }),
-                    ],
-                    spacing: { after: 60 },
-                  }),
-                  new Paragraph({
-                    children: [new TextRun({ text: item.text, size: 22 })],
-                    spacing: { after: 0 },
-                  }),
-                ],
-                shading: { type: ShadingType.CLEAR, fill: bgColor },
-                borders: {
-                  left: {
-                    style: BorderStyle.SINGLE,
-                    size: 24,
-                    color: borderColor,
+      elements.push(
+        new Table({
+          rows: [
+            new TableRow({
+              children: [
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [
+                        new TextRun({
+                          text: `${item.speaker}:`,
+                          bold: true,
+                          size: 22,
+                        }),
+                      ],
+                      spacing: { after: 60 },
+                    }),
+                    new Paragraph({
+                      children: [new TextRun({ text: item.text, size: 22 })],
+                      spacing: { after: 0 },
+                    }),
+                  ],
+                  shading: { type: ShadingType.CLEAR, fill: bgColor },
+                  borders: {
+                    left: {
+                      style: BorderStyle.SINGLE,
+                      size: 24,
+                      color: borderColor,
+                    },
+                    top: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+                    bottom: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+                    right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
                   },
-                  top: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
-                  bottom: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
-                  right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
-                },
-                margins: {
-                  top: 120,
-                  bottom: 120,
-                  left: 140,
-                  right: 140,
-                },
-              }),
-            ],
-          }),
-        ],
-        width: { size: 100, type: WidthType.PERCENTAGE },
-      })
-    );
+                  margins: {
+                    top: 120,
+                    bottom: 120,
+                    left: 140,
+                    right: 140,
+                  },
+                }),
+              ],
+            }),
+          ],
+          width: { size: 100, type: WidthType.PERCENTAGE },
+        })
+      );
+    }
 
     elements.push(
       new Paragraph({ text: "", spacing: { after: 100 } })
@@ -631,7 +642,8 @@ export async function generateDocx(
   title: string = "Group Discussion Notes",
   taskText?: string | null,
   accessCode?: string | null,
-  appOrigin?: string
+  appOrigin?: string,
+  sessionType?: string
 ): Promise<Buffer> {
   const baseUrl = appOrigin || "";
   const listenUrl = accessCode ? `${baseUrl}/listen` : "";
@@ -756,7 +768,7 @@ export async function generateDocx(
             children: [],
             pageBreakBefore: true,
           }),
-          ...buildTranscriptParagraphs(items, qrBuffer, accessCode),
+          ...buildTranscriptParagraphs(items, qrBuffer, accessCode, sessionType),
           new Paragraph({
             children: [],
             pageBreakBefore: true,
@@ -767,7 +779,7 @@ export async function generateDocx(
           }),
           new Paragraph({ text: "" }),
           new Paragraph({
-            text: "💡 Ideas 討論要點",
+            text: sessionType === "response" ? "💡 Ideas 要點" : "💡 Ideas 討論要點",
             heading: HeadingLevel.HEADING_2,
           }),
           ...buildSectionContent(notes.ideas),
@@ -779,7 +791,7 @@ export async function generateDocx(
           ...buildSectionContent(notes.language),
           new Paragraph({ text: "" }),
           new Paragraph({
-            text: "💬 Communication Strategies 溝通策略",
+            text: sessionType === "response" ? "💬 Communication Strategies 溝通策略" : "💬 Communication Strategies 溝通策略",
             heading: HeadingLevel.HEADING_2,
           }),
           ...buildSectionContent(notes.communication_strategies),

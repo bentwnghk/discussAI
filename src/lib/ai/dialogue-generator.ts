@@ -1,7 +1,7 @@
 import { generateObject } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
-import { dialogueSchema } from "./schemas";
-import { buildDialoguePrompt } from "./prompts";
+import { dialogueSchema, individualResponseSchema, questionExtractionSchema } from "./schemas";
+import { buildDialoguePrompt, buildIndividualResponsePrompt, QUESTION_EXTRACTION_SYSTEM, buildQuestionExtractionPrompt } from "./prompts";
 import type { Dialogue, DialogueMode } from "@/types";
 
 function getOpenAIClient(apiKey?: string) {
@@ -11,18 +11,24 @@ function getOpenAIClient(apiKey?: string) {
   });
 }
 
+function getModelId(mode: DialogueMode) {
+  return mode === "Deeper"
+    ? process.env.OPENAI_MODEL_DEEP || "gpt-4.1"
+    : process.env.OPENAI_MODEL_NORMAL || "gpt-4.1-mini";
+}
+
+function isReasoningModel(modelId: string) {
+  return /o[1-4]|gpt-5/i.test(modelId);
+}
+
 export async function generateDialogue(
   text: string,
   mode: DialogueMode,
   apiKey?: string
 ): Promise<Dialogue> {
   const openai = getOpenAIClient(apiKey);
-  const modelId =
-    mode === "Deeper"
-      ? process.env.OPENAI_MODEL_DEEP || "gpt-4.1"
-      : process.env.OPENAI_MODEL_NORMAL || "gpt-4.1-mini";
-
-  const isReasoning = /o[1-4]|gpt-5/i.test(modelId);
+  const modelId = getModelId(mode);
+  const isReasoning = isReasoningModel(modelId);
 
   const { system, user } = buildDialoguePrompt(text);
 
@@ -37,4 +43,48 @@ export async function generateDialogue(
   });
 
   return object as Dialogue;
+}
+
+export async function generateIndividualResponse(
+  text: string,
+  mode: DialogueMode,
+  apiKey?: string
+) {
+  const openai = getOpenAIClient(apiKey);
+  const modelId = getModelId(mode);
+  const isReasoning = isReasoningModel(modelId);
+
+  const { system, user } = buildIndividualResponsePrompt(text);
+
+  const { object } = await generateObject({
+    model: openai(modelId),
+    schema: individualResponseSchema,
+    system,
+    prompt: user,
+    ...(isReasoning ? {} : { temperature: 0.5 }),
+    maxOutputTokens: isReasoning ? 8000 : 4000,
+    maxRetries: 2,
+  });
+
+  return object;
+}
+
+export async function extractQuestions(
+  text: string,
+  apiKey?: string
+): Promise<string[]> {
+  const openai = getOpenAIClient(apiKey);
+  const modelId = process.env.OPENAI_MODEL_NORMAL || "gpt-4.1-mini";
+
+  const { object } = await generateObject({
+    model: openai(modelId),
+    schema: questionExtractionSchema,
+    system: QUESTION_EXTRACTION_SYSTEM,
+    prompt: buildQuestionExtractionPrompt(text),
+    temperature: 0,
+    maxOutputTokens: 2000,
+    maxRetries: 2,
+  });
+
+  return object.questions;
 }

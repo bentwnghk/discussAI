@@ -62,6 +62,7 @@ export const discussionSessions = pgTable("discussion_sessions", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   title: varchar("title", { length: 500 }).notNull(),
+  sessionType: varchar("sessionType", { length: 20 }).notNull().default("discussion"),
   dialogueMode: varchar("dialogueMode", { length: 20 }).notNull(),
   inputMethod: varchar("inputMethod", { length: 20 }).notNull(),
   inputText: text("inputText"),

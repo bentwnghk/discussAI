@@ -10,14 +10,16 @@ interface TranscriptDisplayProps {
 }
 
 export function TranscriptDisplay({ items }: TranscriptDisplayProps) {
+  const isSingleSpeaker = items.length > 0 && items[0].speaker === "Speaker";
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>📄 Transcript 逐字稿</CardTitle>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-[400px] rounded-md">
-          <div className="space-y-3 pr-4">
+        <ScrollArea className={isSingleSpeaker ? undefined : "h-[400px] rounded-md"}>
+          <div className={`space-y-3 pr-4 ${isSingleSpeaker ? "" : ""}`}>
             {items.map((item, index) => (
               <div
                 key={index}
@@ -26,7 +28,9 @@ export function TranscriptDisplay({ items }: TranscriptDisplayProps) {
                   ""
                 }`}
               >
-                <p className="font-semibold text-sm">{item.speaker}:</p>
+                {!isSingleSpeaker && (
+                  <p className="font-semibold text-sm">{item.speaker}:</p>
+                )}
                 <p className="text-sm mt-1">{item.text}</p>
               </div>
             ))}

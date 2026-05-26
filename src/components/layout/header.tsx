@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SettingsDialog } from "@/components/settings-dialog";
-import { Settings, LogOut, MessageSquareText, History, LogIn, Coins, ShieldCheck } from "lucide-react";
+import { Settings, LogOut, MessageSquareText, Mic, History, LogIn, Coins, ShieldCheck } from "lucide-react";
 import { useCredits } from "@/hooks/use-credits";
 
 export function Header() {
@@ -38,6 +38,12 @@ export function Header() {
                 <Button variant="ghost" size="sm" className="font-heading">
                   <MessageSquareText className="mr-2 h-4 w-4" />
                   Discuss
+                </Button>
+              </Link>
+              <Link href="/respond">
+                <Button variant="ghost" size="sm" className="font-heading">
+                  <Mic className="mr-2 h-4 w-4" />
+                  Respond
                 </Button>
               </Link>
               <Link href="/history">
@@ -79,6 +85,12 @@ export function Header() {
                   <Link href="/discuss" className="flex items-center w-full">
                     <MessageSquareText className="mr-2 h-4 w-4" />
                     Discuss
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="md:hidden font-heading">
+                  <Link href="/respond" className="flex items-center w-full">
+                    <Mic className="mr-2 h-4 w-4" />
+                    Respond
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem className="md:hidden font-heading">

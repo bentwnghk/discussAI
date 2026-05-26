@@ -9,12 +9,13 @@ import { Separator } from "@/components/ui/separator";
 import { TranscriptDisplay } from "@/components/discuss/transcript-display";
 import { LearningNotes } from "@/components/discuss/learning-notes";
 import { AudioPlayer } from "@/components/discuss/audio-player";
-import type { DialogueItem, LearningNotes as LearningNotesType } from "@/types";
+import type { DialogueItem, LearningNotes as LearningNotesType, SessionType } from "@/types";
 import { FileText, ArrowLeft } from "lucide-react";
 
 interface SessionData {
   id: string;
   title: string;
+  sessionType: SessionType;
   dialogueMode: string;
   inputMethod: string;
   inputText: string | null;
@@ -79,6 +80,7 @@ export default function SessionDetailPage() {
           title: session.title,
           extractedText: session.inputText,
           accessCode: session.accessCode,
+          sessionType: session.sessionType,
         }),
       });
       if (!res.ok) throw new Error("Export failed.");

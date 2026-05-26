@@ -11,12 +11,13 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { transcript, learningNotes, title, extractedText, accessCode } = body as {
+    const { transcript, learningNotes, title, extractedText, accessCode, sessionType } = body as {
       transcript: DialogueItem[];
       learningNotes: LearningNotes;
       title?: string;
       extractedText?: string;
       accessCode?: string;
+      sessionType?: string;
     };
 
     if (!transcript || !learningNotes) {
@@ -30,7 +31,7 @@ export async function POST(req: NextRequest) {
     const proto = req.headers.get("x-forwarded-proto") || "https";
     const origin = host ? `${proto}://${host}` : process.env.NEXTAUTH_URL || "";
 
-    const buffer = await generateDocx(transcript, learningNotes, title, extractedText, accessCode, origin);
+    const buffer = await generateDocx(transcript, learningNotes, title, extractedText, accessCode, origin, sessionType);
 
     const timestamp = new Date().toLocaleString("en-HK", { timeZone: "Asia/Hong_Kong" }).replace(/[/:, ]/g, "-");
     const filename = `Mr.NG-DiscussAI-notes-${timestamp}.docx`;

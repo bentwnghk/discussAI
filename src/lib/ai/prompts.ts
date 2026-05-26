@@ -4,6 +4,12 @@ Your task is to take the input text provided and create a realistic group discus
 
 Important: The ENTIRE dialogue (including brainstorming, scratchpad, and actual dialogue) should be written in English.`;
 
+export const SYSTEM_PROMPT_RESPONSE = `You are an English language tutor helping Hong Kong secondary students improve their individual speaking and presentation skills for oral exams.
+
+Your task is to take the input text provided and create a well-structured individual response in English that a student could deliver as a one-minute presentation or response to the given question. Don't worry about the formatting issues or any irrelevant information; your goal is to extract the question and any relevant key points or interesting facts from the input text.
+
+Important: The ENTIRE response (including brainstorming, scratchpad, and actual response) should be written in English.`;
+
 export function buildDialoguePrompt(text: string): { system: string; user: string } {
   const user = `Here is the input text you will be working with:
 
@@ -94,4 +100,93 @@ Write all learning notes content in a mix of English and Traditional Chinese to 
     system: SYSTEM_PROMPT_BASE,
     user: `${user}\n\n${learningNotesPrompt}`,
   };
+}
+
+export function buildIndividualResponsePrompt(text: string): { system: string; user: string } {
+  const user = `Here is the input text you will be working with:
+
+<input_text>
+${text}
+</input_text>
+
+First, carefully read through the input text and identify the question being asked, as well as any relevant key points, interesting facts, or background information from the text.
+
+Now brainstorm ideas and outline your individual response. Think about how to structure a clear, engaging one-minute response that directly addresses the question.
+
+Write an individual response that:
+- Directly answers the question in a clear, organized manner
+- Uses a natural opening to introduce the topic
+- Presents 2-3 well-developed main points with supporting details or examples
+- Includes a brief, memorable closing or summary
+- Is engaging and informative
+- Uses natural, accurate vocabulary and expressions suitable for Hong Kong secondary students
+- Uses a conversational tone — as if the student is speaking to an examiner or a small group
+
+The response should be approximately 130-150 words (about 1 minute when spoken at a natural pace).
+
+Design your output to be read aloud — it will be directly converted into audio.
+
+Use 'Speaker' as the speaker identifier for all lines. Ensure the output strictly adheres to the required format: a list of objects, each with 'text' and 'speaker' fields.
+
+Split the response into 3-5 natural speaking segments (paragraphs or logical pauses), each as a separate item in the array.`;
+
+  const learningNotesPrompt = `Now create comprehensive learning notes for Hong Kong secondary students based on the individual response you just generated. The learning notes should have three sections:
+
+**1. Ideas Section:**
+Create a structured outline showing the main ideas covered in the response. Format this as HTML with proper structure:
+- Use <strong> tags to bold main points or key topics
+- Use <em> tags to italicize important concepts or emphasis
+- Use <br><br> for line breaks between major points
+- Use bullet points (•) or numbered lists with <br> after each item
+- Create clear hierarchy with indentation using &nbsp;&nbsp;&nbsp;&nbsp; for sub-points
+- Include Traditional Chinese translations for all major points and sub-points
+
+**2. Language Section:**
+Identify 8-12 useful vocabulary words and phrases from the response. For each item:
+- Provide the English word/phrase
+- Give the Traditional Chinese translation (繁體中文)
+- Show how it was used in the response with a brief example
+
+Format this as an HTML table with proper structure:
+<table>
+<tr><th>English</th><th>中文</th><th>Usage Example</th></tr>
+<tr><td><strong>word/phrase</strong></td><td>中文翻譯</td><td>Example sentence from response</td>
+</table>
+
+**3. Communication Strategies Section:**
+List and explain 4-6 presentation and speaking strategies that were demonstrated in the response. Format this as HTML with proper structure:
+- Use <strong> tags to bold strategy names
+- Use <em> tags to italicize example phrases from the response
+- Use <br><br> for line breaks between different strategies
+- Use <br> after each example phrase
+- Include Traditional Chinese explanations
+
+Strategies to include:
+- Opening and introducing the topic (開場及引入主題)
+- Organizing ideas clearly (清晰組織想法)
+- Using transitions between points (使用過渡語連接論點)
+- Providing supporting examples (提供支持性例子)
+- Engaging the audience (吸引聽眾)
+- Concluding effectively (有效總結)
+- Using persuasive language (使用具說服力的語言)
+- Expressing opinions confidently (自信地表達意見)
+
+Write all learning notes content in a mix of English and Traditional Chinese to facilitate Hong Kong students' learning.`;
+
+  return {
+    system: SYSTEM_PROMPT_RESPONSE,
+    user: `${user}\n\n${learningNotesPrompt}`,
+  };
+}
+
+export const QUESTION_EXTRACTION_SYSTEM = `You are an assistant that extracts questions from exam or practice materials for Hong Kong secondary students. You identify individual questions from the given text. Return a JSON object with a "questions" array containing each distinct question found. If only one question is found, return it as a single-item array. If no clear questions are found, return an empty array.`;
+
+export function buildQuestionExtractionPrompt(text: string): string {
+  return `Please read the following text and extract all distinct questions or question prompts from it. Each question should be a complete, self-contained item that a student could respond to individually.
+
+<input_text>
+${text}
+</input_text>
+
+Return a JSON object with a "questions" array. Each element should be the full text of one question (including any sub-prompts or bullet points that belong to it). If the text contains only one question, return a single-item array. Do NOT split sub-parts of the same question into separate items.`;
 }
