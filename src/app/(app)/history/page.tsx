@@ -157,7 +157,11 @@ export default function HistoryPage() {
           <h1 className="text-2xl font-bold">Practice History</h1>
           <Badge variant="secondary" className="gap-1">
             <MessageSquareText className="h-3 w-3" />
-            {items.length}
+            {items.filter((i) => i.sessionType !== "response").length}
+          </Badge>
+          <Badge variant="secondary" className="gap-1">
+            <Mic className="h-3 w-3" />
+            {items.filter((i) => i.sessionType === "response").length}
           </Badge>
         </div>
         <div className="flex gap-2">
