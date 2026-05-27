@@ -190,6 +190,9 @@ export default function CreditsPage() {
                     <Users className="h-3.5 w-3.5" />
                     {discussions} group discussions
                   </span>
+                  <span className="flex items-center justify-center text-xs font-medium uppercase tracking-wider">
+                    or
+                  </span>
                   <span className="flex items-center justify-center gap-1.5">
                     <User className="h-3.5 w-3.5" />
                     {responses} individual responses
