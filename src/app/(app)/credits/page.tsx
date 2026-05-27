@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Coins, CheckCircle, XCircle, Loader2, Star, ShoppingCart, KeyRound, Zap, Package } from "lucide-react";
+import { Coins, CheckCircle, XCircle, Loader2, Star, ShoppingCart, KeyRound, Zap, Package, Users, User } from "lucide-react";
 import { SettingsDialog } from "@/components/settings-dialog";
 
 interface PlanConfig {
@@ -39,10 +39,10 @@ export default function CreditsPage() {
   const { balance, refreshBalance } = useCredits();
   const [plans, setPlans] = useState<PlanConfig[]>([]);
   const [generationCost, setGenerationCost] = useState(10);
+  const [responseCost, setResponseCost] = useState(2);
   const [loading, setLoading] = useState<string | null>(null);
   const [purchases, setPurchases] = useState<PurchaseRecord[]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
-
   const isSuccess = searchParams.get("success") === "true";
   const isCanceled = searchParams.get("canceled") === "true";
 
@@ -62,6 +62,7 @@ export default function CreditsPage() {
       .then((data) => {
         setPlans(data.plans || []);
         if (data.generationCost) setGenerationCost(data.generationCost);
+        if (data.responseCost) setResponseCost(data.responseCost);
       })
       .catch(() => {});
   }, []);
@@ -137,6 +138,7 @@ export default function CreditsPage() {
       <div className="grid gap-6 md:grid-cols-2 mb-8 pt-4">
         {plans.map((plan) => {
           const discussions = Math.floor(plan.credits / generationCost);
+          const responses = Math.floor(plan.credits / responseCost);
           const starterPlan = plans.find((p) => !p.highlight);
           const savedPct = starterPlan
             ? Math.round(
@@ -183,8 +185,15 @@ export default function CreditsPage() {
                     HK${plan.priceHKD}
                   </span>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  {discussions} discussions (~HK${(plan.priceHKD / discussions).toFixed(1)} each)
+                <p className="text-sm text-muted-foreground space-y-1">
+                  <span className="flex items-center justify-center gap-1.5">
+                    <Users className="h-3.5 w-3.5" />
+                    {discussions} group discussions
+                  </span>
+                  <span className="flex items-center justify-center gap-1.5">
+                    <User className="h-3.5 w-3.5" />
+                    {responses} individual responses
+                  </span>
                 </p>
                 {plan.highlight && savedPct > 0 && (
                   <p className="text-sm font-medium text-primary">
