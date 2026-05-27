@@ -10,6 +10,7 @@ import {
   Rocket,
   Coins,
   Users,
+  User,
   Headphones,
   Brain,
   Sparkles,
@@ -18,7 +19,6 @@ import {
   Download,
   Volume2,
   Target,
-  Mic,
   MessageSquareText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -221,7 +221,7 @@ interface LandingPageProps {
 export function LandingPage({ welcomeCredits, generationCost, responseCost }: LandingPageProps) {
   const features = [
     { icon: Users, key: "group", color: "text-emerald-600 dark:text-emerald-400", title: "Group Discussion (Part A)", desc: "Engage in realistic 4-student interactions featuring authentic voices, turn-taking, and strategies modeled after HKDSE Paper 4 Part A." },
-    { icon: Mic, key: "respond", color: "text-cyan-600 dark:text-cyan-400", title: "Individual Response (Part B)", desc: "Practice 1-minute individual responses to exam-style questions with natural speech, targeted feedback, and exam-appropriate language." },
+    { icon: User, key: "respond", color: "text-cyan-600 dark:text-cyan-400", title: "Individual Response (Part B)", desc: "Practice 1-minute individual responses to exam-style questions with natural speech, targeted feedback, and exam-appropriate language." },
     { icon: Upload, key: "upload", color: "text-blue-600 dark:text-blue-400", title: "Snap, Upload, Speak", desc: "Seamlessly upload images, PDFs, or DOCX files to generate custom speaking simulations on the fly." },
     { icon: Volume2, key: "tts", color: "text-teal-600 dark:text-teal-400", title: "Natural Voices", desc: "Listen to realistic AI-generated speech with authentic accents, exam-appropriate intonation, and your choice of voice." },
     { icon: BookOpen, key: "notes", color: "text-purple-600 dark:text-purple-400", title: "Comprehensive Smart Notes", desc: "Gain a competitive edge with structured learning notes covering ideas, advanced vocabulary, and communication strategies." },
@@ -437,7 +437,7 @@ export function LandingPage({ welcomeCredits, generationCost, responseCost }: La
               <AnimatedSection className="space-y-0" staggerDelay={0.08}>
                 <div className="flex items-center gap-2 mb-6">
                   <div className="p-2 rounded-lg bg-cyan-100 dark:bg-cyan-900/30">
-                    <Mic className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
+                    <User className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
                   </div>
                   <h3 className="text-lg font-bold">Part B: Individual Response</h3>
                 </div>
