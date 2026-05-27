@@ -29,9 +29,9 @@ import { useCredits } from "@/hooks/use-credits";
 
 const VOICE_OPTIONS: { value: VoiceOption; label: string }[] = [
   { value: "nova", label: "Nova (Female)" },
-  { value: "alloy", label: "Alloy (Neutral)" },
-  { value: "fable", label: "Fable (Male)" },
-  { value: "echo", label: "Echo (Male)" },
+  { value: "alloy", label: "Alloy (Male)" },
+  { value: "fable", label: "Phoebe (Female)" },
+  { value: "echo", label: "Adam (Male)" },
 ];
 
 export default function RespondPage() {
