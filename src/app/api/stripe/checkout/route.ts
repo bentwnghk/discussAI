@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
             unit_amount: plan.priceHKD * 100,
             product_data: {
               name: `${plan.label} — ${plan.credits} Credits`,
-              description: `${plan.credits} credits for Mr.🆖 DiscussAI discussion generations`,
+              description: `${plan.credits} credits for Mr.🆖 DiscussAI discussion and individual response generations`,
             },
           },
           quantity: 1,
