@@ -21,8 +21,8 @@ import {
   X,
   Check,
   Coins,
-  MessageSquareText,
-  Mic,
+  Users,
+  User,
   History,
   ChevronLeft,
   ChevronRight,
@@ -154,13 +154,13 @@ export default function HistoryPage() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div className="flex items-center gap-2">
           <History className="size-6" />
-          <h1 className="text-2xl font-bold">Practice History</h1>
+          <h1 className="text-2xl font-bold">History</h1>
           <Badge variant="secondary" className="gap-1">
-            <MessageSquareText className="h-3 w-3" />
+            <Users className="h-3 w-3" />
             {items.filter((i) => i.sessionType !== "response").length}
           </Badge>
           <Badge variant="secondary" className="gap-1">
-            <Mic className="h-3 w-3" />
+            <User className="h-3 w-3" />
             {items.filter((i) => i.sessionType === "response").length}
           </Badge>
         </div>
@@ -194,7 +194,7 @@ export default function HistoryPage() {
           onClick={() => { setFilterType("discussion"); setCurrentPage(1); }}
           className="gap-1"
         >
-          <MessageSquareText className="h-3 w-3" />
+          <Users className="h-3 w-3" />
           Discussions
         </Button>
         <Button
@@ -203,7 +203,7 @@ export default function HistoryPage() {
           onClick={() => { setFilterType("response"); setCurrentPage(1); }}
           className="gap-1"
         >
-          <Mic className="h-3 w-3" />
+          <User className="h-3 w-3" />
           Responses
         </Button>
       </div>
@@ -215,13 +215,13 @@ export default function HistoryPage() {
             <div className="flex justify-center gap-3 mt-4">
               <Link href="/discuss">
                 <Button>
-                  <MessageSquareText className="mr-2 h-4 w-4" />
+                  <Users className="mr-2 h-4 w-4" />
                   Start a Discussion
                 </Button>
               </Link>
               <Link href="/respond">
                 <Button variant="outline">
-                  <Mic className="mr-2 h-4 w-4" />
+                  <User className="mr-2 h-4 w-4" />
                   Start a Response
                 </Button>
               </Link>
@@ -270,12 +270,12 @@ export default function HistoryPage() {
                         <p className="font-medium">{item.title}</p>
                         {item.sessionType === "response" ? (
                           <Badge variant="secondary" className="gap-1 text-xs">
-                            <Mic className="h-3 w-3" />
+                            <User className="h-3 w-3" />
                             Response
                           </Badge>
                         ) : (
                           <Badge variant="secondary" className="gap-1 text-xs">
-                            <MessageSquareText className="h-3 w-3" />
+                            <Users className="h-3 w-3" />
                             Discussion
                           </Badge>
                         )}

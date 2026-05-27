@@ -23,7 +23,7 @@ import type {
   RespondResponse,
   VoiceOption,
 } from "@/types";
-import { Sparkles, FileText, History, Mic, Loader2 } from "lucide-react";
+import { Sparkles, FileText, History, User, Loader2 } from "lucide-react";
 import { processPdf } from "@/lib/pdf-client";
 import { useCredits } from "@/hooks/use-credits";
 
@@ -422,7 +422,7 @@ export default function RespondPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Mic className="size-6" /> Individual Response Question
+              <User className="size-6" /> Individual Response Question
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -572,7 +572,7 @@ export default function RespondPage() {
             onClick={() => router.push("/history")}
           >
             <History className="mr-2 h-4 w-4" />
-            View Practice History
+            View History
           </Button>
         </div>
       </div>
