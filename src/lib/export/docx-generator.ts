@@ -779,7 +779,7 @@ export async function generateDocx(
           }),
           new Paragraph({ text: "" }),
           new Paragraph({
-            text: sessionType === "response" ? "💡 Ideas 要點" : "💡 Ideas 討論要點",
+            text: sessionType === "response" ? "💡 Ideas 內容要點" : "💡 Ideas 內容要點",
             heading: HeadingLevel.HEADING_2,
           }),
           ...buildSectionContent(notes.ideas),

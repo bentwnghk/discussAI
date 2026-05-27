@@ -20,7 +20,7 @@ export function LearningNotes({ notes }: LearningNotesProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-indigo-600">💡 Ideas 討論要點</CardTitle>
+          <CardTitle className="text-indigo-600">💡 Ideas 內容要點</CardTitle>
         </CardHeader>
         <CardContent>
           <div
