@@ -136,7 +136,7 @@ export async function generateIdeasNotes(
     system,
     prompt: user,
     ...(isReasoning ? {} : { temperature: 0.3 }),
-    maxOutputTokens: 4000,
+    maxOutputTokens: 8000,
     maxRetries: 2,
   });
 
@@ -160,7 +160,7 @@ export async function generateLanguageNotes(
     system,
     prompt: user,
     ...(isReasoning ? {} : { temperature: 0.3 }),
-    maxOutputTokens: 4000,
+    maxOutputTokens: 8000,
     maxRetries: 2,
   });
 
@@ -184,7 +184,7 @@ export async function generateStrategiesNotes(
     system,
     prompt: user,
     ...(isReasoning ? {} : { temperature: 0.3 }),
-    maxOutputTokens: 4000,
+    maxOutputTokens: 8000,
     maxRetries: 2,
   });
 
