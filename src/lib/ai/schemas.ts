@@ -18,6 +18,18 @@ export const learningNotesSchema = z.object({
   communication_strategies: z.string().min(1),
 });
 
+export const ideasNotesSchema = z.object({
+  ideas: z.string().min(1),
+});
+
+export const languageNotesSchema = z.object({
+  language: z.string().min(1),
+});
+
+export const strategiesNotesSchema = z.object({
+  communication_strategies: z.string().min(1),
+});
+
 export const brainstormSchema = z.object({
   scratchpad: z.string(),
   topic_summary: z.string(),

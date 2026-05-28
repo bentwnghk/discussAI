@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { generateBrainstorm, generateDialogueFromBrainstorm, generateDialogueLearningNotes } from "@/lib/ai/dialogue-generator";
+import { generateBrainstorm, generateDialogueFromBrainstorm, generateIdeasNotes, generateLanguageNotes, generateStrategiesNotes } from "@/lib/ai/dialogue-generator";
 import { extractPartAText } from "@/lib/ai/prompts";
 import { extractTextFromFile } from "@/lib/file-processing";
 import { auth } from "@/lib/auth";
@@ -142,16 +142,29 @@ export async function POST(req: NextRequest) {
 
         const mode = dialogueMode as "Normal" | "Deeper";
 
-        sendEvent(controller, "progress", { step: "brainstorm", label: "Step 1/3: Brainstorming ideas...", progress: 20 });
+        sendEvent(controller, "progress", { step: "brainstorm", label: "Step 1/5: Brainstorming ideas...", progress: 15 });
         const brainstorm = await generateBrainstorm(fullText, mode, apiKey);
         const brainstormText = `Topic: ${brainstorm.topic_summary}\n\nQuestion Prompts:\n${brainstorm.question_prompts.map((q, i) => `${i + 1}. ${q}`).join("\n")}\n\nKey Points:\n${brainstorm.key_points.map((p, i) => `${i + 1}. ${p}`).join("\n")}\n\nBrainstorm:\n${brainstorm.scratchpad}`;
 
-        sendEvent(controller, "progress", { step: "dialogue", label: "Step 2/3: Generating dialogue...", progress: 35 });
+        sendEvent(controller, "progress", { step: "dialogue", label: "Step 2/5: Generating dialogue...", progress: 30 });
         const dialogueResult = await generateDialogueFromBrainstorm(brainstormText, mode, apiKey);
 
-        sendEvent(controller, "progress", { step: "learning_notes", label: "Step 3/3: Creating study notes...", progress: 50 });
         const dialogueTextForNotes = dialogueResult.dialogue.map((item: { speaker: string; text: string }) => `${item.speaker}: ${item.text}`).join("\n");
-        const learningNotesResult = await generateDialogueLearningNotes(dialogueTextForNotes, brainstormText, mode, apiKey);
+
+        sendEvent(controller, "progress", { step: "notes_ideas", label: "Step 3/5: Creating study notes — Ideas...", progress: 45 });
+        const ideasResult = await generateIdeasNotes(dialogueTextForNotes, brainstormText, mode, apiKey);
+
+        sendEvent(controller, "progress", { step: "notes_language", label: "Step 4/5: Creating study notes — Vocabulary...", progress: 52 });
+        const languageResult = await generateLanguageNotes(dialogueTextForNotes, mode, apiKey);
+
+        sendEvent(controller, "progress", { step: "notes_strategies", label: "Step 5/5: Creating study notes — Strategies...", progress: 59 });
+        const strategiesResult = await generateStrategiesNotes(dialogueTextForNotes, mode, apiKey);
+
+        const learningNotes = {
+          ideas: ideasResult.ideas,
+          language: languageResult.language,
+          communication_strategies: strategiesResult.communication_strategies,
+        };
 
         const charactersCount = dialogueResult.dialogue.reduce(
           (sum: number, item: { text: string }) => sum + item.text.length,
@@ -163,7 +176,7 @@ export async function POST(req: NextRequest) {
 
         sendEvent(controller, "result", {
           dialogue: dialogueResult.dialogue,
-          learningNotes: learningNotesResult.learning_notes,
+          learningNotes: learningNotes,
           scratchpad: brainstorm.scratchpad,
           charactersCount,
           ttsCostHKD,

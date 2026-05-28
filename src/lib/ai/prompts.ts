@@ -140,6 +140,99 @@ Write all learning notes content in a mix of English and Traditional Chinese to 
   };
 }
 
+export function buildIdeasNotesPrompt(dialogueText: string, brainstorm: string): { system: string; user: string } {
+  const user = `Here is a brainstorm outline and a group discussion dialogue that was generated from it:
+
+<brainstorm>
+${brainstorm}
+</brainstorm>
+
+<dialogue>
+${dialogueText}
+</dialogue>
+
+Create the **Ideas** section of learning notes for Hong Kong secondary students based on the dialogue above.
+
+Create a structured outline showing the main ideas discussed in the dialogue. Format this as HTML with proper structure:
+- Use <strong> tags to bold main question prompts or key topics
+- Use <em> tags to italicize important concepts or emphasis
+- Use <br><br> for line breaks between major points
+- Use bullet points (•) or numbered lists with <br> after each item
+- Create clear hierarchy with indentation using &nbsp;&nbsp;&nbsp;&nbsp; for sub-points
+- Reference the question prompts from the input text and show how the discussion addressed each one
+- Include Traditional Chinese translations for all major points and sub-points
+
+Write the content in a mix of English and Traditional Chinese to facilitate Hong Kong students' learning.`;
+
+  return {
+    system: SYSTEM_PROMPT_BASE,
+    user,
+  };
+}
+
+export function buildLanguageNotesPrompt(dialogueText: string): { system: string; user: string } {
+  const user = `Here is a group discussion dialogue:
+
+<dialogue>
+${dialogueText}
+</dialogue>
+
+Create the **Language** section of learning notes for Hong Kong secondary students based on the dialogue above.
+
+Identify 12-15 useful vocabulary words from the dialogue. For each item:
+- Provide the English word/phrase
+- Give the Traditional Chinese translation (繁體中文)
+- Show how it was used in the dialogue with a brief example
+
+Format this as an HTML table with proper structure:
+<table>
+<tr><th>English</th><th>中文</th><th>Usage Example</th></tr>
+<tr><td><strong>word/phrase</strong></td><td>中文翻譯</td><td>Example sentence from dialogue</td>
+</table>
+
+Write the content in a mix of English and Traditional Chinese to facilitate Hong Kong students' learning.`;
+
+  return {
+    system: SYSTEM_PROMPT_BASE,
+    user,
+  };
+}
+
+export function buildStrategiesNotesPrompt(dialogueText: string): { system: string; user: string } {
+  const user = `Here is a group discussion dialogue:
+
+<dialogue>
+${dialogueText}
+</dialogue>
+
+Create the **Communication Strategies** section of learning notes for Hong Kong secondary students based on the dialogue above.
+
+List and explain 6-8 interaction strategies that were demonstrated in the dialogue. Format this as HTML with proper structure:
+- Use <strong> tags to bold strategy names
+- Use <em> tags to italicize example phrases from the dialogue
+- Use <br><br> for line breaks between different strategies
+- Use <br> after each example phrase
+- Include Traditional Chinese explanations
+
+Strategies to include:
+- Initiating discussion (開始討論)
+- Maintaining discussion (維持討論)
+- Transitioning between topics (轉換話題)
+- Responding and agreeing/disagreeing (回應及表達同意/不同意)
+- Elaborating with examples (舉例說明)
+- Building on others' ideas (延伸他人想法)
+- Asking for clarification (要求澄清)
+- Rephrasing (重新表述)
+- Summarizing (總結)
+
+Write the content in a mix of English and Traditional Chinese to facilitate Hong Kong students' learning.`;
+
+  return {
+    system: SYSTEM_PROMPT_BASE,
+    user,
+  };
+}
+
 export function buildDialoguePrompt(text: string): { system: string; user: string } {
   const user = `Here is the input text you will be working with:
 

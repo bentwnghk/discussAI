@@ -1,7 +1,7 @@
 import { generateObject } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
-import { dialogueSchema, individualResponseSchema, questionExtractionSchema, brainstormSchema, dialogueOnlySchema, dialogueLearningNotesSchema } from "./schemas";
-import { buildDialoguePrompt, buildIndividualResponsePrompt, QUESTION_EXTRACTION_SYSTEM, buildQuestionExtractionPrompt, buildBrainstormPrompt, buildDialogueFromBrainstormPrompt, buildDialogueLearningNotesPrompt } from "./prompts";
+import { dialogueSchema, individualResponseSchema, questionExtractionSchema, brainstormSchema, dialogueOnlySchema, dialogueLearningNotesSchema, ideasNotesSchema, languageNotesSchema, strategiesNotesSchema } from "./schemas";
+import { buildDialoguePrompt, buildIndividualResponsePrompt, QUESTION_EXTRACTION_SYSTEM, buildQuestionExtractionPrompt, buildBrainstormPrompt, buildDialogueFromBrainstormPrompt, buildDialogueLearningNotesPrompt, buildIdeasNotesPrompt, buildLanguageNotesPrompt, buildStrategiesNotesPrompt } from "./prompts";
 import type { Dialogue, DialogueMode } from "@/types";
 
 function getOpenAIClient(apiKey?: string) {
@@ -62,7 +62,7 @@ export async function generateBrainstorm(
     system,
     prompt: user,
     ...(isReasoning ? {} : { temperature: 0.5 }),
-    maxOutputTokens: isReasoning ? 4000 : 2000,
+    maxOutputTokens: 4000,
     maxRetries: 2,
   });
 
@@ -112,6 +112,79 @@ export async function generateDialogueLearningNotes(
     prompt: user,
     ...(isReasoning ? {} : { temperature: 0.3 }),
     maxOutputTokens: isReasoning ? 8000 : 4000,
+    maxRetries: 2,
+  });
+
+  return object;
+}
+
+export async function generateIdeasNotes(
+  dialogueText: string,
+  brainstorm: string,
+  mode: DialogueMode,
+  apiKey?: string
+) {
+  const openai = getOpenAIClient(apiKey);
+  const modelId = getModelId(mode);
+  const isReasoning = isReasoningModel(modelId);
+
+  const { system, user } = buildIdeasNotesPrompt(dialogueText, brainstorm);
+
+  const { object } = await generateObject({
+    model: openai(modelId),
+    schema: ideasNotesSchema,
+    system,
+    prompt: user,
+    ...(isReasoning ? {} : { temperature: 0.3 }),
+    maxOutputTokens: 4000,
+    maxRetries: 2,
+  });
+
+  return object;
+}
+
+export async function generateLanguageNotes(
+  dialogueText: string,
+  mode: DialogueMode,
+  apiKey?: string
+) {
+  const openai = getOpenAIClient(apiKey);
+  const modelId = getModelId(mode);
+  const isReasoning = isReasoningModel(modelId);
+
+  const { system, user } = buildLanguageNotesPrompt(dialogueText);
+
+  const { object } = await generateObject({
+    model: openai(modelId),
+    schema: languageNotesSchema,
+    system,
+    prompt: user,
+    ...(isReasoning ? {} : { temperature: 0.3 }),
+    maxOutputTokens: 4000,
+    maxRetries: 2,
+  });
+
+  return object;
+}
+
+export async function generateStrategiesNotes(
+  dialogueText: string,
+  mode: DialogueMode,
+  apiKey?: string
+) {
+  const openai = getOpenAIClient(apiKey);
+  const modelId = getModelId(mode);
+  const isReasoning = isReasoningModel(modelId);
+
+  const { system, user } = buildStrategiesNotesPrompt(dialogueText);
+
+  const { object } = await generateObject({
+    model: openai(modelId),
+    schema: strategiesNotesSchema,
+    system,
+    prompt: user,
+    ...(isReasoning ? {} : { temperature: 0.3 }),
+    maxOutputTokens: 4000,
     maxRetries: 2,
   });
 
