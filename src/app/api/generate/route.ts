@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateDialogue } from "@/lib/ai/dialogue-generator";
+import { generateBrainstorm, generateDialogueFromBrainstorm, generateDialogueLearningNotes } from "@/lib/ai/dialogue-generator";
 import { extractPartAText } from "@/lib/ai/prompts";
 import { extractTextFromFile } from "@/lib/file-processing";
 import { auth } from "@/lib/auth";
@@ -137,10 +137,17 @@ export async function POST(req: NextRequest) {
     }
 
     const mode = dialogueMode as "Normal" | "Deeper";
-    const dialogue = await generateDialogue(fullText, mode, apiKey);
 
-    const charactersCount = dialogue.dialogue.reduce(
-      (sum, item) => sum + item.text.length,
+    const brainstorm = await generateBrainstorm(fullText, mode, apiKey);
+    const brainstormText = `Topic: ${brainstorm.topic_summary}\n\nQuestion Prompts:\n${brainstorm.question_prompts.map((q, i) => `${i + 1}. ${q}`).join("\n")}\n\nKey Points:\n${brainstorm.key_points.map((p, i) => `${i + 1}. ${p}`).join("\n")}\n\nBrainstorm:\n${brainstorm.scratchpad}`;
+
+    const dialogueResult = await generateDialogueFromBrainstorm(brainstormText, mode, apiKey);
+
+    const dialogueTextForNotes = dialogueResult.dialogue.map((item: { speaker: string; text: string }) => `${item.speaker}: ${item.text}`).join("\n");
+    const learningNotesResult = await generateDialogueLearningNotes(dialogueTextForNotes, brainstormText, mode, apiKey);
+
+    const charactersCount = dialogueResult.dialogue.reduce(
+      (sum: number, item: { text: string }) => sum + item.text.length,
       0
     );
     const ttsCostHKD = (charactersCount / 1_000_000) * 15 * 7.8;
@@ -148,9 +155,9 @@ export async function POST(req: NextRequest) {
     const title = `Group Discussion - ${topicLabel}`;
 
     return NextResponse.json({
-      dialogue: dialogue.dialogue,
-      learningNotes: dialogue.learning_notes,
-      scratchpad: dialogue.scratchpad,
+      dialogue: dialogueResult.dialogue,
+      learningNotes: learningNotesResult.learning_notes,
+      scratchpad: brainstorm.scratchpad,
       charactersCount,
       ttsCostHKD,
       title,

@@ -18,6 +18,21 @@ export const learningNotesSchema = z.object({
   communication_strategies: z.string().min(1),
 });
 
+export const brainstormSchema = z.object({
+  scratchpad: z.string(),
+  topic_summary: z.string(),
+  question_prompts: z.array(z.string()),
+  key_points: z.array(z.string()),
+});
+
+export const dialogueOnlySchema = z.object({
+  dialogue: z.array(dialogueItemSchema).min(4),
+});
+
+export const dialogueLearningNotesSchema = z.object({
+  learning_notes: learningNotesSchema,
+});
+
 export const dialogueSchema = z.object({
   scratchpad: z.string(),
   dialogue: z.array(dialogueItemSchema).min(4),

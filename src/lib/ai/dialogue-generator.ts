@@ -1,7 +1,7 @@
 import { generateObject } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
-import { dialogueSchema, individualResponseSchema, questionExtractionSchema } from "./schemas";
-import { buildDialoguePrompt, buildIndividualResponsePrompt, QUESTION_EXTRACTION_SYSTEM, buildQuestionExtractionPrompt } from "./prompts";
+import { dialogueSchema, individualResponseSchema, questionExtractionSchema, brainstormSchema, dialogueOnlySchema, dialogueLearningNotesSchema } from "./schemas";
+import { buildDialoguePrompt, buildIndividualResponsePrompt, QUESTION_EXTRACTION_SYSTEM, buildQuestionExtractionPrompt, buildBrainstormPrompt, buildDialogueFromBrainstormPrompt, buildDialogueLearningNotesPrompt } from "./prompts";
 import type { Dialogue, DialogueMode } from "@/types";
 
 function getOpenAIClient(apiKey?: string) {
@@ -45,6 +45,79 @@ export async function generateDialogue(
   return object as Dialogue;
 }
 
+export async function generateBrainstorm(
+  text: string,
+  mode: DialogueMode,
+  apiKey?: string
+) {
+  const openai = getOpenAIClient(apiKey);
+  const modelId = process.env.OPENAI_MODEL_BRAINSTORM || getModelId(mode);
+  const isReasoning = isReasoningModel(modelId);
+
+  const { system, user } = buildBrainstormPrompt(text);
+
+  const { object } = await generateObject({
+    model: openai(modelId),
+    schema: brainstormSchema,
+    system,
+    prompt: user,
+    ...(isReasoning ? {} : { temperature: 0.5 }),
+    maxOutputTokens: isReasoning ? 4000 : 2000,
+    maxRetries: 2,
+  });
+
+  return object;
+}
+
+export async function generateDialogueFromBrainstorm(
+  brainstorm: string,
+  mode: DialogueMode,
+  apiKey?: string
+) {
+  const openai = getOpenAIClient(apiKey);
+  const modelId = getModelId(mode);
+  const isReasoning = isReasoningModel(modelId);
+
+  const { system, user } = buildDialogueFromBrainstormPrompt(brainstorm);
+
+  const { object } = await generateObject({
+    model: openai(modelId),
+    schema: dialogueOnlySchema,
+    system,
+    prompt: user,
+    ...(isReasoning ? {} : { temperature: 0.5 }),
+    maxOutputTokens: isReasoning ? 16000 : 8000,
+    maxRetries: 2,
+  });
+
+  return object;
+}
+
+export async function generateDialogueLearningNotes(
+  dialogueText: string,
+  brainstorm: string,
+  mode: DialogueMode,
+  apiKey?: string
+) {
+  const openai = getOpenAIClient(apiKey);
+  const modelId = getModelId(mode);
+  const isReasoning = isReasoningModel(modelId);
+
+  const { system, user } = buildDialogueLearningNotesPrompt(dialogueText, brainstorm);
+
+  const { object } = await generateObject({
+    model: openai(modelId),
+    schema: dialogueLearningNotesSchema,
+    system,
+    prompt: user,
+    ...(isReasoning ? {} : { temperature: 0.3 }),
+    maxOutputTokens: isReasoning ? 8000 : 4000,
+    maxRetries: 2,
+  });
+
+  return object;
+}
+
 export async function generateIndividualResponse(
   text: string,
   mode: DialogueMode,
@@ -74,7 +147,7 @@ export async function extractQuestions(
   apiKey?: string
 ): Promise<string[]> {
   const openai = getOpenAIClient(apiKey);
-  const modelId = process.env.OPENAI_MODEL_NORMAL || "gpt-4.1-mini";
+  const modelId = process.env.OPENAI_MODEL_QUESTION_EXTRACTION || process.env.OPENAI_MODEL_NORMAL || "gpt-4.1-mini";
 
   const { object } = await generateObject({
     model: openai(modelId),
