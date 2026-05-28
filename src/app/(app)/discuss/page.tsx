@@ -110,7 +110,7 @@ export default function DiscussPage() {
         }
       }
 
-      setProgressLabel("Generating transcript and study notes...");
+      setProgressLabel("Starting generation...");
       setProgress(20);
 
       const res = await fetch("/api/generate", {
@@ -118,7 +118,7 @@ export default function DiscussPage() {
         body: formData,
       });
 
-      if (!res.ok) {
+      if (!res.headers.get("Content-Type")?.includes("text/event-stream")) {
         let errorMsg = "Generation failed.";
         try {
           const err = await res.json();
@@ -141,7 +141,49 @@ export default function DiscussPage() {
         throw new Error(errorMsg);
       }
 
-      const data: GenerateResponse = await res.json();
+      let data: GenerateResponse | null = null;
+
+      const reader = res.body?.getReader();
+      if (!reader) throw new Error("No response stream.");
+
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        let currentEvent = "";
+        for (const line of lines) {
+          if (line.startsWith("event: ")) {
+            currentEvent = line.slice(7).trim();
+          } else if (line.startsWith("data: ")) {
+            const payload = JSON.parse(line.slice(6));
+
+            if (currentEvent === "progress") {
+              setProgress(payload.progress);
+              setProgressLabel(payload.label);
+            } else if (currentEvent === "result") {
+              data = payload as GenerateResponse;
+            } else if (currentEvent === "error") {
+              if (payload.creditsNeeded) {
+                throw new Error(
+                  `Insufficient credits. You need ${payload.creditsNeeded} credits but have ${payload.currentBalance}. Go to Credits page to purchase more.`
+                );
+              }
+              throw new Error(payload.error || "Generation failed.");
+            }
+            currentEvent = "";
+          }
+        }
+      }
+
+      if (!data) throw new Error("No result received from server.");
+
       generationId = data.generationId ?? null;
       setDialogueItems(data.dialogue);
       setLearningNotes(data.learningNotes);
@@ -157,7 +199,7 @@ export default function DiscussPage() {
       }
 
       setProgressLabel("Generating audio...");
-      setProgress(40);
+      setProgress(60);
 
       let audioFailed = false;
       const totalLines = data.dialogue.length;
@@ -185,7 +227,7 @@ export default function DiscussPage() {
           const results = await Promise.all(promises);
           audioChunks.push(...results);
           completed += batch.length;
-          const pct = 40 + Math.round((completed / totalLines) * 50);
+          const pct = 60 + Math.round((completed / totalLines) * 30);
           setProgress(pct);
           setProgressLabel(`Generating audio ${completed}/${totalLines}...`);
         }
