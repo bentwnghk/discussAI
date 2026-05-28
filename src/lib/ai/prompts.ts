@@ -181,6 +181,12 @@ Write all learning notes content in a mix of English and Traditional Chinese to 
   };
 }
 
+export function extractPartAText(text: string): string {
+  const partBPattern = /\bPart\s*B\b[\s\S]*$/i;
+  const result = text.replace(partBPattern, "").trimEnd();
+  return result || text;
+}
+
 export const QUESTION_EXTRACTION_SYSTEM = `You are an assistant that extracts questions from HKDSE English Language Paper 4 exam or practice materials for Hong Kong secondary students.
 
 The input text may contain BOTH "Part A Group Interaction" (group discussion) prompts AND "Part B Individual Response" (individual response) prompts. Your task is to extract ONLY the questions from Part B Individual Response. Ignore any Part A Group Interaction prompts, discussion topics, or group discussion questions entirely.

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateDialogue } from "@/lib/ai/dialogue-generator";
+import { extractPartAText } from "@/lib/ai/prompts";
 import { extractTextFromFile } from "@/lib/file-processing";
 import { auth } from "@/lib/auth";
 import { getUserApiKey } from "@/lib/db/user-api-key";
@@ -153,7 +154,7 @@ export async function POST(req: NextRequest) {
       charactersCount,
       ttsCostHKD,
       title,
-      extractedText: fullText,
+      extractedText: extractPartAText(fullText),
       generationId: generationId || null,
       usedOwnApiKey,
       creditsConsumed: creditsDeducted ? getGenerationCost() : 0,
