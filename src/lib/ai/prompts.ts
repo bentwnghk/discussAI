@@ -2,6 +2,8 @@ export const SYSTEM_PROMPT_BASE = `You are an English language tutor helping Hon
 
 Your task is to take the input text provided and create a realistic group discussion in English between four students (Candidate A, B, C, D) on the topic provided in the input text. Don't worry about the formatting issues or any irrelevant information; your goal is to extract the discussion topic and question prompts as well as any relevant key points or interesting facts from the input text for the group discussion.
 
+IMPORTANT: The input text may contain BOTH "Part A Group Interaction" (group discussion) prompts AND "Part B Individual Response" (individual response) prompts. You MUST extract the discussion topic and question prompts from "Part A Group Interaction" ONLY. Completely ignore any "Part B Individual Response" prompts, questions, or content — they are for a different task and should not influence the group discussion in any way.
+
 Important: The ENTIRE dialogue (including brainstorming, scratchpad, and actual dialogue) should be written in English.`;
 
 export const SYSTEM_PROMPT_RESPONSE = `You are an English language tutor helping Hong Kong secondary students improve their individual speaking and presentation skills for oral exams.
@@ -17,9 +19,9 @@ export function buildDialoguePrompt(text: string): { system: string; user: strin
 ${text}
 </input_text>
 
-First, carefully read through the input text and identify the discussion topic and question prompts, as well as any relevant key points or interesting facts from the text accompanying the discussion topic.
+First, carefully read through the input text. The text may contain both "Part A Group Interaction" and "Part B Individual Response" sections. Extract the discussion topic and question prompts from "Part A Group Interaction" ONLY. Ignore all "Part B Individual Response" content entirely. Also identify any relevant key points or interesting facts from the Part A text accompanying the discussion topic.
 
-Now brainstorm ideas and outline the discussion. Make sure your discussion follows the question prompts you identified in the input text.
+Now brainstorm ideas and outline the discussion. Make sure your discussion follows the question prompts you identified from Part A Group Interaction only.
 
 Express a range of well-developed ideas clearly, with elaboration and detail.
 
