@@ -62,7 +62,7 @@ export default function RespondPage() {
   const { refreshBalance } = useCredits();
 
   const [inputMethod, setInputMethod] = useState<InputMethod>("Upload Files");
-  const [responseMode, setResponseMode] = useState<DialogueMode>("Deeper");
+  const [responseMode, setResponseMode] = useState<DialogueMode>("Normal");
   const [selectedVoice, setSelectedVoice] = useState<VoiceOption>("nova");
   const [files, setFiles] = useState<File[]>([]);
   const [topicText, setTopicText] = useState("");
@@ -569,9 +569,16 @@ export default function RespondPage() {
                 className="flex gap-4"
               >
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Deeper" id="deeper" disabled />
+                  <RadioGroupItem value="Normal" id="normal" />
+                  <Label htmlFor="normal">Normal</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="Deeper" id="deeper" />
                   <Label htmlFor="deeper">
                     Deeper
+                    <span className="text-xs text-muted-foreground ml-1">
+                      (More ideas &amp; elaboration)
+                    </span>
                   </Label>
                 </div>
               </RadioGroup>

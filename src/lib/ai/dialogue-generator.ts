@@ -61,7 +61,7 @@ export async function generateIndividualResponse(
   const modelId = getModelId(mode);
   const isReasoning = isReasoningModel(modelId);
 
-  const { system, user } = buildIndividualResponsePrompt(text);
+  const { system, user } = buildIndividualResponsePrompt(text, mode);
 
   const { object } = await generateObject({
     model: openai(modelId),
