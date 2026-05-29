@@ -482,9 +482,6 @@ export default function RespondPage() {
                   <RadioGroupItem value="Deeper" id="deeper" disabled />
                   <Label htmlFor="deeper">
                     Deeper
-                    <span className="text-xs text-muted-foreground ml-1">
-                      (More elaborate vocabulary)
-                    </span>
                   </Label>
                 </div>
               </RadioGroup>
