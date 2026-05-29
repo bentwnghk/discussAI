@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,31 @@ import { getVoiceForSpeaker } from "@/lib/tts/generate";
 import { processPdf } from "@/lib/pdf-client";
 import { useCredits } from "@/hooks/use-credits";
 
+type SseProgressEvent = {
+  type: "progress";
+  stage: string;
+  message: string;
+};
+
+type SseCompleteEvent = {
+  type: "complete";
+  data: GenerateResponse;
+};
+
+type SseErrorEvent = {
+  type: "error";
+  message: string;
+};
+
+type SseEvent = SseProgressEvent | SseCompleteEvent | SseErrorEvent;
+
+const STAGE_PROGRESS: Record<string, number> = {
+  processing_files: 22,
+  processing_file: 25,
+  generating: 30,
+  finalizing: 37,
+};
+
 export default function DiscussPage() {
   const router = useRouter();
   const { refreshBalance } = useCredits();
@@ -37,6 +62,8 @@ export default function DiscussPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
   const [progressLabel, setProgressLabel] = useState("");
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [generatingStage, setGeneratingStage] = useState<string | null>(null);
 
   const [dialogueItems, setDialogueItems] = useState<DialogueItem[]>([]);
   const [learningNotes, setLearningNotes] = useState<LearningNotesType | null>(
@@ -52,6 +79,23 @@ export default function DiscussPage() {
   const [accessCode, setAccessCode] = useState<string | null>(null);
   const [expiryDays, setExpiryDays] = useState<number | null>(null);
   const [generatedTimestamp, setGeneratedTimestamp] = useState<string | null>(null);
+
+  const elapsedTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const startElapsedTimer = useCallback(() => {
+    setElapsedSeconds(0);
+    elapsedTimerRef.current = setInterval(() => {
+      setElapsedSeconds((s) => s + 1);
+    }, 1000);
+  }, []);
+
+  const stopElapsedTimer = useCallback(() => {
+    if (elapsedTimerRef.current) {
+      clearInterval(elapsedTimerRef.current);
+      elapsedTimerRef.current = null;
+    }
+    setElapsedSeconds(0);
+  }, []);
 
   const handleGenerate = useCallback(async () => {
     if (
@@ -69,6 +113,7 @@ export default function DiscussPage() {
     setIsGenerating(true);
     setProgress(5);
     setProgressLabel("Preparing files...");
+    setGeneratingStage(null);
 
     let generationId: string | null = null;
 
@@ -110,7 +155,7 @@ export default function DiscussPage() {
         }
       }
 
-      setProgressLabel("Generating transcript and study notes...");
+      setProgressLabel("Connecting to server...");
       setProgress(20);
 
       const res = await fetch("/api/generate", {
@@ -141,7 +186,45 @@ export default function DiscussPage() {
         throw new Error(errorMsg);
       }
 
-      const data: GenerateResponse = await res.json();
+      startElapsedTimer();
+
+      let data: GenerateResponse | null = null;
+      const reader = res.body!.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          const event: SseEvent = JSON.parse(line.slice(6));
+
+          if (event.type === "progress") {
+            const pct = STAGE_PROGRESS[event.stage] ?? 25;
+            setProgress(pct);
+            setProgressLabel(event.message);
+            setGeneratingStage(event.stage);
+          } else if (event.type === "complete") {
+            data = event.data;
+          } else if (event.type === "error") {
+            stopElapsedTimer();
+            throw new Error(event.message);
+          }
+        }
+      }
+
+      stopElapsedTimer();
+
+      if (!data) {
+        throw new Error("Server returned an incomplete response.");
+      }
+
       generationId = data.generationId ?? null;
       setDialogueItems(data.dialogue);
       setLearningNotes(data.learningNotes);
@@ -292,6 +375,7 @@ export default function DiscussPage() {
         );
       }
     } catch (error: unknown) {
+      stopElapsedTimer();
       const message =
         error instanceof Error ? error.message : "An error occurred.";
       toast.error(message);
@@ -311,9 +395,10 @@ export default function DiscussPage() {
       }
       refreshBalance();
     } finally {
+      stopElapsedTimer();
       setIsGenerating(false);
     }
-  }, [inputMethod, dialogueMode, files, topicText, refreshBalance]);
+  }, [inputMethod, dialogueMode, files, topicText, refreshBalance, startElapsedTimer, stopElapsedTimer]);
 
   const handleExportDocx = useCallback(async () => {
     if (!dialogueItems.length || !learningNotes) return;
@@ -414,6 +499,11 @@ export default function DiscussPage() {
                 <Progress value={progress} />
                 <p className="text-sm text-muted-foreground text-center">
                   {progressLabel}
+                  {elapsedSeconds > 0 && generatingStage === "generating" && (
+                    <span className="text-muted-foreground/70 ml-1">
+                      ({elapsedSeconds}s elapsed)
+                    </span>
+                  )}
                 </p>
               </div>
             )}
