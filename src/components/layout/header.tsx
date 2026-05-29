@@ -37,13 +37,13 @@ export function Header() {
               <Link href="/discuss">
                 <Button variant="ghost" size="sm" className="font-heading">
                   <Users className="mr-2 h-4 w-4" />
-                  Discuss
+                  Discussion
                 </Button>
               </Link>
               <Link href="/respond">
-                <Button variant="ghost" size="sm" className="font-heading">
-                  <User className="mr-2 h-4 w-4" />
-                  Respond
+                <Button variant="ghost" size="sm" className="font-heading h-auto min-h-[2.25rem] py-1">
+                  <User className="mr-2 h-4 w-4 shrink-0" />
+                  <span className="text-left leading-tight">Individual<br/>Response</span>
                 </Button>
               </Link>
               <Link href="/history">
@@ -84,13 +84,13 @@ export function Header() {
                 <DropdownMenuItem className="md:hidden font-heading">
                   <Link href="/discuss" className="flex items-center w-full">
                     <Users className="mr-2 h-4 w-4" />
-                    Discuss
+                    Discussion
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem className="md:hidden font-heading">
                   <Link href="/respond" className="flex items-center w-full">
                     <User className="mr-2 h-4 w-4" />
-                    Respond
+                    Individual Response
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem className="md:hidden font-heading">
