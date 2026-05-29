@@ -438,7 +438,7 @@ export default function DiscussPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Users className="size-6" /> Discussion Topic
+              <Users className="size-6" /> Group Discussion Topic
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">

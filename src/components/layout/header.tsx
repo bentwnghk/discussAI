@@ -34,10 +34,10 @@ export function Header() {
         {session?.user ? (
           <div className="flex items-center gap-4">
             <nav className="hidden md:flex items-center gap-4">
-              <Link href="/discuss">
-                <Button variant="ghost" size="sm" className="font-heading">
-                  <Users className="mr-2 h-4 w-4" />
-                  Discussion
+                <Link href="/discuss">
+                <Button variant="ghost" size="sm" className="font-heading h-auto min-h-[2.25rem] py-1">
+                  <Users className="mr-2 h-4 w-4 shrink-0" />
+                  <span className="text-left leading-tight">Group<br/>Discussion</span>
                 </Button>
               </Link>
               <Link href="/respond">
@@ -84,7 +84,7 @@ export function Header() {
                 <DropdownMenuItem className="md:hidden font-heading">
                   <Link href="/discuss" className="flex items-center w-full">
                     <Users className="mr-2 h-4 w-4" />
-                    Discussion
+                    Group Discussion
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem className="md:hidden font-heading">
