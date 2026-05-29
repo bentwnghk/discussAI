@@ -21,6 +21,12 @@ function isReasoningModel(modelId: string) {
   return /o[1-4]|gpt-5/i.test(modelId);
 }
 
+function getReasoningProviderOptions() {
+  const effort = process.env.OPENAI_REASONING_EFFORT;
+  if (!effort) return undefined;
+  return { openai: { reasoningEffort: effort as "none" | "low" | "medium" | "high" } };
+}
+
 export async function generateDialogue(
   text: string,
   mode: DialogueMode,
@@ -40,6 +46,7 @@ export async function generateDialogue(
     ...(isReasoning ? {} : { temperature: 0.5 }),
     maxOutputTokens: isReasoning ? 16000 : 8000,
     maxRetries: 2,
+    providerOptions: getReasoningProviderOptions(),
   });
 
   return object as Dialogue;
@@ -64,6 +71,7 @@ export async function generateIndividualResponse(
     ...(isReasoning ? {} : { temperature: 0.5 }),
     maxOutputTokens: isReasoning ? 8000 : 4000,
     maxRetries: 2,
+    providerOptions: getReasoningProviderOptions(),
   });
 
   return object;
@@ -84,6 +92,7 @@ export async function extractQuestions(
     temperature: 0,
     maxOutputTokens: 2000,
     maxRetries: 2,
+    providerOptions: getReasoningProviderOptions(),
   });
 
   return object.questions;
