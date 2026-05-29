@@ -27,6 +27,29 @@ import { Sparkles, FileText, History, User, Loader2 } from "lucide-react";
 import { processPdf } from "@/lib/pdf-client";
 import { useCredits } from "@/hooks/use-credits";
 
+type SseProgressEvent = {
+  type: "progress";
+  stage: string;
+  message: string;
+};
+
+type SseCompleteEvent = {
+  type: "complete";
+  data: RespondResponse;
+};
+
+type SseErrorEvent = {
+  type: "error";
+  message: string;
+};
+
+type SseEvent = SseProgressEvent | SseCompleteEvent | SseErrorEvent;
+
+const STAGE_PROGRESS: Record<string, number> = {
+  generating: 20,
+  finalizing: 35,
+};
+
 const VOICE_OPTIONS: { value: VoiceOption; label: string }[] = [
   { value: "nova", label: "Nova (Female)" },
   { value: "alloy", label: "Alloy (Male)" },
@@ -47,6 +70,8 @@ export default function RespondPage() {
   const [isPreparing, setIsPreparing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [progressLabel, setProgressLabel] = useState("");
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [generatingStage, setGeneratingStage] = useState<string | null>(null);
 
   const [questions, setQuestions] = useState<string[] | null>(null);
   const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
@@ -73,6 +98,23 @@ export default function RespondPage() {
     voice: VoiceOption;
   } | null>(null);
 
+  const elapsedTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const startElapsedTimer = useCallback(() => {
+    setElapsedSeconds(0);
+    elapsedTimerRef.current = setInterval(() => {
+      setElapsedSeconds((s) => s + 1);
+    }, 1000);
+  }, []);
+
+  const stopElapsedTimer = useCallback(() => {
+    if (elapsedTimerRef.current) {
+      clearInterval(elapsedTimerRef.current);
+      elapsedTimerRef.current = null;
+    }
+    setElapsedSeconds(0);
+  }, []);
+
   const handleGenerate = useCallback(async (
     text: string,
     question: string | null,
@@ -82,7 +124,8 @@ export default function RespondPage() {
   ) => {
     setIsGenerating(true);
     setProgress(5);
-    setProgressLabel("Generating response and study notes...");
+    setProgressLabel("Connecting to server...");
+    setGeneratingStage(null);
 
     let generationId: string | null = null;
 
@@ -120,7 +163,45 @@ export default function RespondPage() {
         throw new Error(errorMsg);
       }
 
-      const data: RespondResponse = await res.json();
+      startElapsedTimer();
+
+      let data: RespondResponse | null = null;
+      const reader = res.body!.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          const event: SseEvent = JSON.parse(line.slice(6));
+
+          if (event.type === "progress") {
+            const pct = STAGE_PROGRESS[event.stage] ?? 20;
+            setProgress(pct);
+            setProgressLabel(event.message);
+            setGeneratingStage(event.stage);
+          } else if (event.type === "complete") {
+            data = event.data;
+          } else if (event.type === "error") {
+            stopElapsedTimer();
+            throw new Error(event.message);
+          }
+        }
+      }
+
+      stopElapsedTimer();
+
+      if (!data) {
+        throw new Error("Server returned an incomplete response.");
+      }
+
       generationId = data.generationId ?? null;
       setResponseItems(data.response);
       setLearningNotes(data.learningNotes);
@@ -270,6 +351,7 @@ export default function RespondPage() {
         );
       }
     } catch (error: unknown) {
+      stopElapsedTimer();
       const message =
         error instanceof Error ? error.message : "An error occurred.";
       toast.error(message);
@@ -289,9 +371,10 @@ export default function RespondPage() {
       }
       refreshBalance();
     } finally {
+      stopElapsedTimer();
       setIsGenerating(false);
     }
-  }, [refreshBalance]);
+  }, [refreshBalance, startElapsedTimer, stopElapsedTimer]);
 
   const handlePrepare = useCallback(async () => {
     if (inputMethod === "Upload Files" && files.length === 0) {
@@ -304,6 +387,8 @@ export default function RespondPage() {
     }
 
     setIsPreparing(true);
+    setProgress(5);
+    setProgressLabel("Preparing files...");
     try {
       const formData = new FormData();
       formData.append("inputMethod", inputMethod);
@@ -321,6 +406,8 @@ export default function RespondPage() {
         nonPdfFiles.forEach((f) => formData.append("files", f));
 
         if (pdfFiles.length > 0) {
+          setProgressLabel("Processing PDF pages...");
+          setProgress(8);
           for (const pdfFile of pdfFiles) {
             try {
               const result = await processPdf(pdfFile);
@@ -336,6 +423,9 @@ export default function RespondPage() {
           }
         }
       }
+
+      setProgressLabel("Extracting questions...");
+      setProgress(10);
 
       const res = await fetch("/api/respond/prepare", {
         method: "POST",
@@ -492,6 +582,11 @@ export default function RespondPage() {
                 <Progress value={progress} />
                 <p className="text-sm text-muted-foreground text-center">
                   {progressLabel}
+                  {elapsedSeconds > 0 && generatingStage === "generating" && (
+                    <span className="text-muted-foreground/70 ml-1">
+                      ({elapsedSeconds}s elapsed)
+                    </span>
+                  )}
                 </p>
               </div>
             )}
