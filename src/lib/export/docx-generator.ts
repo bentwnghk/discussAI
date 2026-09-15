@@ -18,6 +18,7 @@ import {
 import * as cheerio from "cheerio";
 import type { Element as DomElement, Text as DomText } from "domhandler";
 import type { DialogueItem, LearningNotes, Speaker } from "@/types";
+import { normalizeLearningNotes } from "@/lib/ai/notes-formatter";
 import QRCode from "qrcode";
 
 const SPEAKER_BG_COLORS: Record<Speaker, string> = {
@@ -645,6 +646,12 @@ export async function generateDocx(
   appOrigin?: string,
   sessionType?: string
 ): Promise<Buffer> {
+  // Normalize notes to guaranteed HTML (<br> line structure, <strong>/<em>,
+  // real <table> markup). Fixes Word exports of sessions whose notes were
+  // generated as markdown/plain text (e.g. by reasoning models) — otherwise
+  // buildSectionContent renders them as one giant unformatted paragraph.
+  const normalizedNotes = normalizeLearningNotes(notes);
+
   const baseUrl = appOrigin || "";
   const listenUrl = accessCode ? `${baseUrl}/listen` : "";
 
@@ -782,19 +789,19 @@ export async function generateDocx(
             text: sessionType === "response" ? "💡 Ideas 內容要點" : "💡 Ideas 內容要點",
             heading: HeadingLevel.HEADING_2,
           }),
-          ...buildSectionContent(notes.ideas),
+          ...buildSectionContent(normalizedNotes.ideas),
           new Paragraph({ text: "" }),
           new Paragraph({
             text: "📖 Language 語言學習",
             heading: HeadingLevel.HEADING_2,
           }),
-          ...buildSectionContent(notes.language),
+          ...buildSectionContent(normalizedNotes.language),
           new Paragraph({ text: "" }),
           new Paragraph({
             text: sessionType === "response" ? "💬 Communication Strategies 溝通策略" : "💬 Communication Strategies 溝通策略",
             heading: HeadingLevel.HEADING_2,
           }),
-          ...buildSectionContent(notes.communication_strategies),
+          ...buildSectionContent(normalizedNotes.communication_strategies),
         ],
       },
     ],
