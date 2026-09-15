@@ -6,6 +6,15 @@ IMPORTANT: The input text may contain BOTH "Part A Group Interaction" (group dis
 
 Important: The ENTIRE dialogue (including brainstorming, scratchpad, and actual dialogue) should be written in English.`;
 
+export const NOTES_FORMAT_RULES = `
+
+CRITICAL FORMATTING RULES for all three learning notes sections (ideas, language, communication_strategies):
+- Each field MUST contain raw HTML only. Markdown syntax (**bold**, *italic*, # headings, | tables, - lists) is STRICTLY FORBIDDEN anywhere in the learning notes.
+- The notes are rendered in a web page using innerHTML: plain newlines and blank lines are collapsed into spaces and will NOT create line breaks or paragraphs. You MUST use <br> for line breaks and <br><br> for paragraph/section breaks.
+- Bold text with <strong>...</strong>. Italic text with <em>...</em>.
+- Tables MUST use real HTML markup: <table><tr><th>...</th></tr><tr><td>...</td></tr></table>.
+- Every numbered strategy or bullet point MUST start with its own <br><br> separation so each item appears on its own block in the rendered page.`;
+
 export const SYSTEM_PROMPT_RESPONSE = `You are an English language tutor helping Hong Kong secondary students improve their individual speaking and presentation skills for oral exams.
 
 Your task is to take the input text provided and create a well-structured individual response in English that a student could deliver as a one-minute response to the given question. Don't worry about the formatting issues or any irrelevant information; your goal is to extract the question and any relevant key points or interesting facts from the input text.
@@ -100,7 +109,7 @@ Write all learning notes content in a mix of English and Traditional Chinese to 
 
   return {
     system: SYSTEM_PROMPT_BASE,
-    user: `${user}\n\n${learningNotesPrompt}`,
+    user: `${user}\n\n${learningNotesPrompt}${NOTES_FORMAT_RULES}`,
   };
 }
 
@@ -186,7 +195,7 @@ Strategies to include:
 - Using persuasive language (使用具說服力的語言)
 - Expressing opinions confidently (自信地表達意見)
 
-Write all learning notes content in a mix of English and Traditional Chinese to facilitate Hong Kong students' learning.`
+Write all learning notes content in a mix of English and Traditional Chinese to facilitate Hong Kong students' learning.${NOTES_FORMAT_RULES}`
     : `Now create learning notes for Hong Kong secondary students based on the individual response you just generated. The learning notes should have three sections:
 
 **1. Ideas Section:**
@@ -225,7 +234,7 @@ Strategies to include:
 - Concluding effectively (有效總結)
 - Expressing opinions confidently (自信地表達意見)
 
-Write all learning notes content in a mix of English and Traditional Chinese to facilitate Hong Kong students' learning.`;
+Write all learning notes content in a mix of English and Traditional Chinese to facilitate Hong Kong students' learning.${NOTES_FORMAT_RULES}`;
 
   return {
     system: SYSTEM_PROMPT_RESPONSE,

@@ -2,6 +2,7 @@ import { generateObject } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { dialogueSchema, individualResponseSchema, questionExtractionSchema } from "./schemas";
 import { buildDialoguePrompt, buildIndividualResponsePrompt, QUESTION_EXTRACTION_SYSTEM, buildQuestionExtractionPrompt } from "./prompts";
+import { normalizeLearningNotes } from "./notes-formatter";
 import type { Dialogue, DialogueMode } from "@/types";
 
 function getOpenAIClient(apiKey?: string) {
@@ -49,7 +50,8 @@ export async function generateDialogue(
     providerOptions: getReasoningProviderOptions(),
   });
 
-  return object as Dialogue;
+  const result = object as Dialogue;
+  return { ...result, learning_notes: normalizeLearningNotes(result.learning_notes) };
 }
 
 export async function generateIndividualResponse(
@@ -74,7 +76,7 @@ export async function generateIndividualResponse(
     providerOptions: getReasoningProviderOptions(),
   });
 
-  return object;
+  return { ...object, learning_notes: normalizeLearningNotes(object.learning_notes) };
 }
 
 export async function extractQuestions(

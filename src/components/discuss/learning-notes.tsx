@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { normalizeLearningNotes } from "@/lib/ai/notes-formatter";
 import type { LearningNotes as LearningNotesType } from "@/types";
 
 interface LearningNotesProps {
@@ -8,6 +9,8 @@ interface LearningNotesProps {
 }
 
 export function LearningNotes({ notes }: LearningNotesProps) {
+  const normalized = normalizeLearningNotes(notes);
+
   return (
     <div className="space-y-4">
       <Card className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10">
@@ -25,7 +28,7 @@ export function LearningNotes({ notes }: LearningNotesProps) {
         <CardContent>
           <div
             className="prose prose-sm max-w-none dark:prose-invert"
-            dangerouslySetInnerHTML={{ __html: notes.ideas }}
+            dangerouslySetInnerHTML={{ __html: normalized.ideas }}
           />
         </CardContent>
       </Card>
@@ -37,7 +40,7 @@ export function LearningNotes({ notes }: LearningNotesProps) {
         <CardContent>
           <div
             className="prose prose-sm max-w-none dark:prose-invert [&_table]:w-full [&_table]:border-collapse [&_th]:bg-indigo-600 [&_th]:text-white [&_th]:px-3 [&_th]:py-2 [&_td]:border [&_td]:border-gray-200 [&_td]:px-3 [&_td]:py-2 [&_tr:nth-child(even)]:bg-gray-50"
-            dangerouslySetInnerHTML={{ __html: notes.language }}
+            dangerouslySetInnerHTML={{ __html: normalized.language }}
           />
         </CardContent>
       </Card>
@@ -51,7 +54,7 @@ export function LearningNotes({ notes }: LearningNotesProps) {
         <CardContent>
           <div
             className="prose prose-sm max-w-none dark:prose-invert"
-            dangerouslySetInnerHTML={{ __html: notes.communication_strategies }}
+            dangerouslySetInnerHTML={{ __html: normalized.communication_strategies }}
           />
         </CardContent>
       </Card>
