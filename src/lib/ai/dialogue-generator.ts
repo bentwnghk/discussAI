@@ -19,7 +19,7 @@ function getModelId(mode: DialogueMode) {
 }
 
 function isReasoningModel(modelId: string) {
-  return /o[1-4]|gpt-5/i.test(modelId);
+  return /o[1-4]|gpt-5|glm/i.test(modelId);
 }
 
 function getReasoningProviderOptions() {
@@ -40,7 +40,7 @@ export async function generateDialogue(
   const { system, user } = buildDialoguePrompt(text);
 
   const { object } = await generateObject({
-    model: openai(modelId),
+    model: openai.chat(modelId),
     schema: dialogueSchema,
     system,
     prompt: user,
@@ -66,7 +66,7 @@ export async function generateIndividualResponse(
   const { system, user } = buildIndividualResponsePrompt(text, mode);
 
   const { object } = await generateObject({
-    model: openai(modelId),
+    model: openai.chat(modelId),
     schema: individualResponseSchema,
     system,
     prompt: user,
@@ -87,7 +87,7 @@ export async function extractQuestions(
   const modelId = process.env.OPENAI_MODEL_QUESTION_EXTRACTION || process.env.OPENAI_MODEL_NORMAL || "gpt-4.1-mini";
 
   const { object } = await generateObject({
-    model: openai(modelId),
+    model: openai.chat(modelId),
     schema: questionExtractionSchema,
     system: QUESTION_EXTRACTION_SYSTEM,
     prompt: buildQuestionExtractionPrompt(text),
