@@ -21,6 +21,50 @@ Your task is to take the input text provided and create a well-structured indivi
 
 Important: The ENTIRE response (including brainstorming, scratchpad, and actual response) should be written in English.`;
 
+export function buildJsonOutputRules(shapeSpec: string): string {
+  return `
+
+OUTPUT FORMAT — CRITICAL RULES:
+- Your ENTIRE response MUST be a single raw JSON object and NOTHING else. It MUST start with { and end with }.
+- Do NOT use markdown headings (##), bullet points outside the JSON, or code fences (\`\`\`). Do NOT write any commentary before or after the JSON object.
+- Every piece of content (planning notes, dialogue text, HTML learning notes) MUST be embedded as JSON string values inside this object.
+- The JSON object MUST have EXACTLY this structure:
+${shapeSpec}`;
+}
+
+const LEARNING_NOTES_SHAPE = `    "learning_notes": {
+      "ideas": "<raw HTML string>",
+      "language": "<raw HTML string containing exactly one <table>...</table>>",
+      "communication_strategies": "<raw HTML string>"
+    }`;
+
+export const JSON_OUTPUT_RULES_DIALOGUE = buildJsonOutputRules(`{
+  "scratchpad": "your brief planning and outline notes as plain text",
+  "dialogue": [
+    { "text": "one complete spoken turn by this candidate", "speaker": "Candidate A" },
+    { "text": "...", "speaker": "Candidate B" },
+    { "text": "...", "speaker": "Candidate C" },
+    { "text": "...", "speaker": "Candidate D" }
+  ],
+${LEARNING_NOTES_SHAPE}
+}
+"speaker" must be one of "Candidate A", "Candidate B", "Candidate C", "Candidate D". The "dialogue" array must contain every turn from all four candidates (each candidate speaks 4-6 times).`);
+
+export const JSON_OUTPUT_RULES_RESPONSE = buildJsonOutputRules(`{
+  "scratchpad": "your brief planning and outline notes as plain text",
+  "response": [
+    { "text": "one natural speaking segment", "speaker": "Speaker" },
+    { "text": "...", "speaker": "Speaker" }
+  ],
+${LEARNING_NOTES_SHAPE}
+}
+Every "speaker" value must be "Speaker". The "response" array must contain 3-5 speaking segments.`);
+
+export const JSON_OUTPUT_RULES_QUESTIONS = buildJsonOutputRules(`{
+  "questions": ["full text of question 1", "full text of question 2"]
+}
+If only one question is found, use a single-item array. If none are found, use an empty array.`);
+
 export function buildDialoguePrompt(text: string): { system: string; user: string } {
   const user = `Here is the input text you will be working with:
 
@@ -56,7 +100,7 @@ Alternate speakers naturally, ensuring every candidate speaks 4-6 times througho
 
 Design your output to be read aloud -- it will be directly converted into audio.
 
-Assign appropriate speakers (Candidate A, Candidate B, Candidate C, Candidate D) to each line. Ensure the output strictly adheres to the required format: a list of objects, each with 'text' and 'speaker' fields.
+Assign appropriate speakers (Candidate A, Candidate B, Candidate C, Candidate D) to each line. Remember: the dialogue turns go into the "dialogue" array of the required JSON object, each item with 'text' and 'speaker' fields.
 
 Make the dialogue 6-7 minutes long when spoken at a natural pace (approximately 120-150 words per minute).
 
@@ -108,7 +152,7 @@ Strategies to include:
 Write all learning notes content in a mix of English and Traditional Chinese to facilitate Hong Kong students' learning.`;
 
   return {
-    system: SYSTEM_PROMPT_BASE,
+    system: SYSTEM_PROMPT_BASE + JSON_OUTPUT_RULES_DIALOGUE,
     user: `${user}\n\n${learningNotesPrompt}${NOTES_FORMAT_RULES}`,
   };
 }
@@ -149,7 +193,7 @@ ${responseGuidance}
 
 Design your output to be read aloud — it will be directly converted into audio.
 
-Use 'Speaker' as the speaker identifier for all lines. Ensure the output strictly adheres to the required format: a list of objects, each with 'text' and 'speaker' fields.
+Use 'Speaker' as the speaker identifier for all lines. Remember: the response segments go into the "response" array of the required JSON object, each item with 'text' and 'speaker' fields.
 
 Split the response into 3-5 natural speaking segments (paragraphs or logical pauses), each as a separate item in the array.`;
 
@@ -237,7 +281,7 @@ Strategies to include:
 Write all learning notes content in a mix of English and Traditional Chinese to facilitate Hong Kong students' learning.${NOTES_FORMAT_RULES}`;
 
   return {
-    system: SYSTEM_PROMPT_RESPONSE,
+    system: SYSTEM_PROMPT_RESPONSE + JSON_OUTPUT_RULES_RESPONSE,
     user: `${user}\n\n${learningNotesPrompt}`,
   };
 }
@@ -252,7 +296,7 @@ export const QUESTION_EXTRACTION_SYSTEM = `You are an assistant that extracts qu
 
 The input text may contain BOTH "Part A Group Interaction" (group discussion) prompts AND "Part B Individual Response" (individual response) prompts. Your task is to extract ONLY the questions from Part B Individual Response. Ignore any Part A Group Interaction prompts, discussion topics, or group discussion questions entirely.
 
-Return a JSON object with a "questions" array containing each distinct Part B Individual Response question found. If only one question is found, return it as a single-item array. If no clear Part B questions are found, return an empty array.`;
+Return a JSON object with a "questions" array containing each distinct Part B Individual Response question found. If only one question is found, return it as a single-item array. If no clear Part B questions are found, return an empty array.` + JSON_OUTPUT_RULES_QUESTIONS;
 
 export function buildQuestionExtractionPrompt(text: string): string {
   return `Please read the following text and extract ONLY the questions from "Part B Individual Response". Ignore any "Part A Group Interaction" prompts or group discussion topics.

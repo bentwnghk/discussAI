@@ -28,6 +28,26 @@ function getReasoningProviderOptions() {
   return { openai: { reasoningEffort: effort as "none" | "low" | "medium" | "high" } };
 }
 
+function extractJsonFromText(text: string): string | null {
+  const fences = [...text.matchAll(/```(?:json)?\s*([\s\S]*?)```/gi)].map((m) => m[1]);
+  let candidate =
+    fences.length > 0
+      ? fences.sort((a, b) => b.length - a.length)[0].trim()
+      : text;
+
+  const start = candidate.search(/[{[]/);
+  if (start === -1) return null;
+  candidate = candidate.slice(start);
+
+  const end = Math.max(candidate.lastIndexOf("}"), candidate.lastIndexOf("]"));
+  if (end !== -1) candidate = candidate.slice(0, end + 1);
+
+  return candidate;
+}
+
+const repairModelText = async ({ text }: { text: string }): Promise<string | null> =>
+  extractJsonFromText(text);
+
 export async function generateDialogue(
   text: string,
   mode: DialogueMode,
@@ -48,6 +68,7 @@ export async function generateDialogue(
     maxOutputTokens: isReasoning ? 16000 : 8000,
     maxRetries: 2,
     providerOptions: getReasoningProviderOptions(),
+    experimental_repairText: repairModelText,
   });
 
   const result = object as Dialogue;
@@ -74,6 +95,7 @@ export async function generateIndividualResponse(
     maxOutputTokens: isReasoning ? 8000 : 4000,
     maxRetries: 2,
     providerOptions: getReasoningProviderOptions(),
+    experimental_repairText: repairModelText,
   });
 
   return { ...object, learning_notes: normalizeLearningNotes(object.learning_notes) };
@@ -95,6 +117,7 @@ export async function extractQuestions(
     maxOutputTokens: 2000,
     maxRetries: 2,
     providerOptions: getReasoningProviderOptions(),
+    experimental_repairText: repairModelText,
   });
 
   return object.questions;
