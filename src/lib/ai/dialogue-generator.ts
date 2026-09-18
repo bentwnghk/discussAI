@@ -23,23 +23,33 @@ function isReasoningModel(modelId: string) {
   return /o[1-4]|gpt-5|glm|deepseek/i.test(modelId);
 }
 
-const RESPONSE_FORMAT_MODES = new Set(["json_schema", "json_object", "none"]);
+const RESPONSE_FORMAT_MODES = new Set(["json_schema", "json_object", "none", "auto"]);
+
+const STRUCTURED_OUTPUT_MODEL_PATTERN = /^(gpt-4\.1|gpt-4o|gpt-[5-9]|o[1-9](?:-mini)?|chatgpt|glm)/i;
+
+function resolveTargetFormat(mode: string, model?: string): string {
+  if (mode !== "auto") return mode;
+  return model && STRUCTURED_OUTPUT_MODEL_PATTERN.test(model) ? "json_schema" : "json_object";
+}
 
 function getProviderFetch() {
   const mode = (process.env.OPENAI_RESPONSE_FORMAT ?? "json_schema").toLowerCase();
-  if (mode === "json_schema" || !RESPONSE_FORMAT_MODES.has(mode)) return undefined;
+  if (!RESPONSE_FORMAT_MODES.has(mode) || mode === "json_schema") return undefined;
 
   return async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
     if (init?.body && typeof init.body === "string") {
       try {
-        const body = JSON.parse(init.body) as { response_format?: { type?: string } };
+        const body = JSON.parse(init.body) as { model?: string; response_format?: { type?: string } };
         if (body.response_format?.type === "json_schema") {
-          if (mode === "json_object") {
+          const target = resolveTargetFormat(mode, body.model);
+          if (target === "json_object") {
             body.response_format = { type: "json_object" };
-          } else {
+          } else if (target === "none") {
             delete body.response_format;
           }
-          init = { ...init, body: JSON.stringify(body) };
+          if (target !== "json_schema") {
+            init = { ...init, body: JSON.stringify(body) };
+          }
         }
       } catch {
         // non-JSON body; send unchanged
