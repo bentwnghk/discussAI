@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["pdf-parse"],
   transpilePackages: ["pdfjs-dist"],
   turbopack: {},
+  experimental: {
+    proxyClientMaxBodySize: "50mb",
+  },
 };
 
 export default (phase: string) => {
