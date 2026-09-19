@@ -33,23 +33,46 @@ function resolveTargetFormat(mode: string, model?: string): string {
 }
 
 function getProviderFetch() {
-  const mode = (process.env.OPENAI_RESPONSE_FORMAT ?? "json_schema").toLowerCase();
-  if (!RESPONSE_FORMAT_MODES.has(mode) || mode === "json_schema") return undefined;
+  const formatMode = (process.env.OPENAI_RESPONSE_FORMAT ?? "json_schema").toLowerCase();
+  const rewriteFormat = RESPONSE_FORMAT_MODES.has(formatMode) && formatMode !== "json_schema";
+
+  const pattern = process.env.OPENAI_ALWAYS_THINKING_MODELS;
+  const alwaysThinking =
+    pattern === "" ? null : new RegExp(pattern ?? "^glm-.*x$", "i");
 
   return async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
     if (init?.body && typeof init.body === "string") {
       try {
-        const body = JSON.parse(init.body) as { model?: string; response_format?: { type?: string } };
-        if (body.response_format?.type === "json_schema") {
-          const target = resolveTargetFormat(mode, body.model);
+        const body = JSON.parse(init.body) as {
+          model?: string;
+          response_format?: { type?: string };
+          reasoning_effort?: string;
+        };
+        let changed = false;
+
+        if (rewriteFormat && body.response_format?.type === "json_schema") {
+          const target = resolveTargetFormat(formatMode, body.model);
           if (target === "json_object") {
             body.response_format = { type: "json_object" };
+            changed = true;
           } else if (target === "none") {
             delete body.response_format;
+            changed = true;
           }
-          if (target !== "json_schema") {
-            init = { ...init, body: JSON.stringify(body) };
-          }
+        }
+
+        if (
+          body.reasoning_effort === "none" &&
+          alwaysThinking !== null &&
+          typeof body.model === "string" &&
+          alwaysThinking.test(body.model)
+        ) {
+          body.reasoning_effort = "low";
+          changed = true;
+        }
+
+        if (changed) {
+          init = { ...init, body: JSON.stringify(body) };
         }
       } catch {
         // non-JSON body; send unchanged
