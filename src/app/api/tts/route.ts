@@ -1,7 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateTTSAudio } from "@/lib/tts/generate";
+import { z } from "zod";
+import { generateTTSAudio, getAvailableVoices, getTTSModel, getVoiceForSpeaker } from "@/lib/tts/generate";
 import { auth } from "@/lib/auth";
 import { getUserApiKey } from "@/lib/db/user-api-key";
+import type { Speaker } from "@/types";
+
+const ttsRequestSchema = z
+  .object({
+    text: z.string().min(1),
+    speaker: z.string().optional(),
+    voice: z.string().optional(),
+  })
+  .refine((data) => data.speaker || data.voice, {
+    message: "Either speaker or voice is required.",
+  });
+
+export async function GET() {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  return NextResponse.json({
+    model: getTTSModel(),
+    voices: getAvailableVoices(),
+  });
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,18 +36,16 @@ export async function POST(req: NextRequest) {
 
     const apiKey = await getUserApiKey(session.user.id);
 
-    const body = await req.json();
-    const { text, voice } = body as {
-      text: string;
-      voice: string;
-    };
-
-    if (!text || !voice) {
+    const parsed = ttsRequestSchema.safeParse(await req.json());
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Text and voice are required." },
+        { error: parsed.error.issues[0]?.message ?? "Invalid request." },
         { status: 400 }
       );
     }
+
+    const { text, speaker, voice: explicitVoice } = parsed.data;
+    const voice = explicitVoice || getVoiceForSpeaker(speaker as Speaker);
 
     const audioBuffer = await generateTTSAudio(text, voice, apiKey);
 

@@ -20,10 +20,8 @@ import type {
   DialogueItem,
   LearningNotes as LearningNotesType,
   GenerateResponse,
-  Speaker,
 } from "@/types";
 import { Sparkles, FileText, History, Users } from "lucide-react";
-import { getVoiceForSpeaker } from "@/lib/tts/generate";
 import { processPdf } from "@/lib/pdf-client";
 import { useCredits } from "@/hooks/use-credits";
 
@@ -252,13 +250,12 @@ export default function DiscussPage() {
         for (let i = 0; i < totalLines; i += batchSize) {
           const batch = data.dialogue.slice(i, i + batchSize);
           const promises = batch.map(async (item) => {
-            const voice = getVoiceForSpeaker(item.speaker as Speaker);
             const ttsRes = await fetch("/api/tts", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 text: item.text,
-                voice,
+                speaker: item.speaker,
               }),
             });
             if (!ttsRes.ok) throw new Error("TTS failed for a line.");

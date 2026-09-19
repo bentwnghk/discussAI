@@ -1,14 +1,35 @@
 import type { Speaker } from "@/types";
 
-const OPENAI_VOICE_MAPPINGS: Record<Speaker, string> = {
-  "Candidate A": "nova",
-  "Candidate B": "alloy",
-  "Candidate C": "fable",
-  "Candidate D": "echo",
-};
+const SPEAKER_ORDER: Speaker[] = [
+  "Candidate A",
+  "Candidate B",
+  "Candidate C",
+  "Candidate D",
+];
+
+const DEFAULT_TTS_MODEL = "tts-1";
+const DEFAULT_TTS_VOICES = ["nova", "alloy", "fable", "echo"];
+
+export function getTTSModel(): string {
+  return process.env.TTS_MODEL?.trim() || DEFAULT_TTS_MODEL;
+}
+
+export function getAvailableVoices(): string[] {
+  const raw = process.env.TTS_VOICES;
+  if (!raw?.trim()) return [...DEFAULT_TTS_VOICES];
+
+  const parsed = raw
+    .split(",")
+    .map((v) => v.trim())
+    .filter(Boolean);
+
+  return SPEAKER_ORDER.map((_, i) => parsed[i] ?? DEFAULT_TTS_VOICES[i]);
+}
 
 export function getVoiceForSpeaker(speaker: Speaker): string {
-  return OPENAI_VOICE_MAPPINGS[speaker];
+  const voices = getAvailableVoices();
+  const index = SPEAKER_ORDER.indexOf(speaker);
+  return voices[index] ?? voices[0];
 }
 
 export async function generateTTSAudio(
@@ -31,7 +52,7 @@ export async function generateTTSAudio(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "tts-1",
+      model: getTTSModel(),
       voice,
       input: text,
       response_format: "mp3",

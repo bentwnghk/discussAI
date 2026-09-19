@@ -28,8 +28,10 @@ services:
       - "3000:3000"
     environment:
       DATABASE_URL: postgresql://discussai:discussai@db:5432/discussai
-      OPENAI_BASE_URL: https://api.mr5ai.com/v1
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.mr5ai.com/v1}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      TTS_MODEL: ${TTS_MODEL:-tts-1}
+      TTS_VOICES: ${TTS_VOICES:-nova,alloy,fable,echo}
       OPENAI_MODEL_NORMAL: ${OPENAI_MODEL_NORMAL:-gpt-4.1-mini}
       OPENAI_MODEL_DEEP: ${OPENAI_MODEL_DEEP:-gpt-4.1}
       OPENAI_MODEL_QUESTION_EXTRACTION: ${OPENAI_MODEL_QUESTION_EXTRACTION:-gpt-4.1-mini}

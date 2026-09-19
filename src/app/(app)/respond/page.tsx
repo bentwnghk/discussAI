@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -50,12 +50,18 @@ const STAGE_PROGRESS: Record<string, number> = {
   finalizing: 35,
 };
 
-const VOICE_OPTIONS: { value: VoiceOption; label: string }[] = [
-  { value: "nova", label: "Nova (Female)" },
-  { value: "alloy", label: "Alloy (Male)" },
-  { value: "fable", label: "Phoebe (Female)" },
-  { value: "echo", label: "Adam (Male)" },
+const FALLBACK_VOICE_OPTIONS: { value: string; label: string }[] = [
+  { value: "nova", label: "Nova" },
+  { value: "alloy", label: "Alloy" },
+  { value: "fable", label: "Fable" },
+  { value: "echo", label: "Echo" },
 ];
+
+function formatVoiceLabel(voice: string): string {
+  return voice
+    .replace(/[-_]/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
 export default function RespondPage() {
   const router = useRouter();
@@ -63,11 +69,39 @@ export default function RespondPage() {
 
   const [inputMethod, setInputMethod] = useState<InputMethod>("Upload Files");
   const [responseMode, setResponseMode] = useState<DialogueMode>("Normal");
-  const [selectedVoice, setSelectedVoice] = useState<VoiceOption>("nova");
+  const [selectedVoice, setSelectedVoice] = useState<VoiceOption>("");
+  const [voiceOptions, setVoiceOptions] = useState<
+    { value: string; label: string }[]
+  >([]);
   const [files, setFiles] = useState<File[]>([]);
   const [topicText, setTopicText] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isPreparing, setIsPreparing] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/tts")
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error())))
+      .then((data: { voices?: string[] }) => {
+        if (cancelled) return;
+        const voices = data.voices?.length
+          ? data.voices
+          : FALLBACK_VOICE_OPTIONS.map((opt) => opt.value);
+        setVoiceOptions(
+          voices.map((v) => ({ value: v, label: formatVoiceLabel(v) }))
+        );
+        setSelectedVoice(voices[0]);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setVoiceOptions(FALLBACK_VOICE_OPTIONS);
+        setSelectedVoice(FALLBACK_VOICE_OPTIONS[0].value);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const [progress, setProgress] = useState(0);
   const [progressLabel, setProgressLabel] = useState("");
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -552,7 +586,7 @@ export default function RespondPage() {
                 onValueChange={(v) => setSelectedVoice(v as VoiceOption)}
                 className="flex flex-wrap gap-3"
               >
-                {VOICE_OPTIONS.map((opt) => (
+                {voiceOptions.map((opt) => (
                   <div key={opt.value} className="flex items-center space-x-2">
                     <RadioGroupItem value={opt.value} id={`voice-${opt.value}`} />
                     <Label htmlFor={`voice-${opt.value}`}>{opt.label}</Label>

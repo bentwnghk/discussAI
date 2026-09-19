@@ -1,10 +1,3 @@
-export const SPEAKER_VOICE_MAPPINGS: Record<string, string> = {
-  "Candidate A": "nova",
-  "Candidate B": "alloy",
-  "Candidate C": "fable",
-  "Candidate D": "echo",
-};
-
 export const SPEAKER_COLORS: Record<string, string> = {
   "Candidate A": "bg-blue-50 dark:bg-blue-950 border-l-blue-400",
   "Candidate B": "bg-yellow-50 dark:bg-yellow-950 border-l-yellow-400",
@@ -25,7 +18,7 @@ export type Speaker = "Candidate A" | "Candidate B" | "Candidate C" | "Candidate
 export type DialogueMode = "Normal" | "Deeper";
 export type InputMethod = "Upload Files" | "Enter Topic";
 export type SessionType = "discussion" | "response";
-export type VoiceOption = "nova" | "alloy" | "fable" | "echo";
+export type VoiceOption = string;
 
 export interface DialogueItem {
   text: string;
