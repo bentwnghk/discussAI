@@ -75,6 +75,13 @@ function pcmToMp3(pcm: Buffer, sampleRate: number): Buffer {
   return Buffer.concat(chunks);
 }
 
+function looksLikeMp3(buf: Buffer): boolean {
+  if (buf.length >= 3 && buf[0] === 0x49 && buf[1] === 0x44 && buf[2] === 0x33) {
+    return true;
+  }
+  return buf.length >= 2 && buf[0] === 0xff && (buf[1] & 0xe0) === 0xe0;
+}
+
 export async function generateTTSAudio(
   text: string,
   voice: string,
@@ -110,11 +117,44 @@ export async function generateTTSAudio(
     );
   }
 
+  const contentType = response.headers.get("content-type") || "";
+  if (contentType.includes("json") || contentType.startsWith("text/")) {
+    const errorText = await response.text().catch(() => "");
+    let message = errorText.slice(0, 500);
+    try {
+      const parsed = JSON.parse(errorText) as {
+        error?: { message?: string } | string;
+        message?: string;
+      };
+      message =
+        (typeof parsed.error === "string"
+          ? parsed.error
+          : parsed.error?.message) ||
+        parsed.message ||
+        message;
+    } catch {
+      // keep raw text
+    }
+    throw new Error(
+      `TTS provider returned a non-audio response (${contentType}): ${message}`
+    );
+  }
+
   const arrayBuffer = await response.arrayBuffer();
   let audioBuffer: Buffer = Buffer.from(arrayBuffer);
 
+  if (audioBuffer.length === 0) {
+    throw new Error("TTS provider returned an empty audio response.");
+  }
+
   if (responseFormat === "pcm") {
-    audioBuffer = pcmToMp3(audioBuffer, getPCMSampleRate());
+    if (looksLikeMp3(audioBuffer)) {
+      console.warn(
+        `TTS: requested response_format=pcm but provider returned mp3; using mp3 as-is.`
+      );
+    } else {
+      audioBuffer = pcmToMp3(audioBuffer, getPCMSampleRate());
+    }
   }
 
   return audioBuffer;
