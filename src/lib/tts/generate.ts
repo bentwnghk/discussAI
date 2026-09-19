@@ -182,8 +182,9 @@ export async function generateTTSAudio(
   voice: string,
   apiKey?: string
 ): Promise<Buffer> {
-  const effectiveApiKey = apiKey || process.env.OPENAI_API_KEY;
-  const baseUrl = process.env.OPENAI_BASE_URL;
+  const effectiveApiKey =
+    apiKey || process.env.TTS_API_KEY || process.env.OPENAI_API_KEY;
+  const baseUrl = process.env.TTS_BASE_URL || process.env.OPENAI_BASE_URL;
   const responseFormat = getTTSResponseFormat();
 
   if (!effectiveApiKey) throw new Error("API key not configured.");
