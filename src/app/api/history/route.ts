@@ -58,6 +58,7 @@ export async function POST(req: NextRequest) {
       charactersCount,
       ttsCostHKD,
       usedOwnApiKey,
+      creditsUsed,
     } = body;
 
     const [newSession] = await db
@@ -76,6 +77,10 @@ export async function POST(req: NextRequest) {
         charactersCount: charactersCount || 0,
         ttsCostHKD: ttsCostHKD || 0,
         usedOwnApiKey: !!usedOwnApiKey,
+        creditsUsed:
+          typeof creditsUsed === "number" && Number.isFinite(creditsUsed)
+            ? Math.max(0, Math.trunc(creditsUsed))
+            : null,
       })
       .returning();
 

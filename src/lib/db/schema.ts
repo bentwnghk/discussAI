@@ -73,6 +73,7 @@ export const discussionSessions = pgTable("discussion_sessions", {
   charactersCount: integer("charactersCount").notNull().default(0),
   ttsCostHKD: real("ttsCostHKD").notNull().default(0),
   usedOwnApiKey: boolean("usedOwnApiKey").notNull().default(false),
+  creditsUsed: integer("creditsUsed"),
   createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
 });
 

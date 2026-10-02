@@ -335,6 +335,7 @@ export default function DiscussPage() {
             charactersCount: data.charactersCount,
             ttsCostHKD: data.ttsCostHKD,
             usedOwnApiKey: data.usedOwnApiKey,
+            creditsUsed: data.creditsConsumed,
           }),
         });
         if (saveRes.ok) {

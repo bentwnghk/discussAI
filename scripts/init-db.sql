@@ -62,6 +62,7 @@ CREATE TABLE IF NOT EXISTS "discussion_sessions" (
   "charactersCount" INTEGER NOT NULL DEFAULT 0,
   "ttsCostHKD" REAL NOT NULL DEFAULT 0,
   "usedOwnApiKey" BOOLEAN NOT NULL DEFAULT false,
+  "creditsUsed" INTEGER,
   "createdAt" TIMESTAMP NOT NULL DEFAULT NOW()
 );
 

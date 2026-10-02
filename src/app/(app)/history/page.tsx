@@ -46,6 +46,7 @@ interface HistoryItem {
   charactersCount: number;
   ttsCostHKD: number;
   usedOwnApiKey: boolean;
+  creditsUsed: number | null;
   createdAt: string;
 }
 
@@ -290,7 +291,10 @@ export default function HistoryPage() {
                         {!item.usedOwnApiKey && (
                           <Badge variant="outline" className="gap-1">
                             <Coins className="h-3 w-3" />
-                            {item.sessionType === "response" ? responseCost : generationCost}
+                            {item.creditsUsed ??
+                              (item.sessionType === "response"
+                                ? responseCost
+                                : generationCost)}
                           </Badge>
                         )}
                         {item.usedOwnApiKey && (

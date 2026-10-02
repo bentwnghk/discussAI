@@ -4,7 +4,7 @@ import { isAdminEmail } from "@/lib/admin";
 import { db } from "@/lib/db";
 import { discussionSessions, users } from "@/lib/db/schema";
 import { desc, asc, sql, ilike, or } from "drizzle-orm";
-import { getGenerationCost } from "@/lib/db/credits";
+import { getGenerationCost, getResponseCost } from "@/lib/db/credits";
 
 export async function GET(req: NextRequest) {
   try {
@@ -24,10 +24,12 @@ export async function GET(req: NextRequest) {
         userName: users.name,
         email: users.email,
         title: discussionSessions.title,
+        sessionType: discussionSessions.sessionType,
         dialogueMode: discussionSessions.dialogueMode,
         createdAt: discussionSessions.createdAt,
         usedOwnApiKey: discussionSessions.usedOwnApiKey,
         ttsCostHKD: discussionSessions.ttsCostHKD,
+        creditsUsed: discussionSessions.creditsUsed,
       })
       .from(discussionSessions)
       .innerJoin(users, sql`${discussionSessions.userId} = ${users.id}`);
@@ -58,7 +60,11 @@ export async function GET(req: NextRequest) {
           .orderBy(orderFn(orderColumn))
       : await query.orderBy(orderFn(orderColumn));
 
-    return NextResponse.json({ discussions: rows, generationCost: getGenerationCost() });
+    return NextResponse.json({
+      discussions: rows,
+      generationCost: getGenerationCost(),
+      responseCost: getResponseCost(),
+    });
   } catch (error) {
     console.error("Admin discussions GET error:", error);
     return NextResponse.json(

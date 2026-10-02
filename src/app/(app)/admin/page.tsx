@@ -37,10 +37,12 @@ interface DiscussionRow {
   userName: string | null;
   email: string | null;
   title: string;
+  sessionType: string;
   dialogueMode: string;
   createdAt: string;
   usedOwnApiKey: boolean;
   ttsCostHKD: number;
+  creditsUsed: number | null;
 }
 
 interface PurchaseRow {
@@ -134,6 +136,7 @@ export default function AdminDashboardPage() {
   const [signIns, setSignIns] = useState<SignInRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [generationCost, setGenerationCost] = useState(10);
+  const [responseCost, setResponseCost] = useState(2);
   const [search, setSearch] = useState("");
   const [dSortBy, setDSortBy] = useState<DiscussionSortKey>("createdAt");
   const [dSortDesc, setDSortDesc] = useState(true);
@@ -216,6 +219,7 @@ export default function AdminDashboardPage() {
           const data = await res.json();
           setDiscussions(data.discussions || []);
           if (data.generationCost) setGenerationCost(data.generationCost);
+          if (data.responseCost) setResponseCost(data.responseCost);
         }
       } catch {}
     }
@@ -302,6 +306,13 @@ export default function AdminDashboardPage() {
     };
   }, [detailId]);
 
+  const getCreditsUsed = useCallback(
+    (d: DiscussionRow) =>
+      d.creditsUsed ??
+      (d.sessionType === "response" ? responseCost : generationCost),
+    [responseCost, generationCost]
+  );
+
   const discussionCumulative = useMemo(() => {
     const sorted = [...discussions].sort(
       (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
@@ -311,13 +322,13 @@ export default function AdminDashboardPage() {
     for (const d of sorted) {
       const key = d.email || d.userName || "";
       const prev = running.get(key) || { credits: 0, ttsHKD: 0 };
-      if (!d.usedOwnApiKey) prev.credits += generationCost;
+      if (!d.usedOwnApiKey) prev.credits += getCreditsUsed(d);
       prev.ttsHKD += d.ttsCostHKD;
       running.set(key, prev);
       result.set(d.id, { credits: prev.credits, ttsHKD: prev.ttsHKD });
     }
     return result;
-  }, [discussions, generationCost]);
+  }, [discussions, getCreditsUsed]);
 
   if (loading) {
     return (
@@ -482,7 +493,7 @@ export default function AdminDashboardPage() {
                               ) : (
                                 <Badge variant="outline" className="gap-1">
                                   <Coins className="h-3 w-3" />
-                                  {generationCost} credits
+                                  {getCreditsUsed(d)} credits
                                 </Badge>
                               )}
                             </div>

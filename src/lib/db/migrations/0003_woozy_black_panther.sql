@@ -1,0 +1,1 @@
+ALTER TABLE "discussion_sessions" ADD COLUMN "creditsUsed" integer;

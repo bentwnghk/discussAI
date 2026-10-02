@@ -348,6 +348,7 @@ export default function RespondPage() {
             charactersCount: data.charactersCount,
             ttsCostHKD: data.ttsCostHKD,
             usedOwnApiKey: data.usedOwnApiKey,
+            creditsUsed: data.creditsConsumed,
           }),
         });
         if (saveRes.ok) {

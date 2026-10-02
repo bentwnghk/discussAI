@@ -41,7 +41,11 @@ export async function GET(
 
     return NextResponse.json({
       ...result,
-      generationCost: result.sessionType === "response" ? getResponseCost() : getGenerationCost(),
+      generationCost:
+        result.creditsUsed ??
+        (result.sessionType === "response"
+          ? getResponseCost()
+          : getGenerationCost()),
       audioExpiresAt,
     });
   } catch (error) {
