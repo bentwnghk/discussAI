@@ -273,10 +273,10 @@ export default function CreditsPage() {
                     No credit usage yet.
                   </p>
                 ) : (
-                  <div className="rounded-md border">
+                  <div className="rounded-md border max-h-[400px] overflow-y-auto">
                     <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b bg-muted/50">
+                      <thead className="sticky top-0 z-10 bg-muted">
+                        <tr className="border-b">
                           <th className="p-3 text-left font-medium">Date &amp; Time</th>
                           <th className="p-3 text-left font-medium">Type</th>
                           <th className="p-3 text-left font-medium">Details</th>
@@ -331,10 +331,10 @@ export default function CreditsPage() {
                     No purchases yet.
                   </p>
                 ) : (
-                  <div className="rounded-md border">
+                  <div className="rounded-md border max-h-[400px] overflow-y-auto">
                     <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b bg-muted/50">
+                      <thead className="sticky top-0 z-10 bg-muted">
+                        <tr className="border-b">
                           <th className="p-3 text-left font-medium">Date</th>
                           <th className="p-3 text-left font-medium">Package</th>
                           <th className="p-3 text-right font-medium">Amount</th>
