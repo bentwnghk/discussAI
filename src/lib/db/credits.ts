@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { credits, creditTransactions, purchases } from "@/lib/db/schema";
-import { eq, sql, and } from "drizzle-orm";
+import { eq, sql, and, inArray } from "drizzle-orm";
 
 const WELCOME_CREDITS = parseInt(process.env.WELCOME_CREDITS || "20", 10);
 const GENERATION_COST = parseInt(process.env.GENERATION_COST || "10", 10);
@@ -188,6 +188,19 @@ export async function getUserPurchases(userId: string) {
     .from(purchases)
     .where(eq(purchases.userId, userId))
     .orderBy(sql`${purchases.createdAt} DESC`);
+}
+
+export async function getUserUsageHistory(userId: string) {
+  return db
+    .select()
+    .from(creditTransactions)
+    .where(
+      and(
+        eq(creditTransactions.userId, userId),
+        inArray(creditTransactions.type, ["generation", "refund"])
+      )
+    )
+    .orderBy(sql`${creditTransactions.createdAt} DESC`);
 }
 
 export async function refundLastGeneration(

@@ -13,7 +13,13 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Coins, CheckCircle, XCircle, Loader2, Star, ShoppingCart, KeyRound, Zap, Package, Users, User } from "lucide-react";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import { Coins, CheckCircle, XCircle, Loader2, Star, ShoppingCart, KeyRound, Zap, Package, Users, User, Activity } from "lucide-react";
 import { SettingsDialog } from "@/components/settings-dialog";
 
 interface PlanConfig {
@@ -33,6 +39,14 @@ interface PurchaseRecord {
   createdAt: string;
 }
 
+interface UsageRecord {
+  id: string;
+  amount: number;
+  type: string;
+  description: string | null;
+  createdAt: string;
+}
+
 export default function CreditsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -42,6 +56,7 @@ export default function CreditsPage() {
   const [responseCost, setResponseCost] = useState(2);
   const [loading, setLoading] = useState<string | null>(null);
   const [purchases, setPurchases] = useState<PurchaseRecord[]>([]);
+  const [transactions, setTransactions] = useState<UsageRecord[]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const isSuccess = searchParams.get("success") === "true";
   const isCanceled = searchParams.get("canceled") === "true";
@@ -71,6 +86,13 @@ export default function CreditsPage() {
     fetch("/api/user/purchases")
       .then((res) => res.json())
       .then((data) => setPurchases(data.purchases || []))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/user/transactions")
+      .then((res) => res.json())
+      .then((data) => setTransactions(data.transactions || []))
       .catch(() => {});
   }, []);
 
@@ -228,56 +250,135 @@ export default function CreditsPage() {
         })}
       </div>
 
-      {purchases.length > 0 && (
+      {(transactions.length > 0 || purchases.length > 0) && (
         <>
           <Separator className="my-8" />
           <div>
-            <h2 className="text-xl font-semibold mb-4">Purchase History</h2>
-            <div className="rounded-md border">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-muted/50">
-                    <th className="p-3 text-left font-medium">Date</th>
-                    <th className="p-3 text-left font-medium">Package</th>
-                    <th className="p-3 text-right font-medium">Amount</th>
-                    <th className="p-3 text-right font-medium">Credits</th>
-                    <th className="p-3 text-right font-medium">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {purchases.map((p) => (
-                    <tr key={p.id} className="border-b last:border-0">
-                      <td className="p-3">
-                        {new Date(p.createdAt).toLocaleDateString("en-HK", {
-                          timeZone: "Asia/Hong_Kong",
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
+            <h2 className="text-xl font-semibold mb-4">History</h2>
+            <Tabs defaultValue="usage">
+              <TabsList>
+                <TabsTrigger value="usage" className="gap-1.5">
+                  <Activity className="h-4 w-4" />
+                  Usage History
+                </TabsTrigger>
+                <TabsTrigger value="purchases" className="gap-1.5">
+                  <ShoppingCart className="h-4 w-4" />
+                  Purchase History
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="usage" className="mt-4">
+                {transactions.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-6 text-center">
+                    No credit usage yet.
+                  </p>
+                ) : (
+                  <div className="rounded-md border">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b bg-muted/50">
+                          <th className="p-3 text-left font-medium">Date &amp; Time</th>
+                          <th className="p-3 text-left font-medium">Type</th>
+                          <th className="p-3 text-left font-medium">Details</th>
+                          <th className="p-3 text-right font-medium">Credits</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {transactions.map((t) => {
+                          const isRefund = t.type === "refund";
+                          const details = t.description?.startsWith("Refund for ")
+                            ? "Refund for failed generation"
+                            : t.description || "Credit usage";
+                          return (
+                            <tr key={t.id} className="border-b last:border-0">
+                              <td className="p-3 whitespace-nowrap">
+                                {new Date(t.createdAt).toLocaleString("en-HK", {
+                                  timeZone: "Asia/Hong_Kong",
+                                  year: "numeric",
+                                  month: "short",
+                                  day: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </td>
+                              <td className="p-3">
+                                <Badge variant={isRefund ? "secondary" : "outline"}>
+                                  {isRefund ? "Refund" : "Usage"}
+                                </Badge>
+                              </td>
+                              <td className="p-3">{details}</td>
+                              <td
+                                className={`p-3 text-right font-medium whitespace-nowrap ${
+                                  t.amount < 0
+                                    ? "text-red-600 dark:text-red-400"
+                                    : "text-green-600 dark:text-green-400"
+                                }`}
+                              >
+                                {t.amount > 0 ? `+${t.amount}` : t.amount}
+                              </td>
+                            </tr>
+                          );
                         })}
-                      </td>
-                      <td className="p-3">
-                        {p.planName}
-                      </td>
-                      <td className="p-3 text-right">HK${p.amountHKD}</td>
-                      <td className="p-3 text-right">{p.creditsAmount}</td>
-                      <td className="p-3 text-right">
-                        <Badge
-                          variant={
-                            p.status === "completed"
-                              ? "default"
-                              : p.status === "pending"
-                                ? "secondary"
-                                : "destructive"
-                          }
-                        >
-                          {p.status}
-                        </Badge>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="purchases" className="mt-4">
+                {purchases.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-6 text-center">
+                    No purchases yet.
+                  </p>
+                ) : (
+                  <div className="rounded-md border">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b bg-muted/50">
+                          <th className="p-3 text-left font-medium">Date</th>
+                          <th className="p-3 text-left font-medium">Package</th>
+                          <th className="p-3 text-right font-medium">Amount</th>
+                          <th className="p-3 text-right font-medium">Credits</th>
+                          <th className="p-3 text-right font-medium">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {purchases.map((p) => (
+                          <tr key={p.id} className="border-b last:border-0">
+                            <td className="p-3">
+                              {new Date(p.createdAt).toLocaleDateString("en-HK", {
+                                timeZone: "Asia/Hong_Kong",
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              })}
+                            </td>
+                            <td className="p-3">
+                              {p.planName}
+                            </td>
+                            <td className="p-3 text-right">HK${p.amountHKD}</td>
+                            <td className="p-3 text-right">{p.creditsAmount}</td>
+                            <td className="p-3 text-right">
+                              <Badge
+                                variant={
+                                  p.status === "completed"
+                                    ? "default"
+                                    : p.status === "pending"
+                                      ? "secondary"
+                                      : "destructive"
+                                }
+                              >
+                                {p.status}
+                              </Badge>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
           </div>
         </>
       )}
