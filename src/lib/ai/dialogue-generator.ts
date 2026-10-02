@@ -40,6 +40,10 @@ function getProviderFetch() {
   const alwaysThinking =
     pattern === "" ? null : new RegExp(pattern ?? "^glm-.*x$", "i");
 
+  const noTempPattern = process.env.OPENAI_NO_TEMPERATURE_MODELS;
+  const noTemperature =
+    noTempPattern === "" ? null : new RegExp(noTempPattern ?? "^claude", "i");
+
   return async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
     if (init?.body && typeof init.body === "string") {
       try {
@@ -47,6 +51,7 @@ function getProviderFetch() {
           model?: string;
           response_format?: { type?: string };
           reasoning_effort?: string;
+          temperature?: number;
         };
         let changed = false;
 
@@ -68,6 +73,16 @@ function getProviderFetch() {
           alwaysThinking.test(body.model)
         ) {
           body.reasoning_effort = "low";
+          changed = true;
+        }
+
+        if (
+          typeof body.temperature === "number" &&
+          noTemperature !== null &&
+          typeof body.model === "string" &&
+          noTemperature.test(body.model)
+        ) {
+          delete body.temperature;
           changed = true;
         }
 
