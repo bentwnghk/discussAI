@@ -273,7 +273,7 @@ export default function CreditsPage() {
                     No credit usage yet.
                   </p>
                 ) : (
-                  <div className="rounded-md border max-h-[400px] overflow-y-auto">
+                  <div className="rounded-md border max-h-[400px] overflow-auto">
                     <table className="w-full text-sm">
                       <thead className="sticky top-0 z-10 bg-muted">
                         <tr className="border-b">
@@ -291,7 +291,7 @@ export default function CreditsPage() {
                             : t.description || "Credit usage";
                           return (
                             <tr key={t.id} className="border-b last:border-0">
-                              <td className="p-3 whitespace-nowrap">
+                              <td className="p-3 whitespace-normal sm:whitespace-nowrap">
                                 {new Date(t.createdAt).toLocaleString("en-HK", {
                                   timeZone: "Asia/Hong_Kong",
                                   year: "numeric",
@@ -331,7 +331,7 @@ export default function CreditsPage() {
                     No purchases yet.
                   </p>
                 ) : (
-                  <div className="rounded-md border max-h-[400px] overflow-y-auto">
+                  <div className="rounded-md border max-h-[400px] overflow-auto">
                     <table className="w-full text-sm">
                       <thead className="sticky top-0 z-10 bg-muted">
                         <tr className="border-b">
