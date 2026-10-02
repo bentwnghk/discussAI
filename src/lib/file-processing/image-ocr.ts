@@ -23,7 +23,11 @@ export async function extractTextFromImage(
         : "image/png";
 
   const { text } = await generateText({
-    model: openai.chat("gpt-5-nano"),
+    model: openai.chat(
+      process.env.OPENAI_MODEL_OCR ||
+        process.env.OPENAI_MODEL_NORMAL ||
+        "gpt-6-luna"
+    ),
     messages: [
       {
         role: "user",
